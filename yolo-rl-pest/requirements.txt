@@ -1,0 +1,32 @@
+# Core deep learning
+torch==2.0.1
+torchvision==0.15.2
+
+# YOLO frameworks
+ultralytics>=8.0.0       # YOLOv8 + YOLOv11
+yolov5>=7.0.0            # YOLOv5
+
+# Metrics
+torchmetrics>=1.0.0
+
+# Logging
+tensorboard>=2.13.0
+
+# Data & augmentation
+albumentations>=1.3.0
+opencv-python>=4.7.0
+numpy>=1.24.0
+Pillow>=9.5.0
+
+# Utilities
+tqdm>=4.65.0
+matplotlib>=3.7.0
+pandas>=2.0.0
+tabulate>=0.9.0          # df.to_markdown()
+PyYAML>=6.0
+
+# Deformable convolution (for D2C3/D3C3)
+# Option A: torchvision built-in (requires torch>=1.8)
+# torchvision already included above
+# Option B: mmcv for full DCNv2/DCNv3 support (optional, heavier)
+# mmcv-full>=2.0.0
