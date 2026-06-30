@@ -67,9 +67,24 @@ COMMON = {
 # ─────────────────────────────────────────────────────────────────────────────
 
 def train_yolov5(name: str, cfg: dict):
-    """Train YOLOv5 / DP-YOLO qua yolov5/train.py subprocess."""
+    """
+    Train YOLOv5 / DP-YOLO.
+
+    - DP-YOLO (cfg có 'cfg' key): dùng dp_yolo_train.py – áp dụng
+      W3F_MPDIoU loss, PSA label assignment, và custom modules.
+    - YOLOv5s standard: dùng yolov5/train.py trực tiếp.
+    """
+    is_dp_yolo = bool(cfg.get('cfg'))   # chỉ dp_yolo mới có --cfg flag
+
+    if is_dp_yolo:
+        # Dùng wrapper để đảm bảo patches (loss, PSA, modules) được apply
+        # TRƯỚC KHI YOLOv5 training bắt đầu
+        script = 'dp_yolo_train.py'
+    else:
+        script = 'yolov5/train.py'
+
     cmd = [
-        'python', 'yolov5/train.py',
+        'python', script,
         f"--weights={cfg['weights']}",
         f"--data={COMMON['data']}",
         f"--imgsz={COMMON['imgsz']}",

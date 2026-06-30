@@ -179,8 +179,11 @@ class DCNv3(nn.Module):
                 nn.Conv2d(c1, c2, 1, 1, 0, bias=False),
             )
 
+        # torchvision.ops.DeformConv2d dùng 1 offset dùng chung cho mọi group:
+        #   offset shape = (B, 2*k*k, H, W)  – KHÔNG phải groups*2*k*k
+        #   mask   shape = (B,   k*k, H, W)
         self.offset_mask = nn.Conv2d(
-            c1, groups * 3 * k * k,
+            c1, 3 * k * k,   # 2*k*k offset + 1*k*k mask (shared across groups)
             kernel_size=k, stride=s, padding=p, bias=True,
         )
         nn.init.constant_(self.offset_mask.weight, 0.0)
@@ -193,12 +196,11 @@ class DCNv3(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if _HAVE_DEFORM:
-            om     = self.offset_mask(x)
-            g      = self.groups
+            om     = self.offset_mask(x)          # (B, 3*k², H, W)
             k2     = self.k * self.k
-            offset = om[:, :2 * g * k2]
-            mask   = om[:, 2 * g * k2:].sigmoid()
-            out = self.dcn(x, offset, mask)
+            offset = om[:, :2 * k2]               # (B, 2*k², H, W) – shared offset
+            mask   = om[:, 2 * k2:].sigmoid()     # (B,   k², H, W)
+            out    = self.dcn(x, offset, mask)
         else:
             out = self.dcn(x)
         return self.act(self.bn(out))

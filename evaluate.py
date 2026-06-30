@@ -61,40 +61,127 @@ EXPERIMENTS = {
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Helper: Load model (xu ly ca supervised va RL checkpoint)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _load_model_for_eval(
+    checkpoint:      str,
+    framework:       str,
+    device:          str,
+    conf_thres:      float = 0.25,
+    iou_thres:       float = 0.45,
+    supervised_ckpt: str | None = None,
+):
+    """
+    Load model cho evaluation, xu ly 2 truong hop:
+    1. Standard checkpoint (yolov5 format hoac ultralytics)
+    2. RL checkpoint (dict voi is_rl_checkpoint=True, luu boi train_rl.py)
+
+    Voi RL checkpoint, load supervised base truoc, sau do apply RL weights.
+
+    Returns:
+        Tuple (model, is_rl: bool)
+    """
+    # Phat hien dinh dang checkpoint
+    ckpt_data = torch.load(checkpoint, map_location='cpu', weights_only=False)
+    is_rl = isinstance(ckpt_data, dict) and ckpt_data.get('is_rl_checkpoint', False)
+
+    if framework == 'ultralytics':
+        if is_rl:
+            if not supervised_ckpt or not Path(supervised_ckpt).exists():
+                raise FileNotFoundError(
+                    f"RL checkpoint can supervised_ckpt de load model structure. "
+                    f"Got: {supervised_ckpt}"
+                )
+            # Load tu supervised checkpoint, apply RL weights
+            model = YOLO(supervised_ckpt)
+            state_dict = ckpt_data['state_dict']
+            # Ultralytics model: state_dict la model.model.state_dict()
+            if hasattr(model.model, 'model'):
+                model.model.model.load_state_dict(state_dict, strict=False)
+            else:
+                model.model.load_state_dict(state_dict, strict=False)
+        else:
+            model = YOLO(checkpoint)
+        model.overrides['conf'] = conf_thres
+        model.overrides['iou']  = iou_thres
+        return model, is_rl
+
+    else:  # framework == 'v5'
+        import sys
+        v5_path = str(Path('yolov5').resolve())
+        if v5_path not in sys.path:
+            sys.path.insert(0, v5_path)
+
+        if is_rl:
+            if not supervised_ckpt or not Path(supervised_ckpt).exists():
+                raise FileNotFoundError(
+                    f"RL checkpoint can supervised_ckpt. Got: {supervised_ckpt}"
+                )
+            # Load supervised checkpoint de lay model structure
+            sup_data = torch.load(supervised_ckpt, map_location='cpu',
+                                  weights_only=False)
+            if isinstance(sup_data, dict) and 'model' in sup_data:
+                inner_model = sup_data['model'].float().to(device).eval()
+            else:
+                inner_model = sup_data.float().to(device).eval()
+
+            # Apply RL state_dict
+            state_dict = ckpt_data['state_dict']
+            inner_model.load_state_dict(state_dict, strict=False)
+
+            # Wrap trong AutoShape de co interface .xyxy
+            try:
+                from models.common import AutoShape
+                model = AutoShape(inner_model)
+            except ImportError:
+                # Fallback: dung raw model (khong co AutoShape)
+                model = inner_model
+
+            model.conf = conf_thres
+            model.iou  = iou_thres
+            if hasattr(model, 'to'):
+                model.to(device)
+            model.eval()
+            return model, True
+        else:
+            # Standard YOLOv5 checkpoint
+            model = torch.hub.load(
+                v5_path, 'custom', path=checkpoint,
+                source='local', force_reload=False, verbose=False,
+            )
+            model.conf = conf_thres
+            model.iou  = iou_thres
+            model.to(device).eval()
+            return model, False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Evaluate single checkpoint
 # ─────────────────────────────────────────────────────────────────────────────
 
 def evaluate_model(
-    checkpoint: str,
+    checkpoint:      str,
     dataloader,
-    framework:  str   = 'ultralytics',
-    device:     str   = 'cuda',
-    conf_thres: float = 0.25,
-    iou_thres:  float = 0.45,
+    framework:       str   = 'ultralytics',
+    device:          str   = 'cuda',
+    conf_thres:      float = 0.25,
+    iou_thres:       float = 0.45,
+    supervised_ckpt: str | None = None,   # [fix] can thiet khi load RL checkpoint
 ) -> dict:
     """
-    Chạy evaluation đầy đủ cho 1 checkpoint.
+    Chay evaluation day du cho 1 checkpoint.
+    Xu ly ca supervised checkpoint lan RL checkpoint (dict format).
 
-    Trả về dict:
+    Tra ve dict:
         mAP50, mAP50_95, APs (small), APm (medium), recall, fps
     """
-    # ── Load model ───────────────────────────────────────────────────────
-    if framework == 'ultralytics':
-        model = YOLO(checkpoint)
-        model.overrides['conf'] = conf_thres
-        model.overrides['iou']  = iou_thres
-    else:
-        # YOLOv5: dùng torch.hub để load và chạy inference
-        import sys
-        if 'yolov5' not in sys.path:
-            sys.path.insert(0, 'yolov5')
-        model = torch.hub.load('ultralytics/yolov5', 'custom',
-                                path=checkpoint, force_reload=False,
-                                verbose=False)
-        model.conf = conf_thres
-        model.iou  = iou_thres
-        model.to(device)
-        model.eval()
+    # ── Load model (xu ly ca RL va supervised) ───────────────────────────
+    model, _is_rl = _load_model_for_eval(
+        checkpoint, framework, device,
+        conf_thres=conf_thres, iou_thres=iou_thres,
+        supervised_ckpt=supervised_ckpt,
+    )
 
     # ── Metric ───────────────────────────────────────────────────────────
     metric = MeanAveragePrecision(
@@ -241,6 +328,7 @@ def run_comparison(
                     ckpt, loader,
                     framework=paths['framework'],
                     device=device,
+                    supervised_ckpt=(paths.get('supervised') if stage == 'rl' else None),
                 )
                 rows.append({
                     'Model': model_name,
