@@ -86,8 +86,27 @@ class PestDataset(Dataset):
         self.img_size = img_size
         self.transforms = transforms
 
+        # Fallback: if 'data/pest' does not exist but 'data/V2' does, map it
+        if not Path(root).exists() and root == 'data/pest':
+            if (Path(root).parent / 'V2').exists():
+                root = str(Path(root).parent / 'V2')
+
+        # Fallback: map split 'val' to 'valid' if 'val' doesn't exist but 'valid' does
+        if split == 'val' and not (Path(root) / 'val').exists() and not (Path(root) / 'images' / 'val').exists():
+            if (Path(root) / 'valid').exists() or (Path(root) / 'images' / 'valid').exists():
+                split = 'valid'
+        elif split == 'valid' and not (Path(root) / 'valid').exists() and not (Path(root) / 'images' / 'valid').exists():
+            if (Path(root) / 'val').exists() or (Path(root) / 'images' / 'val').exists():
+                split = 'val'
+
+        # Try structure: root / images / split
         img_dir   = Path(root) / 'images' / split
         label_dir = Path(root) / 'labels' / split
+
+        # Fallback: try structure: root / split / images
+        if not img_dir.exists():
+            img_dir   = Path(root) / split / 'images'
+            label_dir = Path(root) / split / 'labels'
 
         # Lấy tất cả file ảnh
         exts = {'.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff'}
