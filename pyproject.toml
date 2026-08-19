@@ -1,0 +1,47 @@
+[project]
+name = "yolo-rl-pest"
+version = "0.1.0"
+description = "Reward-guided and preference-optimization scenarios for YOLO pest detection"
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0.1",
+    "torchvision>=0.15.2",
+    "torchmetrics>=1.0.0",
+    "ultralytics>=8.0.0",
+    "tensorboard>=2.13.0",
+    "albumentations>=1.3.0",
+    "opencv-python>=4.7.0",
+    "numpy>=1.24.0",
+    "Pillow>=9.5.0",
+    "tqdm>=4.65.0",
+    "matplotlib>=3.7.0",
+    "pandas>=2.0.0",
+    "tabulate>=0.9.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+# Flat layout: ship tất cả .py files ở root + thư mục models/, adapters/
+packages = ["kb1_reward_guided_training/adapters", "kb1_reward_guided_training/models"]
+
+[tool.uv]
+index-url = "https://pypi.org/simple"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu121" }]
+torchvision = [{ index = "pytorch-cu121" }]
+torchaudio = [{ index = "pytorch-cu121" }]

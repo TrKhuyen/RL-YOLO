@@ -1,0 +1,60 @@
+# RL Fine-tuning Hyperparameters
+# Tham khao: yanivnik (lr=1e-6), bwconrad (lr=5e-5 fine-tune)
+#
+# ── Hardware target: i9-14900HX / 16GB RAM / RTX 4060 8GB VRAM ──────────────
+#   - batch_size=8:  giam tu 16 -> 8 tranh OOM khi forward qua NMS + reward
+#   - steps=10000:   gioi han tren; early stopping co the dung som hon
+#   - eval_interval=500: phat hien suy giam truoc khi catastrophic forgetting
+#   - grad_clip=0.5: giu on dinh gradient REINFORCE
+
+# Optimizer
+lr: 5.0e-7
+min_lr: 1.0e-7
+warmup_steps: 500
+scheduler: cosine
+optimizer: adam         # adam | sgd
+grad_clip: 0.5          # tighter clipping for REINFORCE stability
+reward_loss_weight: 0.10
+native_supervised_loss_weight: 0.25
+supervised_loss_weight: 0.25
+fallback_proxy_loss_weight: 1.0
+stability_loss_weight: 0.001
+gradient_accumulation_steps: 2
+
+# Training schedule
+steps: 10000            # maximum; early stopping may finish sooner
+log_interval: 100       # log tensorboard moi N buoc
+save_interval: 5000     # luu checkpoint moi N buoc
+eval_interval: 500      # detect degradation before catastrophic forgetting
+early_stopping_patience: 4
+early_stopping_min_delta: 0.0005
+
+# Reward
+reward_type: detection_composite
+reward_iou_thresholds: [0.5, 0.6, 0.7, 0.8]
+precision_weight: 0.25
+recall_weight: 0.45
+iou_weight: 0.30
+tp_weight: 1.0
+fp_weight: 0.5
+fn_weight: 1.5
+normalize_advantage: true
+advantage_clip: 3.0
+reward_alpha: 0.6       # trong so recall vs small-object reward (composite only)
+iou_threshold: 0.5      # IoU threshold de tinh match GT-pred
+duplicate_penalty: 0.3  # he so phat prediction thua
+small_thresh: 32        # nguong dien tich (px) cho "vat the nho"
+
+# EMA Baseline
+ema_alpha: 0.99         # EMA decay de giam variance REINFORCE
+
+# Inference settings (khi lay predictions trong vong lap RL)
+conf_thres: 0.20        # nguong confidence (thap hon train de co du preds)
+iou_thres: 0.45         # NMS IoU threshold
+
+# Architecture
+train_head_only: true     # freeze backbone + neck, update final Detect module only
+freeze_backbone: false    # fallback only when train_head_only=false
+batch_size: 8            # [HW] giam 16->8 de tranh OOM tren 8GB VRAM (RTX 4060)
+seed: 42
+                         #      tang len 12-16 neu con VRAM sau khi test
