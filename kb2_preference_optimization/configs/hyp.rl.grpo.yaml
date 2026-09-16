@@ -6,12 +6,16 @@
 
 # ── Optimizer ──────────────────────────────────────────────────────────
 lr: 1.0e-6            # Implicit KL constraint. lr > 1e-5: catastrophic forgetting
+dpo_beta: 0.05
+dpo_weight: 0.02
+supervised_weight: 1.0
+min_preference_gap: 1.0e-4
 optimizer: adam
 grad_clip: 1.0
 
 # ── Training schedule ──────────────────────────────────────────────────
 steps: 50000
-log_interval: 100
+log_interval: 10
 save_interval: 5000
 eval_interval: 5000
 
@@ -36,10 +40,10 @@ min_std:  0.01   # Dynamic filter: bỏ sample nếu group reward std < 0.01
 # ── Inference trong training loop ──────────────────────────────────────
 conf_thres: 0.20   # Thấp hơn eval (0.25) → nhiều predictions → signal mạnh
 iou_thres:  0.45
-batch_size: 16
+batch_size: 4
 
 # ── Data ───────────────────────────────────────────────────────────────
 data_root: ../pre-data/data/v2i
 
 # ── Architecture ───────────────────────────────────────────────────────
-freeze_backbone: false
+freeze_backbone: true

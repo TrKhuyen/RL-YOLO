@@ -49,7 +49,7 @@ def get_train_transforms(img_size: int = 640) -> A.Compose:
                     std=(1.0, 1.0, 1.0), max_pixel_value=255.0),
         ToTensorV2(),
     ], bbox_params=A.BboxParams(
-        format='yolo',
+        format='yolo', clip=True,
         label_fields=['class_labels'],
         min_visibility=0.3,   # loai box bi cat qua nhieu
     ))
@@ -65,7 +65,7 @@ def get_val_transforms(img_size: int = 640) -> A.Compose:
                     std=(1.0, 1.0, 1.0), max_pixel_value=255.0),
         ToTensorV2(),
     ], bbox_params=A.BboxParams(
-        format='yolo',
+        format='yolo', clip=True,
         label_fields=['class_labels'],
     ))
 
@@ -144,6 +144,8 @@ class PestDataset(Dataset):
 
         # ── Load image ───────────────────────────────────────────────────
         img = cv2.imread(str(img_path))
+        if img is None:
+            raise ValueError(f'Cannot decode image: {img_path}')
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h0, w0 = img.shape[:2]
 
@@ -153,9 +155,15 @@ class PestDataset(Dataset):
             with open(lbl_path) as f:
                 for line in f:
                     parts = line.strip().split()
+                    if not parts:
+                        continue
+                    if len(parts) != 5:
+                        raise ValueError(f'Malformed label: {lbl_path}')
                     if len(parts) == 5:
                         cls = int(parts[0])
                         cx, cy, w, h = map(float, parts[1:])
+                        if cls < 0 or cls >= 28 or not np.isfinite([cx, cy, w, h]).all() or w <= 0 or h <= 0:
+                            raise ValueError(f'Invalid class or box: {lbl_path}')
                         # Clamp để tránh box tràn ra ngoài sau augment
                         cx = np.clip(cx, 0.0, 1.0)
                         cy = np.clip(cy, 0.0, 1.0)
@@ -175,12 +183,8 @@ class PestDataset(Dataset):
                 img_t       = result['image']            # Tensor (3, H, W)
                 bboxes      = list(result['bboxes'])
                 class_labels = list(result['class_labels'])
-            except Exception:
-                # Fallback: resize sạch không augment nếu transform lỗi
-                img_t = torch.from_numpy(
-                    cv2.resize(img, (self.img_size, self.img_size))
-                    .transpose(2, 0, 1).astype(np.float32) / 255.0
-                )
+            except Exception as exc:
+                raise RuntimeError(f'Transform failed for {img_path}') from exc
         else:
             img_t = torch.from_numpy(
                 cv2.resize(img, (self.img_size, self.img_size))
@@ -233,6 +237,7 @@ def get_pest_dataloader(
     img_size:   int = 640,
     num_workers:int = 4,
     shuffle:    Optional[bool] = None,
+    seed:       int = 42,
 ) -> DataLoader:
     """
     Factory function trả về DataLoader sẵn dùng cho RL training / evaluation.
@@ -253,6 +258,7 @@ def get_pest_dataloader(
 
     transforms = (get_train_transforms(img_size) if split == 'train'
                   else get_val_transforms(img_size))
+    transforms.set_random_seed(seed)
 
     dataset = PestDataset(root=root, split=split,
                           img_size=img_size, transforms=transforms)
@@ -265,6 +271,8 @@ def get_pest_dataloader(
         collate_fn=pest_collate_fn,
         pin_memory=True,
         drop_last=(split == 'train'),
+        generator=torch.Generator().manual_seed(seed),
+        persistent_workers=num_workers > 0,
     )
 
 

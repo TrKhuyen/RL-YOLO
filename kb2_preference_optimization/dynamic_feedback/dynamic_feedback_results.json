@@ -1,0 +1,23 @@
+{
+  "configuration": {
+    "sampling_strength": 0.25,
+    "dynamic_object_feedback": true,
+    "object_feedback_alpha": 0.001,
+    "steps": 10,
+    "seeds": [42, 43, 44]
+  },
+  "results": [
+    {"seed": 42, "baseline": 0.6679849028587341, "dynamic": 0.6689735651016235, "delta": 0.0009886622428894043},
+    {"seed": 43, "baseline": 0.6681996583938599, "dynamic": 0.6676653027534485, "delta": -0.000534355640411377},
+    {"seed": 44, "baseline": 0.6685171723365784, "dynamic": 0.6673932075500488, "delta": -0.001123964786529541}
+  ],
+  "summary": {
+    "baseline_mean": 0.6682339111963908,
+    "dynamic_mean": 0.6680106918017069,
+    "paired_delta_mean": -0.0002232193946838379,
+    "paired_delta_std": 0.0010901387819502388,
+    "wins": 1,
+    "num_seeds": 3
+  },
+  "decision": "Rejected: online dynamic feedback did not improve mean mAP50-95 across seeds."
+}

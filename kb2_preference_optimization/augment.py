@@ -26,8 +26,8 @@ import torch.nn.functional as F
 import torchvision.transforms.functional as TF
 
 # ImageNet normalization constants (phải khớp với dataloader.py)
-_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
-_STD  = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
+_MEAN = torch.tensor([0.0, 0.0, 0.0]).view(1, 3, 1, 1)
+_STD  = torch.tensor([1.0, 1.0, 1.0]).view(1, 3, 1, 1)
 
 
 def _denorm(images: torch.Tensor) -> torch.Tensor:
@@ -70,29 +70,23 @@ def augment_view(images: torch.Tensor, g_idx: int) -> torch.Tensor:
 
     aug = images.clone()
 
-    # ── Level 1: Flip (không ảnh hưởng pixel values) ───────────────────────
+    # Giữ nguyên hình học vì mọi view dùng chung targets.
+    aug_px = _denorm(aug)
+
+    # ── Level 1: Brightness ────────────────────────────────────────────────
     if g_idx >= 1:
-        if random.random() > 0.5:
-            aug = TF.hflip(aug)
+        aug_px = TF.adjust_brightness(aug_px, random.uniform(0.8, 1.2))
 
     # ── Level 2: Rotation + Contrast ───────────────────────────────────────
     # rotate không cần denorm (chỉ spatial transform)
     # adjust_contrast cần pixel space [0,1] → denorm/renorm
     if g_idx >= 2:
-        if random.random() > 0.4:
-            aug = TF.vflip(aug)
-        angle = random.uniform(-10, 10)
-        aug = TF.rotate(aug, angle)
-        # Contrast: hoạt động trên pixel space
-        aug_px = _denorm(aug)
         factor = random.uniform(0.7, 1.3)
         aug_px = TF.adjust_contrast(aug_px, factor)
-        aug = _renorm(aug_px)
 
     # ── Level 3: Blur + Noise + Brightness ─────────────────────────────────
     # Tất cả phép toán pixel-level → denorm một lần, xử lý, rồi renorm
     if g_idx >= 3:
-        aug_px = _denorm(aug)
         # Gaussian blur giả lập motion blur UAV
         if random.random() > 0.4:
             kernel_size = random.choice([3, 5])
@@ -104,9 +98,7 @@ def augment_view(images: torch.Tensor, g_idx: int) -> torch.Tensor:
         # Brightness
         factor = random.uniform(0.6, 1.4)
         aug_px = TF.adjust_brightness(aug_px, factor)
-        aug = _renorm(aug_px)
-
-    return aug.contiguous()
+    return _renorm(aug_px.clamp(0.0, 1.0)).contiguous()
 
 
 def _gaussian_blur(images: torch.Tensor, kernel_size: int) -> torch.Tensor:

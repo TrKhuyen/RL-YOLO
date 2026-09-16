@@ -35,21 +35,20 @@ def get_train_transforms(img_size: int = 640) -> A.Compose:
     """
     return A.Compose([
         A.LongestMaxSize(max_size=img_size),
-        A.PadIfNeeded(img_size, img_size, border_mode=cv2.BORDER_CONSTANT, value=114),
+        A.PadIfNeeded(img_size, img_size, border_mode=cv2.BORDER_CONSTANT, fill=114),
         A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
         A.HueSaturationValue(hue_shift_limit=15, sat_shift_limit=30, val_shift_limit=20, p=0.4),
-        A.GaussNoise(var_limit=(5.0, 30.0), p=0.3),       # nhiễu cảm biến UAV
+        A.GaussNoise(std_range=(0.02, 0.10), p=0.3),
         A.MotionBlur(blur_limit=5, p=0.2),                 # motion blur khi bay
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.3),
-        A.Rotate(limit=15, border_mode=cv2.BORDER_CONSTANT, value=114, p=0.4),
+        A.Rotate(limit=15, border_mode=cv2.BORDER_CONSTANT, fill=114, p=0.4),
         A.CLAHE(clip_limit=2.0, p=0.2),                    # tăng tương phản vùng tối
-        A.Normalize(mean=(0.485, 0.456, 0.406),
-                    std=(0.229, 0.224, 0.225)),
+        A.Normalize(mean=(0.0, 0.0, 0.0), std=(1.0, 1.0, 1.0)),
         ToTensorV2(),
     ], bbox_params=A.BboxParams(
         format='yolo',
-        label_fields=['class_labels'],
+        label_fields=['class_labels', 'gt_indices'],
         min_visibility=0.3,   # loại box bị cắt quá nhiều
     ))
 
@@ -58,13 +57,12 @@ def get_val_transforms(img_size: int = 640) -> A.Compose:
     """Validation: chỉ resize + normalize, không augment."""
     return A.Compose([
         A.LongestMaxSize(max_size=img_size),
-        A.PadIfNeeded(img_size, img_size, border_mode=cv2.BORDER_CONSTANT, value=114),
-        A.Normalize(mean=(0.485, 0.456, 0.406),
-                    std=(0.229, 0.224, 0.225)),
+        A.PadIfNeeded(img_size, img_size, border_mode=cv2.BORDER_CONSTANT, fill=114),
+        A.Normalize(mean=(0.0, 0.0, 0.0), std=(1.0, 1.0, 1.0)),
         ToTensorV2(),
     ], bbox_params=A.BboxParams(
         format='yolo',
-        label_fields=['class_labels'],
+        label_fields=['class_labels', 'gt_indices'],
     ))
 
 
@@ -146,7 +144,7 @@ class PestDataset(Dataset):
         h0, w0 = img.shape[:2]
 
         # ── Load labels ──────────────────────────────────────────────────
-        bboxes, class_labels = [], []
+        bboxes, class_labels, gt_indices = [], [], []
         if lbl_path is not None and lbl_path.stat().st_size > 0:
             with open(lbl_path) as f:
                 for line in f:
@@ -161,6 +159,7 @@ class PestDataset(Dataset):
                         h  = np.clip(h,  0.0, 1.0)
                         bboxes.append([cx, cy, w, h])
                         class_labels.append(cls)
+                        gt_indices.append(len(gt_indices))
 
         # ── Augmentation ─────────────────────────────────────────────────
         if self.transforms is not None:
@@ -169,10 +168,12 @@ class PestDataset(Dataset):
                     image=img,
                     bboxes=bboxes,
                     class_labels=class_labels,
+                    gt_indices=gt_indices,
                 )
                 img_t       = result['image']            # Tensor (3, H, W)
                 bboxes      = list(result['bboxes'])
                 class_labels = list(result['class_labels'])
+                gt_indices = list(result['gt_indices'])
             except Exception:
                 # Fallback: resize sạch không augment nếu transform lỗi
                 img_t = torch.from_numpy(
@@ -201,6 +202,9 @@ class PestDataset(Dataset):
             'labels': torch.tensor(class_labels, dtype=torch.long)
                       if class_labels else torch.zeros(0,     dtype=torch.long),
             'image_id': torch.tensor([idx]),
+            'image_path': str(img_path),
+            'gt_indices': torch.tensor(gt_indices, dtype=torch.long)
+                          if gt_indices else torch.zeros(0, dtype=torch.long),
         }
 
         return img_t, target

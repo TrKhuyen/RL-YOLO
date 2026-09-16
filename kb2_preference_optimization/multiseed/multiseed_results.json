@@ -1,0 +1,43 @@
+{
+  "protocol": {
+    "seeds": [42, 43, 44],
+    "steps": 10,
+    "batch_size": 2,
+    "learning_rate": 1e-06,
+    "validation_images": 495,
+    "selection_metric": "mAP50-95",
+    "feedback_sampling_strength": 0.25,
+    "feedback_alpha": 0.0
+  },
+  "results": [
+    {
+      "seed": 42,
+      "baseline_mAP50-95": 0.6679849028587341,
+      "feedback_mAP50-95": 0.6689336895942688,
+      "delta": 0.000948786735534668
+    },
+    {
+      "seed": 43,
+      "baseline_mAP50-95": 0.6681996583938599,
+      "feedback_mAP50-95": 0.6676464676856995,
+      "delta": -0.0005531907081604004
+    },
+    {
+      "seed": 44,
+      "baseline_mAP50-95": 0.6685171723365784,
+      "feedback_mAP50-95": 0.6671969294548035,
+      "delta": -0.0013202428817749023
+    }
+  ],
+  "summary": {
+    "baseline_mean": 0.6682339111963908,
+    "baseline_std": 0.0002677828226792402,
+    "feedback_mean": 0.6679256955782572,
+    "feedback_std": 0.0009014211598889856,
+    "paired_delta_mean": -0.0003082156181335449,
+    "paired_delta_std": 0.0011541808554586465,
+    "feedback_wins": 1,
+    "num_seeds": 3
+  },
+  "decision": "Rejected: feedback-guided sampling did not improve mean mAP50-95 and won only one of three seeds."
+}

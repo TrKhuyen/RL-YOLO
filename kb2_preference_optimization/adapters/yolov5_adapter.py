@@ -129,7 +129,7 @@ class YOLOv5Adapter:
                 preds.append({
                     'boxes':  torch.zeros((0, 4), device=self.device),
                     'labels': torch.zeros(0, dtype=torch.long, device=self.device),
-                    'scores': torch.zeros(1, device=self.device,
+                    'scores': torch.zeros(0, device=self.device,
                                           requires_grad=True),
                 })
 

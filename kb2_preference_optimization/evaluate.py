@@ -32,13 +32,17 @@ from dataloader import get_pest_dataloader
 # =============================================================================
 
 # Supervised checkpoints (từ kb1_reward_guided_training hoặc train riêng)
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+KB1_DIR = REPO_ROOT / 'kb1_reward_guided_training'
+
 SUPERVISED = {
-    'YOLOv5s':  'checkpoints/yolov5s/weights/best.pt',
-    'YOLOv8n':  'checkpoints/yolov8n/weights/best.pt',
-    'YOLOv8s':  'checkpoints/yolov8s/weights/best.pt',
-    'YOLOv11n': 'checkpoints/yolov11n/weights/best.pt',
-    'YOLOv11s': 'checkpoints/yolov11s/weights/best.pt',
-    'DP-YOLO':  'checkpoints/dp_yolo/weights/best.pt',
+    'YOLOv5s':  KB1_DIR / 'checkpoints/yolov5s/weights/best.pt',
+    'YOLOv8n':  KB1_DIR / 'checkpoints/yolov8n/weights/best.pt',
+    'YOLOv8s':  KB1_DIR / 'checkpoints/yolov8s/weights/best.pt',
+    'YOLOv11n': KB1_DIR / 'checkpoints/yolov11n/weights/best.pt',
+    'YOLOv11s': KB1_DIR / 'checkpoints/yolov11s/weights/best.pt',
+    'DP-YOLO':  KB1_DIR / 'checkpoints/dp_yolo/weights/best.pt',
 }
 
 # RL checkpoints (từ train_rl.py – mỗi level có 1 best.pt)
@@ -50,7 +54,7 @@ RL_CHECKPOINTS = {
     },
     'YOLOv8n': {
         'l1': 'rl_checkpoints/yolov8n_rl_l1_best.pt',
-        'l2': 'rl_checkpoints/yolov8n_rl_l2_best.pt',
+        'l2': SCRIPT_DIR / 'rl_checkpoints/yolov8n_rl_l2_best.pt',
         'l3': 'rl_checkpoints/yolov8n_rl_l3_best.pt',
     },
     'YOLOv8s': {
@@ -168,28 +172,33 @@ def evaluate_checkpoint(
     Trả về dict: mAP50, mAP50-95, AP_small, Recall, FPS.
     """
     metric = MeanAveragePrecision(
-        iou_thresholds=[0.5, 0.75],
-        extended_summary=True,
+        iou_thresholds=[0.50 + 0.05 * i for i in range(10)],
+        extended_summary=False,
         class_metrics=False,
+        backend='faster_coco_eval',
     )
 
-    preds_all, targets_all = [], []
     t0 = time.time()
     n_imgs = 0
 
     with torch.no_grad():
-        for images, targets in val_loader:
+        for batch_i, (images, targets) in enumerate(val_loader, 1):
             images = images.to(device)
+            preds_batch, targets_batch = [], []
 
             if framework == 'ultralytics':
-                results = model(images, conf=conf_thres, iou=iou_thres, verbose=False)
+                results = model(images, conf=conf_thres, iou=iou_thres,
+                                max_det=100, verbose=False)
                 for r, t in zip(results, targets):
-                    preds_all.append({
-                        'boxes':  r.boxes.xyxy.cpu(),
-                        'scores': r.boxes.conf.cpu(),
-                        'labels': r.boxes.cls.int().cpu(),
+                    boxes = r.boxes.xyxy.cpu()
+                    scores = r.boxes.conf.cpu()
+                    labels = r.boxes.cls.int().cpu()
+                    finite = torch.isfinite(boxes).all(1) & torch.isfinite(scores)
+                    preds_batch.append({
+                        'boxes': boxes[finite], 'scores': scores[finite],
+                        'labels': labels[finite],
                     })
-                    targets_all.append({
+                    targets_batch.append({
                         'boxes':  t['boxes'].cpu(),
                         'labels': t['labels'].int().cpu(),
                     })
@@ -202,28 +211,31 @@ def evaluate_checkpoint(
                 dets = non_max_suppression(out.detach(), conf_thres, iou_thres)
                 for det, t in zip(dets, targets):
                     if det is not None and len(det):
-                        preds_all.append({
+                        preds_batch.append({
                             'boxes':  det[:, :4].cpu(),
                             'scores': det[:, 4].cpu(),
                             'labels': det[:, 5].int().cpu(),
                         })
                     else:
-                        preds_all.append({
+                        preds_batch.append({
                             'boxes':  torch.zeros((0, 4)),
                             'scores': torch.zeros(0),
                             'labels': torch.zeros(0, dtype=torch.int),
                         })
-                    targets_all.append({
+                    targets_batch.append({
                         'boxes':  t['boxes'].cpu(),
                         'labels': t['labels'].int().cpu(),
                     })
 
             n_imgs += len(images)
+            metric.update(preds_batch, targets_batch)
+            if batch_i % 10 == 0 or batch_i == len(val_loader):
+                print(f'    eval {batch_i}/{len(val_loader)} batches '
+                      f'({n_imgs} images)', flush=True)
 
     elapsed = time.time() - t0
     fps = n_imgs / elapsed
 
-    metric.update(preds_all, targets_all)
     res = metric.compute()
 
     return {
@@ -341,7 +353,7 @@ def main():
     parser.add_argument('--levels', type=int, nargs='+', default=[1, 2, 3],
                         help='RL levels to compare (e.g. --levels 2 3)')
     parser.add_argument('--split',  default='val', choices=['val', 'test'])
-    parser.add_argument('--data-root', default='../pre-data/data/v2i')
+    parser.add_argument('--data-root', default=str(REPO_ROOT / 'pre-data/data/v2i'))
     parser.add_argument('--device', default='cuda')
     args = parser.parse_args()
 

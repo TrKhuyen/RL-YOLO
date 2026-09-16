@@ -1,0 +1,47 @@
+{
+  "protocol": {
+    "steps": 100,
+    "batch_size": 2,
+    "lr": 1e-06,
+    "seed": 42,
+    "eval_interval": 10,
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.25,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "baseline",
+      "step": 10,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\ablation_100_seed42_bnfixed\\baseline_last_best.pt",
+      "mAP50-95": 0.6679849028587341,
+      "mAP50": 0.8046975135803223,
+      "AP_small": 0.17172324657440186,
+      "Recall": 0.7165215611457825,
+      "FPS": 69.08544347834535,
+      "num_images": 495
+    },
+    {
+      "variant": "sampling",
+      "step": 10,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\ablation_100_seed42_bnfixed\\sampling_last_best.pt",
+      "mAP50-95": 0.6676241159439087,
+      "mAP50": 0.8043205142021179,
+      "AP_small": 0.17172324657440186,
+      "Recall": 0.7162892818450928,
+      "FPS": 68.06559510484371,
+      "num_images": 495
+    },
+    {
+      "variant": "hybrid",
+      "step": 10,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\ablation_100_seed42_bnfixed\\hybrid_last_best.pt",
+      "mAP50-95": 0.6676225662231445,
+      "mAP50": 0.8043069839477539,
+      "AP_small": 0.17172324657440186,
+      "Recall": 0.7163501381874084,
+      "FPS": 67.40636710777312,
+      "num_images": 495
+    }
+  ]
+}

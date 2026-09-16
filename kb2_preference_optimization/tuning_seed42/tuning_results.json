@@ -1,0 +1,42 @@
+{
+  "protocol": {
+    "model": "yolov8n",
+    "seed": 42,
+    "batch_size": 2,
+    "learning_rate": 1e-06,
+    "selection_metric": "mAP50-95",
+    "validation_images": 495,
+    "val_conf": 0.25,
+    "val_iou": 0.45,
+    "batch_norm_running_stats": "frozen"
+  },
+  "reference": {
+    "baseline_step_10": 0.6679849028587341
+  },
+  "sampling_strength_sweep": {
+    "0.25": 0.668933093547821,
+    "0.5": 0.66792,
+    "1.5": 0.66736,
+    "2.0": 0.66767
+  },
+  "feedback_alpha_sweep_at_strength_0.25": {
+    "0.0": 0.668933093547821,
+    "0.01": 0.66891,
+    "0.03": 0.66881,
+    "0.05": 0.66888,
+    "0.1": 0.66889
+  },
+  "selected": {
+    "sampling_strategy": "feedback",
+    "sampling_strength": 0.25,
+    "feedback_alpha": 0.0,
+    "best_step": 10,
+    "mAP50-95": 0.668933093547821,
+    "mAP50": 0.80494,
+    "AP_small": 0.17172324657440186,
+    "Recall": 0.71789,
+    "delta_vs_baseline": 0.0009481906890869,
+    "checkpoint": "selected_sampling_last_best.pt"
+  },
+  "decision": "Keep feedback-guided sampling; reject auxiliary hybrid loss for the multi-seed experiment."
+}

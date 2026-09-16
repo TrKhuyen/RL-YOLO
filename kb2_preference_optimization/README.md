@@ -1,8 +1,12 @@
-# KB2: Preference Optimization
+# KB2: Feedback Fine-tuning for YOLO
 
-Kịch bản này chứa các thử nghiệm preference/group-relative optimization cho
-YOLO. Code hiện là nhánh nghiên cứu và chưa có kết quả thực nghiệm đã xác nhận
-như KB1-B.
+KB2 fine-tune YOLO bằng phản hồi sinh từ prediction và ground truth trên tập
+train. DPO cung cấp ý tưởng chosen/rejected và reference constraint; native
+YOLO detection loss vẫn là objective chính.
+
+Chạy thử:
+
+    python generate_feedback.py --model yolov8n --device cuda
 
 Môi trường Python dùng chung nằm tại root RL-YOLO:
 

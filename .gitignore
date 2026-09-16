@@ -21,3 +21,7 @@ results/
 # Local tooling
 .pytest_cache/
 .ruff_cache/
+
+kb2_preferences_optimization/
+**/feedback_checkpoints/
+**/feedback_data/ 

@@ -175,7 +175,7 @@ def _load_model_for_eval(
 # Evaluate single checkpoint
 # ─────────────────────────────────────────────────────────────────────────────
 
-def evaluate_model(
+def _legacy_evaluate_model(
     checkpoint:      str,
     dataloader,
     framework:       str   = 'ultralytics',
@@ -263,6 +263,55 @@ def evaluate_model(
     }
 
 
+# Canonical adapter loading. The legacy loader above is retained only for
+# backward compatibility with existing imports.
+def _load_canonical_adapter(model_name, checkpoint, device, base_checkpoint=None):
+    from train_rl import load_adapter
+    is_rl = base_checkpoint is not None
+    data = (torch.load(checkpoint, map_location='cpu', weights_only=False)
+            if is_rl else {})
+    source = base_checkpoint if is_rl else checkpoint
+    if is_rl and not source:
+        raise ValueError('RL checkpoint requires base_checkpoint')
+    adapter = load_adapter(model_name, str(source), device)
+    if is_rl:
+        adapter.load_state_dict(data['state_dict'], strict=True)
+    adapter.eval_mode()
+    return adapter, data if is_rl else {}
+
+
+def canonical_evaluate_model(
+    model_name, checkpoint, dataloader, device='cuda',
+    conf_thres=0.001, iou_thres=0.60, max_det=300,
+    supervised_ckpt=None,
+):
+    from canonical_eval import evaluate_adapter
+    adapter, metadata = _load_canonical_adapter(
+        model_name, checkpoint, device, supervised_ckpt,
+    )
+    metrics = evaluate_adapter(
+        adapter, dataloader, device=device,
+        conf_thres=conf_thres, iou_thres=iou_thres,
+        max_det=max_det, class_metrics=True, measure_latency=True,
+    )
+    metrics['checkpoint_step'] = metadata.get('step', 0)
+    metrics['seed'] = metadata.get('seed')
+    return metrics
+
+
+def evaluate_model(checkpoint, dataloader, framework='ultralytics',
+                   device='cuda', conf_thres=0.001, iou_thres=0.60,
+                   supervised_ckpt=None, model_name=None, max_det=300):
+    path = str(supervised_ckpt or checkpoint).lower()
+    names = ('dp_yolo', 'yolov11n', 'yolov11s', 'yolov8n', 'yolov8s', 'yolov5s')
+    model_name = model_name or next((n for n in names if n in path), None)
+    if model_name is None:
+        raise ValueError('model_name cannot be inferred')
+    return canonical_evaluate_model(
+        model_name, checkpoint, dataloader, device,
+        conf_thres, iou_thres, max_det, supervised_ckpt)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Per-class breakdown
 # ─────────────────────────────────────────────────────────────────────────────
@@ -315,6 +364,7 @@ def run_comparison(
     model_filter: str  = 'all',
     split:        str  = 'val',
     device:       str  = 'cuda',
+    seed:         int  = 42,
 ) -> pd.DataFrame:
     """
     Chay evaluation toan bo, tinh delta RL vs supervised, luu CSV.
@@ -330,19 +380,31 @@ def run_comparison(
 
     rows = []
     for model_name, paths in targets_to_eval.items():
-        for stage in ('supervised', 'rl'):
-            ckpt = paths.get(stage)
+        adapter_name = model_name.lower().replace('-', '_')
+        stage_paths = {
+            'supervised': paths['supervised'],
+            'native_only': str(
+                PROJECT_ROOT / 'rl_checkpoints'
+                / f'{adapter_name}_seed{seed}_native_only_best.pt'
+            ),
+            'kb1b': str(
+                PROJECT_ROOT / 'rl_checkpoints'
+                / f'{adapter_name}_seed{seed}_rl_best.pt'
+            ),
+        }
+        for stage, ckpt in stage_paths.items():
             if not ckpt or not Path(ckpt).exists():
                 print(f"  SKIP {model_name} [{stage}]: {ckpt}")
                 continue
 
             print(f"  Evaluating {model_name} [{stage}]...")
             try:
-                metrics = evaluate_model(
-                    ckpt, loader,
-                    framework=paths['framework'],
+                metrics = canonical_evaluate_model(
+                    adapter_name, ckpt, loader,
                     device=device,
-                    supervised_ckpt=(paths.get('supervised') if stage == 'rl' else None),
+                    supervised_ckpt=(
+                        paths['supervised'] if stage != 'supervised' else None
+                    ),
                 )
                 rows.append({
                     'Model': model_name,
@@ -365,12 +427,16 @@ def run_comparison(
     # ── Tính delta RL vs supervised ─────────────────────────────────────
     metrics_cols = ['mAP50', 'mAP50_95', 'APs', 'APm', 'recall']
     df_sup = df[df['Stage'] == 'supervised'].set_index('Model')[metrics_cols]
-    df_rl  = df[df['Stage'] == 'rl'].set_index('Model')[metrics_cols]
-    df_delta = (df_rl - df_sup).add_suffix('_delta')
-    df_delta = df_delta.reset_index()
+    df_native = df[df['Stage'] == 'native_only'].set_index('Model')[metrics_cols]
+    df_kb1b = df[df['Stage'] == 'kb1b'].set_index('Model')[metrics_cols]
+    delta_sup = (df_kb1b - df_sup).add_suffix('_kb1b_minus_supervised')
+    delta_native = (
+        df_kb1b - df_native
+    ).add_suffix('_kb1b_minus_native_only')
+    df_delta = delta_sup.join(delta_native, how='outer').reset_index()
 
     # ── Lưu kết quả ─────────────────────────────────────────────────────
-    out_dir = Path('results/tables')
+    out_dir = PROJECT_ROOT / 'results' / 'canonical' / split
     out_dir.mkdir(parents=True, exist_ok=True)
 
     df.to_csv(out_dir / 'results_full.csv', index=False)
@@ -383,7 +449,7 @@ def run_comparison(
     print(df.to_markdown(index=False, floatfmt='.4f'))
 
     print(f"\n{'='*80}")
-    print('  DELTA: RL - SUPERVISED (dương = RL tốt hơn)')
+    print('  DELTA GHÉP CẶP (dương = KB1-B tốt hơn)')
     print(f"{'='*80}")
     print(df_delta.to_markdown(index=False, floatfmt='+.4f'))
 
@@ -405,12 +471,14 @@ def main():
     parser.add_argument('--split',  default='val',
                         choices=['val', 'test'])
     parser.add_argument('--device', default='cuda')
+    parser.add_argument('--seed', type=int, default=42)
     args = parser.parse_args()
 
     run_comparison(
         model_filter=args.model,
         split=args.split,
         device=args.device,
+        seed=args.seed,
     )
 
 

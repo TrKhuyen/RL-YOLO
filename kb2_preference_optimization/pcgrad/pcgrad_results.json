@@ -1,0 +1,24 @@
+{
+  "configuration": {
+    "sampling_strength": 0.25,
+    "dynamic_object_feedback": true,
+    "gradient_conflict_control": true,
+    "gradient_feedback_alpha": 0.001,
+    "steps": 10,
+    "seeds": [42, 43, 44]
+  },
+  "results": [
+    {"seed": 42, "baseline": 0.6679849028587341, "pcgrad": 0.6690004467964172, "delta": 0.0010155439376831055},
+    {"seed": 43, "baseline": 0.6681996583938599, "pcgrad": 0.6674257516860962, "delta": -0.0007739067077636719},
+    {"seed": 44, "baseline": 0.6685171723365784, "pcgrad": 0.6671542525291443, "delta": -0.001362919807434082}
+  ],
+  "summary": {
+    "baseline_mean": 0.6682339111963908,
+    "pcgrad_mean": 0.6678601503372192,
+    "paired_delta_mean": -0.0003737608591715495,
+    "paired_delta_std": 0.0012386928480532821,
+    "wins": 1,
+    "num_seeds": 3
+  },
+  "decision": "Rejected: gradient conflict control did not improve mean mAP50-95 across seeds."
+}

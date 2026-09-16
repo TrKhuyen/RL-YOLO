@@ -125,14 +125,15 @@ def match_aware_objective(preds, targets, iou_threshold=0.5,
     log_probs = []
     for pred, target in zip(preds, targets):
         scores = pred['scores'].clamp(1e-6, 1.0 - 1e-6)
-        boxes, labels = pred['boxes'].detach(), pred['labels'].detach()
+        boxes = pred['boxes'].detach().float().cpu()
+        labels = pred['labels'].detach().cpu()
         gt_boxes = target['boxes'].to(boxes.device).detach()
         gt_labels = target['labels'].to(labels.device).detach()
-        tp = torch.zeros(len(scores), dtype=torch.bool, device=scores.device)
+        tp = torch.zeros(len(scores), dtype=torch.bool)
         used = set()
         if len(scores) and len(gt_boxes):
             ious = box_iou(gt_boxes.float(), boxes.float())
-            for pred_idx in scores.detach().argsort(descending=True).tolist():
+            for pred_idx in scores.detach().cpu().argsort(descending=True).tolist():
                 valid = gt_labels == labels[pred_idx]
                 if used:
                     valid[list(used)] = False
@@ -146,6 +147,7 @@ def match_aware_objective(preds, targets, iou_threshold=0.5,
                     used.add(gt_idx)
                     tp[pred_idx] = True
 
+        tp = tp.to(scores.device)
         parts = []
         if tp.any():
             parts.append(tp_weight * torch.log(scores[tp]).mean())
@@ -168,7 +170,7 @@ def match_aware_objective(preds, targets, iou_threshold=0.5,
 # 2b. Quick Evaluation (dung trong eval_interval)
 # =============================================================================
 
-def quick_eval(
+def _legacy_quick_eval(
     adapter,
     val_loader,
     device:     str   = 'cuda',
@@ -225,6 +227,18 @@ def quick_eval(
         'mAP50':  float(res.get('map_50',  torch.tensor(0.0)).item()),
         'recall': float(res.get('mar_100', torch.tensor(0.0)).item()),
     }
+
+
+def quick_eval(adapter, val_loader, device='cuda',
+               conf_thres=0.001, iou_thres=0.60) -> dict:
+    from canonical_eval import evaluate_adapter
+    result = evaluate_adapter(
+        adapter, val_loader, device=device,
+        conf_thres=conf_thres, iou_thres=iou_thres,
+    )
+    adapter.train_mode()
+    return {'mAP': result['mAP50_95'], 'mAP50': result['mAP50'],
+            'recall': result['recall']}
 
 
 def validation_score(metrics: dict) -> float:
@@ -488,11 +502,22 @@ def rl_finetune(
             validate_yolo_input(images)
 
         # ── Forward (giu grad qua confidence scores) ─────────────────────────
-        preds = adapter.forward_with_grad(
-            images,
-            conf_thres=cfg.get('conf_thres', 0.20),
-            iou_thres=cfg.get('iou_thres',  0.45),
-        )
+        if mode == 'native-only':
+            # Avoid a redundant inference/NMS pass. These placeholders make
+            # reward/proxy logging neutral; both terms have zero weight.
+            preds = [{
+                'boxes': images.new_zeros((0, 4)),
+                'labels': torch.zeros(0, dtype=torch.long, device=device),
+                'scores': images.new_zeros((0,)),
+                'policy_log_prob': images.new_zeros((), requires_grad=True),
+                'max_score_all': None,
+            } for _ in range(len(images))]
+        else:
+            preds = adapter.forward_with_grad(
+                images,
+                conf_thres=cfg.get('conf_thres', 0.20),
+                iou_thres=cfg.get('iou_thres',  0.45),
+            )
 
         if hasattr(adapter, 'native_detection_loss'):
             native_loss, native_items = adapter.native_detection_loss(

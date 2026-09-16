@@ -3,7 +3,7 @@ train_rl.py – RL Fine-tuning YOLO với 3 cấp độ từ DPO/GRPO/DAPO.
 
 Cấp độ:
   Level 1 – REINFORCE + EMA Baseline  (từ kb1_reward_guided_training, cải tiến)
-  Level 2 – GRPO-style Group Aug      (từ GRPO DeepSeek: group relative advantage)
+  Level 2 – DPO Preference Pairs      (chosen/rejected + frozen reference)
   Level 3 – GRPO + DAPO improvements  (clip-higher + dynamic batch filtering)
 
 Chạy:
@@ -20,6 +20,7 @@ Khác kb1_reward_guided_training/train_rl.py:
 """
 
 import argparse
+import copy
 import time
 from collections import deque
 from pathlib import Path
@@ -67,12 +68,48 @@ def compute_log_prob(preds: list[dict]) -> torch.Tensor:
     for pred in preds:
         scores = pred['scores']
         if scores.numel() == 0:
-            dev = scores.device if scores.numel() > 0 else torch.device('cpu')
-            log_probs.append(torch.tensor(-20.0, requires_grad=True, device=dev))
+            log_probs.append(torch.tensor(-20.0, requires_grad=True,
+                                          device=scores.device))
         else:
             avg_conf = scores.mean().clamp(1e-20, 1.0)
             log_probs.append(torch.log(avg_conf))
     return torch.stack(log_probs)  # (B,), requires_grad=True
+
+
+def anchor_preference_log_probs(adapter, images, targets, selections=None):
+    feat = adapter.raw_predictions(images)
+    xywh = feat[:, :4].permute(0, 2, 1)
+    probs = feat[:, 4:].clamp(1e-8, 1 - 1e-8)
+    values, picked, valid = [], [], []
+    for b, target in enumerate(targets):
+        gt = target['boxes'].to(feat.device)
+        labels = target['labels'].to(feat.device).long()
+        pair = None if selections is None else selections[b]
+        if pair is None and len(gt):
+            areas = (gt[:, 2] - gt[:, 0]) * (gt[:, 3] - gt[:, 1])
+            j = int(areas.argmin())
+            box, label = gt[j], int(labels[j])
+            p = xywh[b].detach()
+            pb = torch.stack((p[:,0]-p[:,2]/2, p[:,1]-p[:,3]/2,
+                              p[:,0]+p[:,2]/2, p[:,1]+p[:,3]/2), 1)
+            inter = (torch.minimum(pb[:,2:],box[2:])-torch.maximum(pb[:,:2],box[:2])).clamp_min(0).prod(1)
+            union = (pb[:,2:]-pb[:,:2]).clamp_min(0).prod(1)+areas[j]-inter+1e-8
+            iou = inter / union
+            pos = int(iou.argmax())
+            mask = iou < 0.1
+            mask[pos] = False
+            neg = int(probs[b,label].detach().masked_fill(~mask,-1).argmax())
+            pair = (label,pos,neg)
+        if pair is not None:
+            c, pos, neg = pair
+            values.append(torch.stack((probs[b,c,pos].log(), probs[b,c,neg].log())))
+            valid.append(True)
+        else:
+            z = feat[b].sum() * 0
+            values.append(torch.stack((z,z)))
+            valid.append(False)
+        picked.append(pair)
+    return torch.stack(values), picked, torch.tensor(valid, device=feat.device)
 
 
 def load_adapter(model_name: str, checkpoint: str, device: str):
@@ -96,9 +133,9 @@ def freeze_backbone(adapter, model_name: str) -> int:
             if any(f'model.{i}.' in name for i in range(10)):
                 should_freeze = True
         else:
-            if 'model.model.' in name:
+            if name.startswith('model.'):
                 try:
-                    idx = int(name.split('model.model.')[1].split('.')[0])
+                    idx = int(name.split('.')[1])
                     if idx < 10:
                         should_freeze = True
                 except (IndexError, ValueError):
@@ -265,7 +302,7 @@ def train_level1(
 
 
 # =============================================================================
-# 3. Level 2 – GRPO-style (Group Augmentation)
+# 3. Level 2 – DPO (Preference Pairs from Group Augmentation)
 #    Nguồn: GRPO (DeepSeek) → augmentation thay text sampling
 # =============================================================================
 
@@ -281,7 +318,7 @@ def train_level2(
     G:          int = 4,
 ):
     """
-    GRPO-style: sinh G augmented views, tính group relative advantage.
+    Sinh G views, chọn chosen/rejected bằng reward và tối ưu DPO loss.
 
     Ý tưởng cốt lõi từ GRPO (DeepSeek):
       - Không cần value model → baseline = mean(reward trong group)
@@ -292,6 +329,10 @@ def train_level2(
         G: số augmented views (4 là tốt nhất theo thực nghiệm)
     """
     trainable    = [p for p in adapter.parameters() if p.requires_grad]
+    reference    = copy.deepcopy(adapter)
+    reference.eval_mode()
+    for p in reference.parameters():
+        p.requires_grad_(False)
     optimizer    = torch.optim.Adam(trainable, lr=cfg['lr'])
     reward_hist  = deque(maxlen=200)
     best_avg_r   = -float('inf')
@@ -308,42 +349,24 @@ def train_level2(
             images, targets = next(data_iter)
         images = images.to(device)
 
-        # ── Sinh G augmented views ─────────────────────────────────────────
-        views = create_group_views(images, G=G, device=device)
-
-        all_log_probs: list[torch.Tensor] = []
-        all_rewards:   list[torch.Tensor] = []
-
-        for g, aug_images in enumerate(views):
-            preds = adapter.forward_with_grad(
-                aug_images,
-                conf_thres=cfg.get('conf_thres', 0.20),
-                iou_thres=cfg.get('iou_thres', 0.45),
+        supervised_loss, loss_items = adapter.supervised_loss(images, targets)
+        policy_pair, selections, valid = anchor_preference_log_probs(
+            adapter, images, targets
+        )
+        with torch.no_grad():
+            ref_pair, _, _ = anchor_preference_log_probs(
+                reference, images, targets, selections
             )
-            with torch.no_grad():
-                r = compute_reward(
-                    preds, targets,
-                    reward_type=cfg.get('reward_type', 'composite'),
-                    alpha=cfg.get('reward_alpha', 0.6),
-                    iou_threshold=cfg.get('iou_threshold', 0.5),
-                    small_thresh=cfg.get('small_thresh', 32),
-                ).to(device)
-                all_rewards.append(r)
-            all_log_probs.append(compute_log_prob(preds))
 
-        # ── Stack: (G, B) ───────────────────────────────────────────────────
-        log_probs_mat = torch.stack(all_log_probs)   # (G, B), has grad
-        rewards_mat   = torch.stack(all_rewards)     # (G, B), no grad
-
-        # ── Group relative advantage (GRPO core) ───────────────────────────
-        # Baseline = mean(reward trong group) thay EMA
-        # Không cần warmup, tự normalize theo std của group
-        mean_r = rewards_mat.mean(dim=0, keepdim=True)   # (1, B)
-        std_r  = rewards_mat.std(dim=0,  keepdim=True) + 1e-8
-        advantage_mat = (rewards_mat - mean_r) / std_r    # (G, B), normalized
-
-        # ── GRPO loss ────────────────────────────────────────────────────────
-        loss = -torch.mean(log_probs_mat * advantage_mat.detach())
+        pi_margin = policy_pair[:, 0] - policy_pair[:, 1]
+        ref_margin = ref_pair[:, 0] - ref_pair[:, 1]
+        beta = cfg.get('dpo_beta', 0.1)
+        pair_loss = -torch.nn.functional.logsigmoid(
+            beta * (pi_margin - ref_margin.detach())
+        )
+        dpo_loss = pair_loss[valid].mean() if valid.any() else (pi_margin * 0).sum()
+        loss = (cfg.get('supervised_weight', 1.0) * supervised_loss
+                + cfg.get('dpo_weight', 0.02) * dpo_loss)
 
         # ── Backprop ─────────────────────────────────────────────────────────
         optimizer.zero_grad()
@@ -352,8 +375,10 @@ def train_level2(
         optimizer.step()
 
         # ── Logging ──────────────────────────────────────────────────────────
-        avg_r_step  = rewards_mat.mean().item()
-        group_std   = rewards_mat.std().item()
+        avg_r_step  = -loss.item()
+        group_std   = pi_margin.detach().std().item() if len(pi_margin) > 1 else 0.0
+        valid_ratio = valid.float().mean().item()
+        mean_gap    = pi_margin.detach()[valid].mean().item() if valid.any() else 0.0
         reward_hist.append(avg_r_step)
 
         if step % cfg.get('log_interval', 100) == 0:
@@ -361,20 +386,25 @@ def train_level2(
             writer.add_scalar(f'{model_name}/L2/reward',     avg_r_step,  step)
             writer.add_scalar(f'{model_name}/L2/reward_avg', avg_r,       step)
             writer.add_scalar(f'{model_name}/L2/group_std',  group_std,   step)
+            writer.add_scalar(f'{model_name}/L2/valid_pair_ratio', valid_ratio, step)
+            writer.add_scalar(f'{model_name}/L2/reward_gap', mean_gap, step)
             writer.add_scalar(f'{model_name}/L2/loss',       loss.item(), step)
-            print(f'  [L2] {step:6d} | R={avg_r_step:.4f} avg200={avg_r:.4f} '
-                  f'group_std={group_std:.4f} loss={loss.item():.6f}')
+            writer.add_scalar(f'{model_name}/L2/supervised_loss', supervised_loss.item(), step)
+            writer.add_scalar(f'{model_name}/L2/dpo_loss', dpo_loss.item(), step)
+            print(f'  [L2] {step:6d} | sup={supervised_loss.item():.4f} '
+                  f'dpo={dpo_loss.item():.4f} valid={valid_ratio:.1%} '
+                  f'margin={mean_gap:.4f} total={loss.item():.4f}')
 
             if avg_r > best_avg_r:
                 best_avg_r = avg_r
                 ckpt = save_checkpoint(
-                    adapter, output_dir, model_name, step, 'l2_best',
+                    adapter, output_dir, model_name, step, 'l2_anchor_dpo_best',
                     extra={'avg_reward': avg_r, 'level': 2, 'G': G},
                 )
                 print(f'    -> Best L2 ckpt (avg_r={avg_r:.4f}): {ckpt}')
 
         if step % cfg.get('save_interval', 5_000) == 0:
-            save_checkpoint(adapter, output_dir, model_name, step, f'l2_step{step}')
+            save_checkpoint(adapter, output_dir, model_name, step, f'l2_anchor_dpo_step{step}')
 
         if step % cfg.get('eval_interval', 5_000) == 0:
             val_m = quick_eval(adapter, val_loader, device=device)
@@ -383,6 +413,12 @@ def train_level2(
             print(f'    [Eval L2 step {step}] mAP50={val_m["mAP50"]:.4f} '
                   f'recall={val_m["recall"]:.4f}')
 
+    final_avg_r = float(np.mean(reward_hist)) if reward_hist else float('nan')
+    final_ckpt = save_checkpoint(
+        adapter, output_dir, model_name, steps, 'l2_anchor_dpo_final',
+        extra={'avg_reward': final_avg_r, 'level': 2, 'G': G},
+    )
+    print(f'    -> Final L2 ckpt: {final_ckpt}')
     return best_avg_r
 
 
@@ -584,12 +620,14 @@ def train_level3(
 # 5. Main dispatcher
 # =============================================================================
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
 CHECKPOINTS = {
     'yolov5s':  'checkpoints/yolov5s/weights/best.pt',
-    'yolov8n':  'checkpoints/yolov8n/weights/best.pt',
-    'yolov8s':  'checkpoints/yolov8s/weights/best.pt',
-    'yolov11n': 'checkpoints/yolov11n/weights/best.pt',
-    'yolov11s': 'checkpoints/yolov11s/weights/best.pt',
+    'yolov8n':  REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov8n/weights/best.pt',
+    'yolov8s':  REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov8s/weights/best.pt',
+    'yolov11n': REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov11n/weights/best.pt',
+    'yolov11s': REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov11s/weights/best.pt',
     'dp_yolo':  'checkpoints/dp_yolo/weights/best.pt',
 }
 
@@ -603,7 +641,7 @@ TRAIN_FUNCS = {
 def run_rl(model_name: str, checkpoint: str, cfg: dict, args):
     """Chạy RL fine-tuning cho 1 model với level được chỉ định."""
     device     = args.device
-    output_dir = Path('rl_checkpoints')
+    output_dir = SCRIPT_DIR / 'rl_checkpoints'
     output_dir.mkdir(exist_ok=True)
 
     run_id = f'{model_name}_l{args.level}_{int(time.time())}'
@@ -640,7 +678,7 @@ def run_rl(model_name: str, checkpoint: str, cfg: dict, args):
             print(f'  [WARN] --resume: {args.resume} không phải RL checkpoint hợp lệ, bỏ qua.')
 
     # ── DataLoaders ──────────────────────────────────────────────────────
-    data_root = cfg.get('data_root', '../pre-data/data/v2i')
+    data_root = str(REPO_ROOT / 'pre-data/data/v2i')
     bs        = cfg.get('batch_size', 16)
     train_loader = get_pest_dataloader(data_root, split='train', batch_size=bs, img_size=640)
     val_loader   = get_pest_dataloader(data_root, split='val',   batch_size=bs, img_size=640)
@@ -662,12 +700,12 @@ def run_rl(model_name: str, checkpoint: str, cfg: dict, args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='RL Fine-tuning YOLO (Level 1/2/3: REINFORCE / GRPO / DAPO)')
+        description='YOLO preference tuning (Level 1=REINFORCE, Level 2=DPO, Level 3=experimental DAPO)')
     parser.add_argument('--model',  default='all',
                         choices=['all'] + list(CHECKPOINTS.keys()),
                         help='Model cần fine-tune')
     parser.add_argument('--level',  type=int, default=2, choices=[1, 2, 3],
-                        help='RL level: 1=REINFORCE+EMA, 2=GRPO, 3=GRPO+DAPO')
+                        help='RL level: 1=REINFORCE+EMA, 2=DPO, 3=experimental DAPO')
     parser.add_argument('--G',      type=int, default=4,
                         help='Số augmented views (Level 2/3, default=4)')
     parser.add_argument('--steps',  type=int,   default=None)
@@ -678,11 +716,11 @@ def main():
     parser.add_argument('--resume', default=None, metavar='CKPT',
                         help='Path đến RL checkpoint để resume training bị dừ dượng giữa chừng. '
                              'Ví dụ: rl_checkpoints/dp_yolo_rl_l2_step25000.pt')
-    parser.add_argument('--cfg',    default='configs/hyp.rl.yaml')
+    parser.add_argument('--cfg', default=str(SCRIPT_DIR / 'configs/hyp.rl.grpo.yaml'))
     parser.add_argument('--device', default='cuda')
     args = parser.parse_args()
 
-    with open(args.cfg) as f:
+    with open(args.cfg, encoding='utf-8') as f:
         cfg = yaml.safe_load(f)
 
     # CLI overrides

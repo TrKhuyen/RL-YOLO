@@ -1,0 +1,36 @@
+{
+  "protocol": {
+    "steps": 25,
+    "batch_size": 2,
+    "lr": 1e-06,
+    "seed": 42,
+    "eval_interval": 25,
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.25,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "sampling",
+      "step": 0,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\bn_regression_feedback\\sampling_last_best.pt",
+      "mAP50-95": 0.6674109697341919,
+      "mAP50": 0.8047025203704834,
+      "AP_small": 0.17172324657440186,
+      "Recall": 0.7160940170288086,
+      "FPS": 63.807115196405725,
+      "num_images": 495
+    },
+    {
+      "variant": "hybrid",
+      "step": 0,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\bn_regression_feedback\\hybrid_last_best.pt",
+      "mAP50-95": 0.6674109697341919,
+      "mAP50": 0.8047025203704834,
+      "AP_small": 0.17172324657440186,
+      "Recall": 0.7160940170288086,
+      "FPS": 65.96181600349986,
+      "num_images": 495
+    }
+  ]
+}

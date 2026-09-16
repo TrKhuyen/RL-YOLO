@@ -1,17 +1,35 @@
-path: ../pre-data/data/v2i
+path: D:/graduate/RL-YOLO/pre-data/data/v2i
 train: train/images
 val:   valid/images
 test:  test/images
 
-nc: 10
+nc: 28
 names:
-  0: sau_duc_than      # Stem borer
-  1: sau_cuon_la       # Leaf roller
-  2: benh_dom_nau      # Brown spot
-  3: benh_dao_on       # Blast
-  4: benh_kho_van      # Sheath blight
-  5: ran_xanh          # Green leafhopper
-  6: bo_tri            # Thrips
-  7: ran_nau           # Brown planthopper
-  8: dom_la            # Leaf spot
-  9: healthy           # Healthy leaf (hard negative)
+  0: Apple Scab Leaf
+  1: Apple leaf
+  2: Apple rust leaf
+  3: Bell_pepper leaf
+  4: Bell_pepper leaf spot
+  5: Blueberry leaf
+  6: Cherry leaf
+  7: Corn Gray leaf spot
+  8: Corn leaf blight
+  9: Corn rust leaf
+  10: Peach leaf
+  11: Potato leaf
+  12: Potato leaf early blight
+  13: Potato leaf late blight
+  14: Raspberry leaf
+  15: Soyabean leaf
+  16: Squash Powdery mildew leaf
+  17: Strawberry leaf
+  18: Tomato Early blight leaf
+  19: Tomato Septoria leaf spot
+  20: Tomato leaf
+  21: Tomato leaf bacterial spot
+  22: Tomato leaf late blight
+  23: Tomato leaf mosaic virus
+  24: Tomato leaf yellow virus
+  25: Tomato mold leaf
+  26: grape leaf
+  27: grape leaf black rot

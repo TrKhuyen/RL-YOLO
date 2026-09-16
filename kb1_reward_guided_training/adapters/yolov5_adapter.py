@@ -61,6 +61,40 @@ class YOLOv5Adapter:
     def state_dict(self):
         return self.model.model.state_dict()
 
+    def load_state_dict(self, state_dict, strict: bool = True):
+        return self.model.model.load_state_dict(state_dict, strict=strict)
+
+    def _format_native_targets(self, images, targets):
+        height, width = images.shape[-2:]
+        rows = []
+        for image_idx, target in enumerate(targets):
+            boxes = target['boxes'].to(self.device)
+            if boxes.numel() == 0:
+                continue
+            labels = target['labels'].to(self.device)
+            xywh = torch.empty_like(boxes)
+            xywh[:, 0] = (boxes[:, 0] + boxes[:, 2]) / (2 * width)
+            xywh[:, 1] = (boxes[:, 1] + boxes[:, 3]) / (2 * height)
+            xywh[:, 2] = (boxes[:, 2] - boxes[:, 0]) / width
+            xywh[:, 3] = (boxes[:, 3] - boxes[:, 1]) / height
+            image_col = torch.full(
+                (len(boxes), 1), image_idx, device=self.device,
+                dtype=xywh.dtype,
+            )
+            rows.append(torch.cat((image_col, labels.float()[:, None], xywh), 1))
+        return torch.cat(rows, 0) if rows else images.new_zeros((0, 6))
+
+    def native_detection_loss(self, images, targets):
+        from utils.loss import ComputeLoss
+        targets = self._format_native_targets(images, targets)
+        output = self.model.model(images)
+        raw = output[1] if isinstance(output, tuple) else output
+        if not hasattr(self, '_criterion'):
+            self._criterion = ComputeLoss(self.model.model)
+        loss, items = self._criterion(raw, targets)
+        values = zip(('box', 'obj', 'cls'), items.detach().flatten())
+        return loss / images.shape[0], dict(values)
+
     def freeze_except_detection_head(self) -> tuple[int, int]:
         '''Freeze the feature extractor and train only the final Detect module.'''
         inner = self.model.model
@@ -80,6 +114,7 @@ class YOLOv5Adapter:
         images:     torch.Tensor,
         conf_thres: float = 0.20,
         iou_thres:  float = 0.45,
+        max_det:    int   = 300,
     ) -> list[dict]:
         """
         Forward pass giữ gradient qua confidence scores.
@@ -99,7 +134,7 @@ class YOLOv5Adapter:
         Returns:
             list[dict]: mỗi dict có 'boxes'(xyxy), 'labels'(long), 'scores'(grad)
         """
-        from torchvision.ops import batched_nms
+        from adapters.common import canonical_postprocess
         from utils.general import xywh2xyxy
 
         images = images.to(self.device)
@@ -126,19 +161,16 @@ class YOLOv5Adapter:
             labels_all = single[:, 5:].argmax(dim=-1)
             boxes_all = xywh2xyxy(single[:, :4])
 
-            with torch.no_grad():
-                candidates = torch.where(scores_all.detach() >= conf_thres)[0]
-                keep = batched_nms(
-                    boxes_all[candidates].detach(), scores_all[candidates].detach(),
-                    labels_all[candidates], iou_thres,
-                )[:300]
-                selected = candidates[keep]
+            selected, selected_boxes, selected_labels = canonical_postprocess(
+                boxes_all, scores_all, labels_all,
+                conf_thres, iou_thres, max_det,
+            )
 
             if selected.numel() > 0:
                 selected_scores = scores_all[selected]
                 preds.append({
-                    'boxes':  boxes_all[selected].detach(),
-                    'labels': labels_all[selected].long().detach(),
+                    'boxes':  selected_boxes,
+                    'labels': selected_labels,
                     'scores': selected_scores,
                     'policy_log_prob': torch.log(selected_scores.mean().clamp_min(1e-20)),
                     'max_score_all': scores_all.max(),

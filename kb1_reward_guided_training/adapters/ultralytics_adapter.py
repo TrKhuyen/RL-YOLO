@@ -55,6 +55,9 @@ class UltralyticsAdapter:
     def state_dict(self):
         return self.model.state_dict()
 
+    def load_state_dict(self, state_dict, strict: bool = True):
+        return self.model.load_state_dict(state_dict, strict=strict)
+
     def native_detection_loss(self, images, targets):
         # Restore default loss gains omitted from exported checkpoint args.
         from ultralytics.cfg import DEFAULT_CFG_DICT, get_cfg
@@ -83,7 +86,12 @@ class UltralyticsAdapter:
             'bboxes': torch.cat(boxes).to(self.device),
         }
         loss_components, loss_items = self.model.loss(native_batch)
-        return loss_components.sum() / images.shape[0], loss_items
+        if isinstance(loss_items, dict):
+            items = loss_items
+        else:
+            names = ('box', 'cls', 'dfl')
+            items = dict(zip(names, loss_items.detach().flatten()))
+        return loss_components.sum() / images.shape[0], items
 
     def freeze_except_detection_head(self) -> tuple[int, int]:
         '''Freeze the feature extractor and train only the final Detect module.'''
@@ -92,6 +100,9 @@ class UltralyticsAdapter:
         detect = self.model.model[-1]
         for param in detect.parameters():
             param.requires_grad = True
+        # DFL integrates a fixed categorical support, not learned weights.
+        if hasattr(detect, 'dfl'):
+            detect.dfl.requires_grad_(False)
         frozen = sum(p.numel() for p in self.model.parameters() if not p.requires_grad)
         trainable = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         return frozen, trainable
@@ -103,6 +114,7 @@ class UltralyticsAdapter:
         images:     torch.Tensor,
         conf_thres: float = 0.20,
         iou_thres:  float = 0.45,
+        max_det:    int   = 300,
     ) -> list[dict]:
         """
         Forward pass giữ gradient qua confidence scores.
@@ -117,7 +129,7 @@ class UltralyticsAdapter:
         - Chạy NMS detach để biết predictions nào được giữ.
         - Map confidence → predictions được chọn (top-k approximation).
         """
-        from torchvision.ops import batched_nms
+        from adapters.common import canonical_postprocess
         from ultralytics.utils.ops import xywh2xyxy
 
         images = images.to(self.device)
@@ -137,19 +149,16 @@ class UltralyticsAdapter:
 
         preds = []
         for b in range(B):
-            with torch.no_grad():
-                candidates = torch.where(scores_all[b].detach() >= conf_thres)[0]
-                keep = batched_nms(
-                    boxes_all[b, candidates].detach(), scores_all[b, candidates].detach(),
-                    labels_all[b, candidates], iou_thres,
-                )[:300]
-                selected = candidates[keep]
+            selected, selected_boxes, selected_labels = canonical_postprocess(
+                boxes_all[b], scores_all[b], labels_all[b],
+                conf_thres, iou_thres, max_det,
+            )
 
             if selected.numel() > 0:
                 selected_scores = scores_all[b, selected]
                 preds.append({
-                    'boxes':  boxes_all[b, selected].detach(),
-                    'labels': labels_all[b, selected].long().detach(),
+                    'boxes':  selected_boxes,
+                    'labels': selected_labels,
                     'scores': selected_scores,
                     'policy_log_prob': torch.log(selected_scores.mean().clamp_min(1e-20)),
                     'max_score_all': scores_all[b].max(),

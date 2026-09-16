@@ -1,0 +1,23 @@
+{
+  "configuration": {
+    "sampling_strength": 0.25,
+    "image_feedback_alpha": 0.0,
+    "object_feedback_alpha": 0.05,
+    "steps": 10,
+    "seeds": [42, 43, 44]
+  },
+  "results": [
+    {"seed": 42, "baseline": 0.6679849028587341, "object_feedback": 0.668984591960907, "delta": 0.0009996891021728516},
+    {"seed": 43, "baseline": 0.6681996583938599, "object_feedback": 0.6674980521202087, "delta": -0.000701606273651123},
+    {"seed": 44, "baseline": 0.6685171723365784, "object_feedback": 0.6669849157333374, "delta": -0.0015322566032409668}
+  ],
+  "summary": {
+    "baseline_mean": 0.6682339111963908,
+    "object_feedback_mean": 0.667822519938151,
+    "paired_delta_mean": -0.0004113912582397461,
+    "paired_delta_std": 0.0012906803749064052,
+    "wins": 1,
+    "num_seeds": 3
+  },
+  "decision": "Rejected: object-level auxiliary loss did not improve mean mAP50-95 across seeds."
+}
