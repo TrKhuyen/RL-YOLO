@@ -1,7 +1,7 @@
 [project]
 name = "yolo-rl-pest"
 version = "0.1.0"
-description = "Reward-guided and preference-optimization scenarios for YOLO pest detection"
+description = "Reward-guided, preference, and RL hyperparameter optimization scenarios for YOLO pest detection"
 requires-python = ">=3.9"
 dependencies = [
     "torch>=2.0.1",
@@ -28,8 +28,11 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-# Flat layout: ship tất cả .py files ở root + thư mục models/, adapters/
-packages = ["kb1_reward_guided_training/adapters", "kb1_reward_guided_training/models"]
+packages = [
+    "kb1_reward_guided_training/adapters",
+    "kb1_reward_guided_training/models",
+    "kb3_hyperparameter_optimization",
+]
 
 [tool.uv]
 index-url = "https://pypi.org/simple"

@@ -1,0 +1,56 @@
+experiment:
+  seed: 42
+  total_epochs: 100
+  segment_epochs: 5
+  patience_segments: 8
+  max_seconds: null
+  output_dir: runs/kb3
+
+reward:
+  delta_map50_95: 0.45
+  delta_recall: 0.25
+  delta_ap_small: 0.20
+  delta_map50: 0.10
+  time_penalty: 0.01
+  overfit_penalty: 0.10
+  clipped_action_penalty: 0.02
+  failure_penalty: 1.0
+  terminal_map_bonus: 0.20
+
+search_space:
+  parameters:
+    lr0:
+      initial: 0.01
+      minimum: 0.0001
+      maximum: 0.02
+      multipliers: [0.5, 0.8, 1.0, 1.2, 1.5]
+      additive: false
+    weight_decay:
+      initial: 0.0005
+      minimum: 0.0001
+      maximum: 0.002
+      multipliers: [0.8, 1.0, 1.2]
+      additive: false
+    momentum:
+      initial: 0.937
+      minimum: 0.80
+      maximum: 0.98
+      multipliers: [-0.02, 0.0, 0.02]
+      additive: true
+    augmentation_strength:
+      initial: 0.5
+      minimum: 0.0
+      maximum: 1.0
+      multipliers: [-0.1, 0.0, 0.1]
+      additive: true
+
+ppo:
+  hidden_size: 64
+  learning_rate: 0.0003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  update_epochs: 8
+

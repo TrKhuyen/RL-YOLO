@@ -1,0 +1,17 @@
+experiment:
+  seed: 42
+  total_epochs: 2
+  segment_epochs: 1
+  patience_segments: 3
+  max_seconds: null
+  output_dir: runs/kb3_worker_smoke
+
+ppo:
+  hidden_size: 32
+  learning_rate: 0.0003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  update_epochs: 1
