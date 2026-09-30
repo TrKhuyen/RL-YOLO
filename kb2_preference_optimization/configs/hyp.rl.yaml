@@ -33,4 +33,4 @@ freeze_backbone: false   # đóng băng backbone khi fine-tune
 batch_size: 16           # batch size cho RL loop
 
 # Data
-data_root: ../pre-data/data/v2i   # path đến thư mục dataset (chứa images/ và labels/)
+data_root: ../pre-data/data/v2i_cleanned   # path đến thư mục dataset (chứa images/ và labels/)

@@ -85,7 +85,7 @@ def main() -> None:
         raise ValueError("--episodes must be positive")
     config = load_config(args.config)
     env = YoloHPOEnv(build_trainer(args, config), config)
-    output_dir = Path(config.experiment.output_dir)
+    output_dir = Path(config.experiment.output_dir) / "adaptive_rl"
     output_dir.mkdir(parents=True, exist_ok=True)
     if args.resume_checkpoint:
         agent, metadata = _resume_agent(args, env, config)

@@ -88,20 +88,9 @@ class PestDataset(Dataset):
         self.img_size = img_size
         self.transforms = transforms
 
-        # Fallback path resolution for dataset location
-        root_path = Path(root)
-        if not root_path.exists():
-            for candidate in [
-                Path('../pre-data/data/v2i'),
-                Path('pre-data/data/v2i'),
-                Path('../pre-data/data'),
-                Path('pre-data/data'),
-            ]:
-                if candidate.exists():
-                    root_path = candidate
-                    break
-        if (root_path / 'v2i').exists() and not (root_path / 'train').exists() and not (root_path / 'images').exists():
-            root_path = root_path / 'v2i'
+        root_path = Path(root).expanduser().resolve()
+        if not root_path.is_dir():
+            raise FileNotFoundError(f'Dataset root does not exist: {root_path}')
         root = str(root_path)
 
         # Fallback: map split 'val' to 'valid' if 'val' doesn't exist but 'valid' does

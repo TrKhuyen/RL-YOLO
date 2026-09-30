@@ -266,12 +266,14 @@ def patch() -> bool:
             _DP_YOLO_DIR / "loss.py",
         )
         if os.getenv('DP_YOLO_USE_W3F', '0') == '1':
-            loss_mod.patch_loss()
+            if not loss_mod.patch_loss():
+                return False
         else:
             print('  - W3F disabled; using stable CIoU baseline')
         print("  ✓ W3F_MPDIoU loss patched")
     except Exception as e:
-        print(f"  [WARN] loss patch skipped: {e}")
+        print(f"  [ERROR] loss patch failed: {e}")
+        return False
 
     # ── 7. Patch PSA label assignment ────────────────────────────────────────
     try:
@@ -280,12 +282,14 @@ def patch() -> bool:
             _DP_YOLO_DIR / "psa.py",
         )
         if os.getenv('DP_YOLO_USE_PSA', '0') == '1':
-            psa_mod.patch_psa()
+            if not psa_mod.patch_psa():
+                return False
         else:
             print('  - PSA disabled; using standard target assignment')
         print("  ✓ PSA label assignment patched")
     except Exception as e:
-        print(f"  [WARN] PSA patch skipped: {e}")
+        print(f"  [ERROR] PSA patch failed: {e}")
+        return False
 
     print("DP-YOLO patch complete.\n")
     return True

@@ -25,14 +25,17 @@ class DummyDataset(Dataset):
             'boxes': torch.zeros((0, 4)), 'labels': torch.zeros(0, dtype=torch.long)}
 
 
-def make_record(image_id=0, counts=None, num_ground_truths=1):
-    counts = counts or {}
+def make_record(image_id=0, statuses=None, false_positives=0):
+    statuses = list(statuses or [])
+    feedback = {kind: [] for kind in FEEDBACK_TYPES}
+    for gi, kind in enumerate(statuses):
+        feedback[kind].append({'gt_index': gi})
+    feedback['false_positive'] = [{} for _ in range(false_positives)]
     return {
         'schema_version': SCHEMA_VERSION, 'image_id': image_id,
         'image_path': f'image_{image_id}.jpg',
-        'num_ground_truths': num_ground_truths, 'num_predictions': 0,
-        'feedback': {kind: [{} for _ in range(counts.get(kind, 0))]
-                     for kind in FEEDBACK_TYPES},
+        'num_ground_truths': len(statuses), 'num_predictions': 0,
+        'gt_status': statuses, 'feedback': feedback,
         'preferences': [{'chosen': 1}] if image_id == 0 else []}
 
 
@@ -49,7 +52,7 @@ class FeedbackDatasetTests(unittest.TestCase):
         return path
 
     def test_load_and_vector_order(self):
-        record = make_record(0, {'matched': 2, 'wrong_class': 1, 'missed': 3})
+        record = make_record(0, ['matched', 'matched', 'wrong_class', 'missed', 'missed', 'missed'])
         self.assertEqual(list(load_feedback_records(self.write_jsonl('f.jsonl', [record]))), [0])
         self.assertEqual(feedback_vector(record).tolist(), [2, 1, 0, 0, 0, 3])
 
@@ -64,26 +67,28 @@ class FeedbackDatasetTests(unittest.TestCase):
             load_feedback_records(self.write_jsonl('empty.jsonl', []))
         with self.assertRaisesRegex(ValueError, 'duplicate image_id'):
             load_feedback_records(self.write_jsonl('dup.jsonl', [make_record(), make_record()]))
+        record = make_record(0, ['matched'])
+        record['gt_status'][0] = 'missed'
+        with self.assertRaisesRegex(ValueError, 'inconsistent matched GT status'):
+            load_feedback_records(self.write_jsonl('inconsistent.jsonl', [record]))
 
     def test_difficulty_normalization_and_floor(self):
         self.assertAlmostEqual(feedback_difficulty(
-            make_record(0, {'missed': 2, 'wrong_class': 1}, 2)), 1.75)
-        self.assertEqual(feedback_difficulty(make_record(0, {'matched': 20}, 2)), 0.0)
+            make_record(0, ['missed', 'wrong_class'])), 1.125)
+        self.assertEqual(feedback_difficulty(make_record(0, ['matched', 'matched'])), 0.0)
         self.assertAlmostEqual(feedback_difficulty(
-            make_record(0, {'false_positive': 2}, 0)), 1.0)
+            make_record(0, [], 2)), 1.0)
 
-    def test_object_feedback_mapping_uses_priority_and_augmented_indices(self):
-        record = make_record(0, {'missed': 3}, 3)
-        record['feedback']['missed'] = [
-            {'gt_index': 0}, {'gt_index': 1}, {'gt_index': 2}]
-        record['feedback']['bad_localization'] = [{'gt_index': 1}]
-        record['feedback']['wrong_class'] = [{'gt_index': 2}]
+    def test_object_feedback_mapping_uses_exclusive_augmented_indices(self):
+        record = make_record(0, ['missed', 'bad_localization', 'wrong_class'])
         codes = object_feedback_codes(record, torch.tensor([2, 0, 1]))
         self.assertEqual(codes.tolist(), [1, 3, 2])
+        record['feedback']['wrong_class'].append({'gt_index': 0})
+        self.assertEqual(object_feedback_codes(record, [0]).tolist(), [3])
 
     def test_dataset_attachment_and_weight_bounds(self):
         path = self.write_jsonl('f.jsonl', [
-            make_record(0, {'matched': 1}), make_record(1, {'missed': 20})])
+            make_record(0, ['matched']), make_record(1, ['missed'])])
         dataset = FeedbackDataset(DummyDataset(2), path, sampling_strength=2, max_sampling_weight=3)
         self.assertEqual(dataset.sampling_weights.tolist(), [1.0, 3.0])
         image, target = dataset[0]
@@ -101,26 +106,42 @@ class FeedbackDatasetTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'max_sampling_weight'):
             FeedbackDataset(DummyDataset(1), path, max_sampling_weight=.5)
 
-    def test_real_feedback_covers_real_train_dataset(self):
-        feedback_path = KB2_DIR / 'feedback_data' / 'yolov8n_train.jsonl'
-        data_root = KB2_DIR.parent / 'pre-data' / 'data' / 'v2i'
-        if not feedback_path.exists() or not data_root.exists():
-            self.skipTest('Real artifacts unavailable')
-        from dataloader import PestDataset, get_val_transforms
-        base = PestDataset(str(data_root), 'train', 640, get_val_transforms(640))
+    def real_feedback_fixture(self):
+        """Build schema-2 records from actual train labels without model inference."""
+        data_root = KB2_DIR.parent / 'pre-data' / 'data' / 'v2i_cleanned'
+        if not data_root.exists():
+            self.skipTest('Real train dataset unavailable')
+        from dataloader import PestDataset
+        base = PestDataset(str(data_root), 'train', 64)
+        records = []
+        for image_id, (image_path, label_path) in enumerate(
+                zip(base.img_paths, base.label_paths)):
+            count = 0
+            if label_path is not None:
+                count = sum(len(line.split()) == 5
+                            for line in label_path.read_text().splitlines())
+            record = make_record(image_id, ['missed'] * count)
+            record['image_path'] = str(image_path)
+            records.append(record)
+        return data_root, base, self.write_jsonl('real_train_fixture.jsonl', records)
+
+    def test_schema_feedback_covers_real_train_dataset(self):
+        _, base, feedback_path = self.real_feedback_fixture()
         dataset = FeedbackDataset(base, feedback_path)
         summary = dataset.summary()
-        self.assertEqual(len(dataset), 1722)
-        self.assertEqual(summary['feedback_counts']['matched'], 6050)
-        self.assertEqual(summary['feedback_counts']['missed'], 1124)
+        self.assertEqual(len(dataset), len(base))
+        self.assertEqual(summary['feedback_counts'].get('missed', 0),
+                         sum(len(record['gt_status'])
+                             for record in dataset.records.values()))
         self.assertGreaterEqual(summary['sampling_weight_min'], 1.0)
         self.assertLessEqual(summary['sampling_weight_max'], 5.0)
+        for image_id in (0, len(base) // 2, len(base) - 1):
+            _, target = dataset[image_id]
+            self.assertEqual(len(target['object_feedback_codes']),
+                             len(target['boxes']))
 
     def test_real_loader_is_reproducible_for_same_seed(self):
-        feedback_path = KB2_DIR / 'feedback_data' / 'yolov8n_train.jsonl'
-        data_root = KB2_DIR.parent / 'pre-data' / 'data' / 'v2i'
-        if not feedback_path.exists() or not data_root.exists():
-            self.skipTest('Real artifacts unavailable')
+        data_root, _, feedback_path = self.real_feedback_fixture()
         from feedback_dataset import get_feedback_dataloader
         kwargs = dict(root=str(data_root), feedback_path=str(feedback_path),
                       batch_size=2, img_size=64, num_workers=0, seed=123)
@@ -134,7 +155,7 @@ class FeedbackDatasetTests(unittest.TestCase):
                              len(target['boxes']))
 
     def test_gt_indices_survive_augmentation_and_align_with_boxes(self):
-        data_root = KB2_DIR.parent / 'pre-data' / 'data' / 'v2i'
+        data_root = KB2_DIR.parent / 'pre-data' / 'data' / 'v2i_cleanned'
         if not data_root.exists():
             self.skipTest('Real dataset unavailable')
         from dataloader import PestDataset, get_train_transforms

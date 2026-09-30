@@ -2,7 +2,7 @@
 from collections import Counter
 import torch
 
-SCHEMA_VERSION = '1.0'
+SCHEMA_VERSION = '2.1'
 FEEDBACK_TYPES = ('matched', 'wrong_class', 'bad_localization',
                   'false_positive', 'duplicate', 'missed')
 
@@ -28,7 +28,30 @@ def _prediction(pred, index, iou=0.0, gt_index=None):
     }
 
 
+def _maximum_cardinality_matches(choices, scores):
+    """Deterministic bipartite matching, maximizing the number of covered GTs."""
+    by_gt = {}
+
+    def assign(prediction_index, seen):
+        for gt_index in choices[prediction_index]:
+            if gt_index in seen:
+                continue
+            seen.add(gt_index)
+            if gt_index not in by_gt or assign(by_gt[gt_index], seen):
+                by_gt[gt_index] = prediction_index
+                return True
+        return False
+
+    for prediction_index in sorted(
+            choices, key=lambda index: (-float(scores[index]), index)):
+        assign(prediction_index, set())
+    return by_gt
+
+
 def build_feedback_record(pred, target, match_iou=0.5, localization_iou=0.1):
+    """Assign one primary status per GT, then classify remaining predictions."""
+    if not 0 <= localization_iou < match_iou <= 1:
+        raise ValueError('expected 0 <= localization_iou < match_iou <= 1')
     pb = pred['boxes'].detach().float().cpu()
     pc = pred['labels'].detach().long().cpu()
     ps = pred['scores'].detach().float().cpu()
@@ -39,43 +62,92 @@ def build_feedback_record(pred, target, match_iou=0.5, localization_iou=0.1):
     pred = {'boxes': pb, 'labels': pc, 'scores': ps}
     ious = box_iou(pb, gb)
     groups = {key: [] for key in FEEDBACK_TYPES}
-    matched_gt, primary = set(), {}
-    for pi in ps.argsort(descending=True).tolist():
-        if not len(gb):
-            groups['false_positive'].append(_prediction(pred, pi))
-            continue
-        gi = int(ious[pi].argmax())
-        iou = float(ious[pi, gi])
-        same_class = int(pc[pi]) == int(gc[gi])
-        item = _prediction(pred, pi, iou, gi)
-        if iou >= match_iou and same_class:
-            if gi in matched_gt:
-                groups['duplicate'].append(item)
-            else:
-                groups['matched'].append(item)
-                matched_gt.add(gi)
-                primary[gi] = pi
-        elif iou >= match_iou:
-            groups['wrong_class'].append(item)
-        elif iou >= localization_iou:
-            item['expected_class_id'] = int(gc[gi])
-            groups['bad_localization'].append(item)
-        else:
-            groups['false_positive'].append(item)
+    used_predictions = set()
+    gt_status = [None] * len(gb)
+    primary = {}
 
-    for gi in range(len(gb)):
-        if gi not in matched_gt:
+    # First maximize the number of correct-class primary matches. A greedy
+    # prediction-first choice can leave a nearby GT falsely missed.
+    correct_choices = {
+        pi: sorted(
+            (gi for gi in range(len(gb))
+             if int(pc[pi]) == int(gc[gi]) and float(ious[pi, gi]) >= match_iou),
+            key=lambda gi: (-float(ious[pi, gi]), gi))
+        for pi in range(len(pb))
+    }
+    primary = _maximum_cardinality_matches(correct_choices, ps)
+    used_predictions.update(primary.values())
+    for gi, pi in sorted(primary.items()):
+        gt_status[gi] = 'matched'
+        groups['matched'].append(_prediction(pred, pi, ious[pi, gi], gi))
+
+    # Remaining GTs receive at most one error explanation each.
+    for kind in ('wrong_class', 'bad_localization'):
+        choices = {}
+        for pi in range(len(pb)):
+            if pi in used_predictions:
+                continue
+            candidates = []
+            for gi in range(len(gb)):
+                if gt_status[gi] is not None:
+                    continue
+                overlap = float(ious[pi, gi])
+                if kind == 'wrong_class':
+                    eligible = overlap >= match_iou and int(pc[pi]) != int(gc[gi])
+                else:
+                    eligible = localization_iou <= overlap < match_iou
+                if eligible:
+                    candidates.append(gi)
+            choices[pi] = sorted(
+                candidates, key=lambda gi: (-float(ious[pi, gi]), gi))
+        selected = _maximum_cardinality_matches(choices, ps)
+        for gi, pi in sorted(selected.items()):
+            used_predictions.add(pi)
+            gt_status[gi] = kind
+            item = _prediction(pred, pi, ious[pi, gi], gi)
+            if kind == 'bad_localization':
+                item['expected_class_id'] = int(gc[gi])
+            groups[kind].append(item)
+
+    for gi, status in enumerate(gt_status):
+        if status is None:
+            gt_status[gi] = 'missed'
             groups['missed'].append({
                 'gt_index': gi,
                 'box': [round(float(x), 4) for x in gb[gi]],
                 'class_id': int(gc[gi]),
             })
 
+    for pi in range(len(pb)):
+        if pi in used_predictions:
+            continue
+        duplicate_gts = [
+            gi for gi in primary
+            if int(pc[pi]) == int(gc[gi]) and float(ious[pi, gi]) >= match_iou
+        ]
+        if duplicate_gts:
+            gi = max(duplicate_gts, key=lambda index: (float(ious[pi, index]), -index))
+            groups['duplicate'].append(_prediction(pred, pi, ious[pi, gi], gi))
+        else:
+            gi = int(ious[pi].argmax()) if len(gb) else None
+            overlap = float(ious[pi, gi]) if gi is not None else 0.0
+            groups['false_positive'].append(_prediction(pred, pi, overlap, gi))
+
     preferences = []
-    for gi, chosen in primary.items():
-        candidates = [i for i in range(len(pb)) if i != chosen]
-        if candidates:
-            rejected = max(candidates, key=lambda i: float(ps[i]))
+    for gi, chosen in sorted(primary.items()):
+        rejected_candidates = [
+            pi for pi in range(len(pb))
+            if pi != chosen and pi not in used_predictions
+            and float(ious[pi, gi]) >= localization_iou
+            and (
+                int(pc[pi]) != int(gc[gi])
+                or float(ious[pi, gi]) < float(ious[chosen, gi])
+            )
+        ]
+        if rejected_candidates:
+            rejected = max(
+                rejected_candidates,
+                key=lambda pi: (float(ious[pi, gi]), float(ps[pi]), -pi))
             preferences.append({
                 'gt_index': gi,
                 'chosen_prediction_index': chosen,
@@ -89,6 +161,7 @@ def build_feedback_record(pred, target, match_iou=0.5, localization_iou=0.1):
         'image_path': target.get('image_path', ''),
         'num_ground_truths': len(gb),
         'num_predictions': len(pb),
+        'gt_status': gt_status,
         'feedback': groups,
         'preferences': preferences,
     }

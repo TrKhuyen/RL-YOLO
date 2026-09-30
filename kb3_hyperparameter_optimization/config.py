@@ -16,7 +16,7 @@ class ExperimentConfig:
     segment_epochs: int = 5
     patience_segments: int = 6
     max_seconds: float | None = None
-    output_dir: str = "runs/kb3"
+    output_dir: str = "kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization"
 
     def validate(self) -> None:
         if self.total_epochs <= 0 or self.segment_epochs <= 0:

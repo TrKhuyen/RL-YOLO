@@ -32,33 +32,33 @@ DATA_ROOT = PROJECT_ROOT.parent / 'pre-data' / 'data' / 'v2i_cleanned'
 
 EXPERIMENTS = {
     'YOLOv5s': {
-        'supervised': 'checkpoints/yolov5s/weights/best.pt',
-        'rl':         'rl_checkpoints/yolov5s_rl_best.pt',
+        'supervised': 'checkpoint_based/yolov5s/weights/best.pt',
+        'rl':         'checkpoint_reward_guide_trainning/yolov5s_seed42_rl_best.pt',
         'framework':  'v5',
     },
     'YOLOv8n': {
-        'supervised': 'checkpoints/yolov8n/weights/best.pt',
-        'rl':         'rl_checkpoints/yolov8n_rl_best.pt',
+        'supervised': 'checkpoint_based/yolov8n/weights/best.pt',
+        'rl':         'checkpoint_reward_guide_trainning/yolov8n_seed42_rl_best.pt',
         'framework':  'ultralytics',
     },
     'YOLOv8s': {
-        'supervised': 'checkpoints/yolov8s/weights/best.pt',
-        'rl':         'rl_checkpoints/yolov8s_rl_best.pt',
+        'supervised': 'checkpoint_based/yolov8s/weights/best.pt',
+        'rl':         'checkpoint_reward_guide_trainning/yolov8s_seed42_rl_best.pt',
         'framework':  'ultralytics',
     },
     'YOLOv11n': {
-        'supervised': 'checkpoints/yolov11n/weights/best.pt',
-        'rl':         'rl_checkpoints/yolov11n_rl_best.pt',
+        'supervised': 'checkpoint_based/yolov11n/weights/best.pt',
+        'rl':         'checkpoint_reward_guide_trainning/yolov11n_seed42_rl_best.pt',
         'framework':  'ultralytics',
     },
     'YOLOv11s': {
-        'supervised': 'checkpoints/yolov11s/weights/best.pt',
-        'rl':         'rl_checkpoints/yolov11s_rl_best.pt',
+        'supervised': 'checkpoint_based/yolov11s/weights/best.pt',
+        'rl':         'checkpoint_reward_guide_trainning/yolov11s_seed42_rl_best.pt',
         'framework':  'ultralytics',
     },
     'DP-YOLO': {
-        'supervised': 'checkpoints/dp_yolo/weights/best.pt',
-        'rl':         'rl_checkpoints/dp_yolo_rl_best.pt',
+        'supervised': 'checkpoint_based/dp_yolo/weights/best.pt',
+        'rl':         'checkpoint_reward_guide_trainning/dp_yolo_seed42_rl_best.pt',
         'framework':  'v5',
     },
 }
@@ -66,11 +66,6 @@ EXPERIMENTS = {
 for _paths in EXPERIMENTS.values():
     for _stage in ('supervised', 'rl'):
         _paths[_stage] = str(PROJECT_ROOT / _paths[_stage])
-
-_legacy_v8n = PROJECT_ROOT.parent / 'runs' / 'detect' / 'checkpoints' / 'yolov8n' / 'weights' / 'best.pt'
-if not Path(EXPERIMENTS['YOLOv8n']['supervised']).exists() and _legacy_v8n.exists():
-    EXPERIMENTS['YOLOv8n']['supervised'] = str(_legacy_v8n)
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helper: Load model (xu ly ca supervised va RL checkpoint)
@@ -365,6 +360,7 @@ def run_comparison(
     split:        str  = 'val',
     device:       str  = 'cuda',
     seed:         int  = 42,
+    checkpoint_source: str = 'screening',
 ) -> pd.DataFrame:
     """
     Chay evaluation toan bo, tinh delta RL vs supervised, luu CSV.
@@ -381,17 +377,23 @@ def run_comparison(
     rows = []
     for model_name, paths in targets_to_eval.items():
         adapter_name = model_name.lower().replace('-', '_')
-        stage_paths = {
-            'supervised': paths['supervised'],
-            'native_only': str(
-                PROJECT_ROOT / 'rl_checkpoints'
-                / f'{adapter_name}_seed{seed}_native_only_best.pt'
-            ),
-            'kb1b': str(
-                PROJECT_ROOT / 'rl_checkpoints'
-                / f'{adapter_name}_seed{seed}_rl_best.pt'
-            ),
-        }
+        if checkpoint_source == 'screening':
+            screening = PROJECT_ROOT / 'checkpoint_reward_guide_trainning' / f'screening_seed{seed}_v1' / adapter_name
+            stage_paths = {
+                'supervised': paths['supervised'],
+                'native_only': str(screening / 'native_only' / 'best.pt'),
+                'kb1b': str(screening / 'kb1b' / 'best.pt'),
+            }
+        elif checkpoint_source == 'train_rl':
+            stage_paths = {
+                'supervised': paths['supervised'],
+                'native_only': str(PROJECT_ROOT / 'checkpoint_reward_guide_trainning'
+                                   / f'{adapter_name}_seed{seed}_native_only_best.pt'),
+                'kb1b': str(PROJECT_ROOT / 'checkpoint_reward_guide_trainning'
+                            / f'{adapter_name}_seed{seed}_rl_best.pt'),
+            }
+        else:
+            raise ValueError(f'Unknown checkpoint source: {checkpoint_source}')
         for stage, ckpt in stage_paths.items():
             if not ckpt or not Path(ckpt).exists():
                 print(f"  SKIP {model_name} [{stage}]: {ckpt}")
@@ -436,7 +438,7 @@ def run_comparison(
     df_delta = delta_sup.join(delta_native, how='outer').reset_index()
 
     # ── Lưu kết quả ─────────────────────────────────────────────────────
-    out_dir = PROJECT_ROOT / 'results' / 'canonical' / split
+    out_dir = PROJECT_ROOT / 'results' / 'canonical_clean' / checkpoint_source / split
     out_dir.mkdir(parents=True, exist_ok=True)
 
     df.to_csv(out_dir / 'results_full.csv', index=False)
@@ -472,6 +474,8 @@ def main():
                         choices=['val', 'test'])
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--checkpoint-source', choices=['screening', 'train_rl'],
+                        default='screening')
     args = parser.parse_args()
 
     run_comparison(
@@ -479,6 +483,7 @@ def main():
         split=args.split,
         device=args.device,
         seed=args.seed,
+        checkpoint_source=args.checkpoint_source,
     )
 
 

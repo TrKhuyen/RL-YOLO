@@ -17,7 +17,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="kb3_hyperparameter_optimization/configs/kb3_default.yaml")
     parser.add_argument("--episodes", type=int, default=20)
-    parser.add_argument("--output", default="runs/kb3/adaptive_random_schedule.json")
+    parser.add_argument("--output", default="kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/adaptive_rl/adaptive_random_schedule.json")
     add_backend_arguments(parser)
     args = parser.parse_args()
     if args.episodes <= 0:

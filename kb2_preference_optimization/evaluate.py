@@ -37,47 +37,53 @@ REPO_ROOT = SCRIPT_DIR.parent
 KB1_DIR = REPO_ROOT / 'kb1_reward_guided_training'
 
 SUPERVISED = {
-    'YOLOv5s':  KB1_DIR / 'checkpoints/yolov5s/weights/best.pt',
-    'YOLOv8n':  KB1_DIR / 'checkpoints/yolov8n/weights/best.pt',
-    'YOLOv8s':  KB1_DIR / 'checkpoints/yolov8s/weights/best.pt',
-    'YOLOv11n': KB1_DIR / 'checkpoints/yolov11n/weights/best.pt',
-    'YOLOv11s': KB1_DIR / 'checkpoints/yolov11s/weights/best.pt',
-    'DP-YOLO':  KB1_DIR / 'checkpoints/dp_yolo/weights/best.pt',
+    'YOLOv5s':  KB1_DIR / 'checkpoint_based/yolov5s/weights/best.pt',
+    'YOLOv8n':  KB1_DIR / 'checkpoint_based/yolov8n/weights/best.pt',
+    'YOLOv8s':  KB1_DIR / 'checkpoint_based/yolov8s/weights/best.pt',
+    'YOLOv11n': KB1_DIR / 'checkpoint_based/yolov11n/weights/best.pt',
+    'YOLOv11s': KB1_DIR / 'checkpoint_based/yolov11s/weights/best.pt',
+    'DP-YOLO':  KB1_DIR / 'checkpoint_based/dp_yolo/weights/best.pt',
 }
 
 # RL checkpoints (từ train_rl.py – mỗi level có 1 best.pt)
 RL_CHECKPOINTS = {
     'YOLOv5s': {
-        'l1': 'rl_checkpoints/yolov5s_rl_l1_best.pt',
-        'l2': 'rl_checkpoints/yolov5s_rl_l2_best.pt',
-        'l3': 'rl_checkpoints/yolov5s_rl_l3_best.pt',
+        'l1': 'checkpoint_preference_optimization/yolov5s_rl_l1_best.pt',
+        'l2': 'checkpoint_preference_optimization/yolov5s_rl_l2_anchor_dpo_best.pt',
+        'l3': 'checkpoint_preference_optimization/yolov5s_rl_l3_best.pt',
     },
     'YOLOv8n': {
-        'l1': 'rl_checkpoints/yolov8n_rl_l1_best.pt',
-        'l2': SCRIPT_DIR / 'rl_checkpoints/yolov8n_rl_l2_best.pt',
-        'l3': 'rl_checkpoints/yolov8n_rl_l3_best.pt',
+        'l1': 'checkpoint_preference_optimization/yolov8n_rl_l1_best.pt',
+        'l2': SCRIPT_DIR / 'checkpoint_preference_optimization/yolov8n_rl_l2_anchor_dpo_best.pt',
+        'l3': 'checkpoint_preference_optimization/yolov8n_rl_l3_best.pt',
     },
     'YOLOv8s': {
-        'l1': 'rl_checkpoints/yolov8s_rl_l1_best.pt',
-        'l2': 'rl_checkpoints/yolov8s_rl_l2_best.pt',
-        'l3': 'rl_checkpoints/yolov8s_rl_l3_best.pt',
+        'l1': 'checkpoint_preference_optimization/yolov8s_rl_l1_best.pt',
+        'l2': 'checkpoint_preference_optimization/yolov8s_rl_l2_anchor_dpo_best.pt',
+        'l3': 'checkpoint_preference_optimization/yolov8s_rl_l3_best.pt',
     },
     'YOLOv11n': {
-        'l1': 'rl_checkpoints/yolov11n_rl_l1_best.pt',
-        'l2': 'rl_checkpoints/yolov11n_rl_l2_best.pt',
-        'l3': 'rl_checkpoints/yolov11n_rl_l3_best.pt',
+        'l1': 'checkpoint_preference_optimization/yolov11n_rl_l1_best.pt',
+        'l2': 'checkpoint_preference_optimization/yolov11n_rl_l2_anchor_dpo_best.pt',
+        'l3': 'checkpoint_preference_optimization/yolov11n_rl_l3_best.pt',
     },
     'YOLOv11s': {
-        'l1': 'rl_checkpoints/yolov11s_rl_l1_best.pt',
-        'l2': 'rl_checkpoints/yolov11s_rl_l2_best.pt',
-        'l3': 'rl_checkpoints/yolov11s_rl_l3_best.pt',
+        'l1': 'checkpoint_preference_optimization/yolov11s_rl_l1_best.pt',
+        'l2': 'checkpoint_preference_optimization/yolov11s_rl_l2_anchor_dpo_best.pt',
+        'l3': 'checkpoint_preference_optimization/yolov11s_rl_l3_best.pt',
     },
     'DP-YOLO': {
-        'l1': 'rl_checkpoints/dp_yolo_rl_l1_best.pt',
-        'l2': 'rl_checkpoints/dp_yolo_rl_l2_best.pt',
-        'l3': 'rl_checkpoints/dp_yolo_rl_l3_best.pt',
+        'l1': 'checkpoint_preference_optimization/dp_yolo_rl_l1_best.pt',
+        'l2': 'checkpoint_preference_optimization/dp_yolo_rl_l2_anchor_dpo_best.pt',
+        'l3': 'checkpoint_preference_optimization/dp_yolo_rl_l3_best.pt',
     },
 }
+
+for levels in RL_CHECKPOINTS.values():
+    for level, checkpoint in levels.items():
+        checkpoint_path = Path(checkpoint)
+        levels[level] = checkpoint_path if checkpoint_path.is_absolute() else SCRIPT_DIR / checkpoint_path
+
 
 # Framework mapping
 FRAMEWORKS = {
@@ -330,8 +336,9 @@ def run_comparison(args):
                       f'({sign}{delta:.4f})')
 
     # ── Lưu kết quả ─────────────────────────────────────────────────────
-    Path('results/tables').mkdir(parents=True, exist_ok=True)
-    out_csv = f'results/tables/comparison_{split}.csv'
+    out_dir = SCRIPT_DIR / 'results' / 'tables_clean'
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_csv = out_dir / f'comparison_{split}.csv'
     df.to_csv(out_csv, index=False)
 
     print(f'\n{"="*70}')
@@ -353,7 +360,7 @@ def main():
     parser.add_argument('--levels', type=int, nargs='+', default=[1, 2, 3],
                         help='RL levels to compare (e.g. --levels 2 3)')
     parser.add_argument('--split',  default='val', choices=['val', 'test'])
-    parser.add_argument('--data-root', default=str(REPO_ROOT / 'pre-data/data/v2i'))
+    parser.add_argument('--data-root', default=str(REPO_ROOT / 'pre-data/data/v2i_cleanned'))
     parser.add_argument('--device', default='cuda')
     args = parser.parse_args()
 

@@ -19,7 +19,7 @@ Trong giai đoạn search, mọi trial dùng cùng detector seed để giảm nh
 
 ```bash
 python -m kb3_hyperparameter_optimization.traditional_hpo.evaluate_config \
-  --hyperparameters-json runs/kb3/traditional_optuna.json \
+  --hyperparameters-json kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/traditional_optuna.json \
   --seeds 101 102 103
 ```
 

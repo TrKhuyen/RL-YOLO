@@ -9,11 +9,11 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT.parent / 'pre-data/data/v2i_cleanned'
-OUT = ROOT / 'results/dataset_audit'
+OUT = ROOT / 'results/dataset_audit_clean'
 
 
 def source_id(path):
-    return re.sub(r'_aug\d+_(?:hflip|vflip|hvflip)(?:_\d+)?$', '', path.stem)
+    return re.sub(r'_aug\d+_(?:hflip|vflip|hvflip|rot90cw|rot90ccw|rot180)(?:_\d+)?$', '', path.stem)
 
 
 def audit():
@@ -32,7 +32,7 @@ def audit():
     rows, summary = [], {'dataset': str(DATA), 'counts': {s: len(p) for s,p in splits.items()},
                          'unique_full_source_ids': len(all_sources),
                          'source_groups_with_original_file': originals,
-                         'method': 'same full Roboflow identifier after removing known flip augmentation suffix'}
+                         'method': 'same full Roboflow identifier after removing known flip/rotation augmentation suffix'}
     for left, right in [('train', 'valid'), ('train', 'test'), ('valid', 'test')]:
         shared = sorted(set(groups[left]) & set(groups[right]))
         summary[left + '_' + right] = {

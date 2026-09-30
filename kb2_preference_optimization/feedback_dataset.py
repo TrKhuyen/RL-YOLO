@@ -48,6 +48,17 @@ def load_feedback_records(path):
             missing = set(FEEDBACK_TYPES) - set(feedback)
             if missing:
                 raise ValueError(f'{path}:{line_number}: missing feedback types {sorted(missing)}')
+            statuses = record.get('gt_status')
+            if not isinstance(statuses, list) or len(statuses) != int(record['num_ground_truths']):
+                raise ValueError(f'{path}:{line_number}: invalid gt_status')
+            if any(status not in ('matched', 'wrong_class', 'bad_localization', 'missed')
+                   for status in statuses):
+                raise ValueError(f'{path}:{line_number}: unknown GT status')
+            for kind in ('matched', 'wrong_class', 'bad_localization', 'missed'):
+                indices = [int(item['gt_index']) for item in feedback[kind]]
+                expected = [i for i, status in enumerate(statuses) if status == kind]
+                if sorted(indices) != expected:
+                    raise ValueError(f'{path}:{line_number}: inconsistent {kind} GT status')
             records[image_id] = record
     if not records:
         raise ValueError(f'No feedback records found in {path}')
@@ -62,27 +73,23 @@ def feedback_vector(record):
 
 
 def feedback_difficulty(record, error_weights=None):
-    """Compute a size-normalized image difficulty score from explicit errors."""
+    """Compute size-normalized difficulty from exclusive GT and prediction errors."""
     weights = DEFAULT_ERROR_WEIGHTS if error_weights is None else error_weights
-    counts = {kind: len(record['feedback'][kind]) for kind in FEEDBACK_TYPES}
-    scale = max(1, int(record.get('num_ground_truths', 0)))
+    statuses = record['gt_status']
+    counts = Counter(statuses)
+    counts['false_positive'] = len(record['feedback']['false_positive'])
+    counts['duplicate'] = len(record['feedback']['duplicate'])
+    scale = max(1, int(record['num_ground_truths']))
     raw = sum(float(weights.get(kind, 0.0)) * count
               for kind, count in counts.items())
     return max(0.0, raw / scale)
 
 
 def object_feedback_codes(record, gt_indices):
-    by_gt = {}
-    for item in record['feedback']['missed']:
-        by_gt[int(item['gt_index'])] = OBJECT_FEEDBACK_CODES['missed']
-    for item in record['feedback']['bad_localization']:
-        if item.get('gt_index') is not None:
-            by_gt[int(item['gt_index'])] = OBJECT_FEEDBACK_CODES['bad_localization']
-    for item in record['feedback']['wrong_class']:
-        if item.get('gt_index') is not None:
-            by_gt[int(item['gt_index'])] = OBJECT_FEEDBACK_CODES['wrong_class']
-    return torch.tensor([by_gt.get(int(index), 0) for index in gt_indices],
-                        dtype=torch.long)
+    codes = [OBJECT_FEEDBACK_CODES.get(status, 0)
+             for status in record['gt_status']]
+    return torch.tensor(
+        [codes[int(index)] for index in gt_indices], dtype=torch.long)
 
 
 class FeedbackDataset(Dataset):
@@ -161,4 +168,5 @@ def get_feedback_dataloader(root, feedback_path, batch_size=16, img_size=640,
     return DataLoader(
         dataset, batch_size=batch_size, sampler=sampler,
         num_workers=num_workers, collate_fn=pest_collate_fn,
-        pin_memory=torch.cuda.is_available(), generator=generator)
+        pin_memory=torch.cuda.is_available(), generator=generator,
+        drop_last=True)

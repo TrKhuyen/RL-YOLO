@@ -23,7 +23,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="kb3_hyperparameter_optimization/configs/kb3_default.yaml")
     parser.add_argument("--trials", type=int, default=20)
-    parser.add_argument("--output", default="runs/kb3/traditional_random_search.json")
+    parser.add_argument("--output", default="kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/traditional_random_search.json")
     add_backend_arguments(parser)
     args = parser.parse_args()
     if args.trials <= 0:

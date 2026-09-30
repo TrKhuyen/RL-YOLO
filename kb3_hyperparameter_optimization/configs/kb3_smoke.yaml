@@ -4,7 +4,7 @@ experiment:
   segment_epochs: 1
   patience_segments: 3
   max_seconds: null
-  output_dir: runs/kb3_worker_smoke
+  output_dir: kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/smoke
 
 ppo:
   hidden_size: 32

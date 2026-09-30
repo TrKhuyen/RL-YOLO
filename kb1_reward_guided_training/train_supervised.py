@@ -7,13 +7,16 @@ Chạy tuần tự hoặc chọn một model cụ thể:
     python train_supervised.py --model dp_yolo    # chỉ train DP-YOLO
 
 Sau khi chạy xong, checkpoints được lưu tại:
-    checkpoints/<model_name>/weights/best.pt
+    checkpoint_based/<model_name>/weights/best.pt
 """
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+from run_provenance import dataset_manifest, record_supervised
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -64,7 +67,7 @@ COMMON = {
     'workers':    0 if sys.platform == 'win32' else 4,
     'device':     '0',        # GPU id
     'patience':   30,         # early stopping
-    'project':    str(PROJECT_ROOT / 'checkpoints'),
+    'project':    str(PROJECT_ROOT / 'checkpoint_based'),
     'exist_ok':   True,
 }
 
@@ -123,7 +126,10 @@ def train_yolov5(name: str, cfg: dict):
         cmd.append(f"--cfg={cfg['cfg']}")
 
     print(f"  CMD: {' '.join(cmd)}")
-    result = subprocess.run(cmd, check=True, cwd=PROJECT_ROOT)
+    env = os.environ.copy()
+    if is_dp_yolo:
+        env.update(DP_YOLO_USE_W3F='1', DP_YOLO_USE_PSA='1')
+    result = subprocess.run(cmd, check=True, cwd=PROJECT_ROOT, env=env)
     return result.returncode == 0
 
 
@@ -133,7 +139,8 @@ def train_ultralytics(name: str, cfg: dict):
 
     batch = MODEL_BATCH.get(name, 16)  # [HW] batch size theo model
 
-    model = YOLO(cfg['weights'])
+    weights = PROJECT_ROOT / cfg['weights'] if (PROJECT_ROOT / cfg['weights']).exists() else PROJECT_ROOT.parent / cfg['weights']
+    model = YOLO(str(weights))
     model.train(
         data=COMMON['data'],
         imgsz=COMMON['imgsz'],
@@ -175,15 +182,17 @@ def train_ultralytics(name: str, cfg: dict):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Supervised training – Giai đoạn 1')
+        description='Supervised training - stage 1')
     parser.add_argument(
         '--model', default='all',
         choices=['all'] + list(MODELS.keys()),
-        help='Model cần train (mặc định: all)',
+        help='Model to train (default: all)',
     )
     args = parser.parse_args()
 
     targets = MODELS if args.model == 'all' else {args.model: MODELS[args.model]}
+    dataset_before = dataset_manifest()
+    print('Clean dataset SHA256:', dataset_before['sha256'])
 
     results = {}
     for name, cfg in targets.items():
@@ -191,10 +200,16 @@ def main():
         print(f"  Training: {name}  (framework: {cfg['framework']})")
         print(f"{'='*60}")
         try:
+            run_dir = Path(COMMON['project']) / name
+            if run_dir.exists() and any(run_dir.iterdir()):
+                raise FileExistsError(f'Existing supervised run: {run_dir}. Use a fresh output directory.')
             if cfg['framework'] == 'v5':
                 ok = train_yolov5(name, cfg)
             else:
                 ok = train_ultralytics(name, cfg)
+            if ok:
+                flags = {'w3f': bool(cfg.get('cfg')), 'psa': bool(cfg.get('cfg'))}
+                record_supervised(name, cfg['weights'], dataset_before, flags)
             results[name] = 'OK' if ok else 'FAILED'
         except Exception as e:
             print(f"  ERROR: {e}")
@@ -205,6 +220,8 @@ def main():
     print(f"{'='*60}")
     for name, status in results.items():
         print(f"  {name:15s}  {status}")
+    if any(status != 'OK' for status in results.values()):
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':

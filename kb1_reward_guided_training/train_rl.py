@@ -1,5 +1,5 @@
 """
-train_rl.py - Giai doan 2: RL Fine-tuning YOLO bang REINFORCE.
+train_rl.py - Giai doan 2: reward-guided YOLO fine-tuning (legacy runner).
 
 Thiet ke theo:
 - bwconrad/cv-rl:  pattern CE-pretrain -> RL fine-tune (tranh train tu dau)
@@ -22,6 +22,7 @@ Fix list:
 import argparse
 import importlib.util
 import math
+import os
 import random
 import sys
 import time
@@ -43,12 +44,12 @@ NUM_WORKERS = 4           # giam tu 8 -> 4 cho 16GB RAM
 
 
 # =============================================================================
-# 1. EMA Baseline - giam variance REINFORCE
+# 1. EMA Baseline - giam variance reward-guided surrogate
 # =============================================================================
 
 class EMABaseline:
     """
-    Exponential Moving Average baseline de giam variance cua REINFORCE.
+    Exponential Moving Average baseline de giam variance cua reward-guided surrogate.
 
     advantage_i = R_i - b   (unbiased khi E[b] = E[R])
 
@@ -345,7 +346,7 @@ def rl_finetune(
     device:     str = 'cuda',
 ):
     """
-    Vong lap REINFORCE fine-tuning cho 1 YOLO model.
+    Vong lap reward-guided surrogate fine-tuning cho 1 YOLO model.
 
     Args:
         model_name: ten model ('yolov5s', 'yolov8n', 'yolov11n', 'dp_yolo')
@@ -360,7 +361,7 @@ def rl_finetune(
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-    output_dir = PROJECT_ROOT / 'rl_checkpoints'
+    output_dir = PROJECT_ROOT / 'checkpoint_reward_guide_trainning'
     output_dir.mkdir(exist_ok=True)
 
     run_id = f"{model_name}_{int(time.time())}"
@@ -560,7 +561,7 @@ def rl_finetune(
             fn_weight=float(cfg.get('fn_weight', 1.5)),
         )
 
-        # ── REINFORCE loss ────────────────────────────────────────────────────
+        # ── reward-guided surrogate loss ────────────────────────────────────────────────────
         # L = -E[log pi(a|s) * advantage]  (dau tru: minimize -> maximize reward)
         reward_loss = -torch.mean(log_probs * advantage.detach())
         stability_loss = l2sp_loss(trainable_named, supervised_reference)
@@ -677,19 +678,13 @@ def rl_finetune(
 # =============================================================================
 
 CHECKPOINTS = {
-    'yolov5s':  PROJECT_ROOT / 'checkpoints/yolov5s/weights/best.pt',
-    'yolov8n':  PROJECT_ROOT / 'checkpoints/yolov8n/weights/best.pt',
-    'yolov8s':  PROJECT_ROOT / 'checkpoints/yolov8s/weights/best.pt',
-    'yolov11n': PROJECT_ROOT / 'checkpoints/yolov11n/weights/best.pt',
-    'yolov11s': PROJECT_ROOT / 'checkpoints/yolov11s/weights/best.pt',
-    'dp_yolo':  PROJECT_ROOT / 'checkpoints/dp_yolo/weights/best.pt',
+    'yolov5s':  PROJECT_ROOT / 'checkpoint_based/yolov5s/weights/best.pt',
+    'yolov8n':  PROJECT_ROOT / 'checkpoint_based/yolov8n/weights/best.pt',
+    'yolov8s':  PROJECT_ROOT / 'checkpoint_based/yolov8s/weights/best.pt',
+    'yolov11n': PROJECT_ROOT / 'checkpoint_based/yolov11n/weights/best.pt',
+    'yolov11s': PROJECT_ROOT / 'checkpoint_based/yolov11s/weights/best.pt',
+    'dp_yolo':  PROJECT_ROOT / 'checkpoint_based/dp_yolo/weights/best.pt',
 }
-
-for _name, _checkpoint in list(CHECKPOINTS.items()):
-    _legacy = PROJECT_ROOT.parent / 'runs' / 'detect' / 'checkpoints' / _name / 'weights' / 'best.pt'
-    if not _checkpoint.exists() and _legacy.exists():
-        CHECKPOINTS[_name] = _legacy
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -734,11 +729,13 @@ def main():
     targets = (CHECKPOINTS if args.model == 'all'
                else {args.model: CHECKPOINTS[args.model]})
 
+    from run_provenance import dataset_manifest, verify_supervised
+    current_dataset = dataset_manifest()
     for name, ckpt in targets.items():
-        if not Path(ckpt).exists():
-            print(f"  SKIP {name}: checkpoint not found at {ckpt}")
-            print(f"  -> Chay train_supervised.py truoc.")
-            continue
+        manifest = verify_supervised(name, ckpt, current_dataset)
+        flags = manifest['dp_flags']
+        os.environ['DP_YOLO_USE_W3F'] = '1' if flags['w3f'] else '0'
+        os.environ['DP_YOLO_USE_PSA'] = '1' if flags['psa'] else '0'
         rl_finetune(name, ckpt, cfg, device=args.device)
 
 

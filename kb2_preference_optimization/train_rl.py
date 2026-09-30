@@ -623,12 +623,12 @@ def train_level3(
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 CHECKPOINTS = {
-    'yolov5s':  'checkpoints/yolov5s/weights/best.pt',
-    'yolov8n':  REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov8n/weights/best.pt',
-    'yolov8s':  REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov8s/weights/best.pt',
-    'yolov11n': REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov11n/weights/best.pt',
-    'yolov11s': REPO_ROOT / 'kb1_reward_guided_training/checkpoints/yolov11s/weights/best.pt',
-    'dp_yolo':  'checkpoints/dp_yolo/weights/best.pt',
+    'yolov5s':  REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov5s/weights/best.pt',
+    'yolov8n':  REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt',
+    'yolov8s':  REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov8s/weights/best.pt',
+    'yolov11n': REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov11n/weights/best.pt',
+    'yolov11s': REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov11s/weights/best.pt',
+    'dp_yolo':  REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/dp_yolo/weights/best.pt',
 }
 
 TRAIN_FUNCS = {
@@ -641,7 +641,7 @@ TRAIN_FUNCS = {
 def run_rl(model_name: str, checkpoint: str, cfg: dict, args):
     """Chạy RL fine-tuning cho 1 model với level được chỉ định."""
     device     = args.device
-    output_dir = SCRIPT_DIR / 'rl_checkpoints'
+    output_dir = SCRIPT_DIR / 'checkpoint_preference_optimization'
     output_dir.mkdir(exist_ok=True)
 
     run_id = f'{model_name}_l{args.level}_{int(time.time())}'
@@ -678,7 +678,7 @@ def run_rl(model_name: str, checkpoint: str, cfg: dict, args):
             print(f'  [WARN] --resume: {args.resume} không phải RL checkpoint hợp lệ, bỏ qua.')
 
     # ── DataLoaders ──────────────────────────────────────────────────────
-    data_root = str(REPO_ROOT / 'pre-data/data/v2i')
+    data_root = str(REPO_ROOT / 'pre-data/data/v2i_cleanned')
     bs        = cfg.get('batch_size', 16)
     train_loader = get_pest_dataloader(data_root, split='train', batch_size=bs, img_size=640)
     val_loader   = get_pest_dataloader(data_root, split='val',   batch_size=bs, img_size=640)
@@ -715,7 +715,7 @@ def main():
                         help='DAPO clip upper bound (Level 3)')
     parser.add_argument('--resume', default=None, metavar='CKPT',
                         help='Path đến RL checkpoint để resume training bị dừ dượng giữa chừng. '
-                             'Ví dụ: rl_checkpoints/dp_yolo_rl_l2_step25000.pt')
+                             'Ví dụ: checkpoint_preference_optimization/dp_yolo_rl_l2_anchor_dpo_step25000.pt')
     parser.add_argument('--cfg', default=str(SCRIPT_DIR / 'configs/hyp.rl.grpo.yaml'))
     parser.add_argument('--device', default='cuda')
     args = parser.parse_args()

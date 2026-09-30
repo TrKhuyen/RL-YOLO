@@ -1,11 +1,40 @@
 # KB1: Reward-guided YOLO Training
 
+## Chạy toàn bộ KB1 bằng một lệnh
+
+Từ root workspace trong Git Bash:
+
+```bash
+bash kb1_reward_guided_training/run_all_kb1.sh
+```
+
+Script chạy audit dữ liệu → supervised sáu model → preflight và screening hai nhánh → đánh giá test → tạo `kb1_reward_guided_training/docs/KB1_FINAL_CLEAN_REPORT.md`. Checkpoint supervised hợp lệ sẽ được dùng lại; run thiếu hoặc sai manifest làm script dừng, không tự ghi đè. Để chỉ kiểm tra dataset mà không train:
+
+```bash
+bash kb1_reward_guided_training/run_all_kb1.sh --check-only
+```
+
+Trên PowerShell khi `bash` chưa có trong PATH: `& 'C:/Program Files/Git/bin/bash.exe' kb1_reward_guided_training/run_all_kb1.sh`.
+
+
+## Quy trình KB1 dùng cho lần chạy sạch
+
+Dữ liệu chính là `../pre-data/data/v2i_cleanned`; augmentation theo hậu tố flip/rotation đã biết chỉ nằm trong train. Kết quả nghiên cứu dùng `run_screening.py` và `run_verified.py`; phần hướng dẫn `train_rl.py` phía dưới là đường chạy cũ, không dùng để tổng hợp kết quả chính.
+
+1. Từ root workspace: `python kb1_reward_guided_training/audit_splits.py`.
+2. Từ `kb1_reward_guided_training`: `python train_supervised.py`. Cần đủ sáu `checkpoint_based/<model>/weights/best.pt` kèm `supervised_manifest.json`.
+3. Cùng thư mục: `python run_screening.py`. Script chạy preflight rồi guided/native-only; checkpoint ở `checkpoint_reward_guide_trainning/screening_seed42_v1/<model>/<mode>/best.pt`.
+4. Sau khi đã khóa checkpoint bằng validation: `python evaluate.py --checkpoint-source screening --split test`.
+
+Metric chính là mAP50_95; ứng viên xếp hạng là best guided của sáu model. Stage hai sẽ dừng nếu checkpoint supervised hoặc dữ liệu không trùng manifest.
+
+
 > Môi trường Python dùng chung gồm .venv, pyproject.toml, uv.lock, requirements.txt và .gitignore nằm tại root RL-YOLO. Chạy uv sync và kích hoạt .venv từ root. Guide và báo cáo KB1-B canonical nằm trong docs.
 
 # YOLO-RL-Pest: UAV Pest Detection với RL Fine-tuning
 
 So sánh **DP-YOLO vs YOLOv5s/v8n/v8s/v11n/v11s** trên bài toán phát hiện sâu bệnh cây trồng từ ảnh UAV,  
-với **REINFORCE fine-tuning** để cải thiện recall trên vật thể nhỏ.
+với **reward-guided surrogate fine-tuning** để cải thiện recall trên vật thể nhỏ.
 
 ---
 
@@ -30,7 +59,7 @@ kb1_reward_guided_training/
 ├── dataloader.py          # PestDataset + Albumentations augmentation
 ├── reward.py              # recall_reward, small_object_recall_reward, composite_reward
 ├── train_supervised.py    # Giai đoạn 1: supervised (200 epochs, early stopping)
-├── train_rl.py            # Giai đoạn 2: REINFORCE fine-tune (30k steps)
+├── train_rl.py            # Giai đoạn 2: reward-guided surrogate fine-tune (10k steps)
 ├── evaluate.py            # Giai đoạn 3: mAP/APs/recall/FPS comparison
 ├── dp_yolo_train.py       # Wrapper train DP-YOLO (apply patches trước khi train)
 ├── pyproject.toml         # uv / hatchling project config
@@ -130,7 +159,7 @@ DP-YOLO patch complete.
 ### Giai đoạn 1 – Supervised Training
 
 Train các YOLO model trên dataset (200 epochs, early stopping `patience=30`).  
-Checkpoint được lưu tại `checkpoints/<model>/weights/best.pt`.
+Checkpoint được lưu tại `checkpoint_based/<model>/weights/best.pt`.
 
 ```bash
 # Train tất cả model tuần tự
@@ -151,7 +180,7 @@ python train_supervised.py --model dp_yolo
 | yolov8s  | 8     | Ultralytics  | Anchor-free nặng hơn       |
 | yolov11n | 16    | Ultralytics  | Anchor-free mới nhất       |
 | yolov11s | 8     | Ultralytics  | YOLOv11 lớn hơn            |
-| dp_yolo  | 16    | YOLOv5+patch | **Main model** (D2C3/D3C3) |
+| dp_yolo  | 4     | YOLOv5+patch | **Main model** (D2C3/D3C3) |
 
 > **DP-YOLO:** `dp_yolo_train.py` tự động apply patches (W3F_MPDIoU, PSA, custom modules)  
 > trước khi gọi `yolov5/train.py`. Không cần cấu hình thêm.
@@ -159,64 +188,24 @@ python train_supervised.py --model dp_yolo
 Theo dõi training:
 
 ```bash
-tensorboard --logdir checkpoints
+tensorboard --logdir checkpoint_based
 ```
 
 ---
 
-### Giai đoạn 2 – RL Fine-tuning
+### Giai đoạn 2 – Reward-guided fine-tuning
 
-Fine-tune từ checkpoint supervised bằng thuật toán **REINFORCE** với EMA baseline.  
-Reward mặc định: `R = 0.6 × R_recall + 0.4 × R_small_object`
+Chạy `python run_screening.py` sau khi đã có sáu checkpoint supervised kèm manifest. Runner chạy preflight 2 step cho từng model/mode, rồi `native_only` và `kb1b` từ cùng supervised best. Objective guided gồm native detection loss, reward-guided confidence surrogate, TP/FP/FN proxy và L2-SP. Chỉ Detect head được cập nhật.
 
-```bash
-# Fine-tune tất cả model
-python train_rl.py
+Checkpoint được lưu tại `checkpoint_reward_guide_trainning/screening_seed42_v1/<model>/<mode>/best.pt`. Validation mAP50_95 chọn best; step 0 cũng là một ứng viên. Xem trạng thái và chênh lệch từng model trong `docs/KB1_SCREENING_CLEAN_REPORT.md`. Khi preflight lỗi, xem `console.log` trong thư mục preflight tương ứng.
 
-# Chỉ fine-tune 1 model
-python train_rl.py --model dp_yolo
-python train_rl.py --model yolov8n
-
-# Freeze backbone (tránh catastrophic forgetting, tiết kiệm VRAM)
-python train_rl.py --model dp_yolo --freeze
-
-# Override số bước và learning rate
-python train_rl.py --model dp_yolo --steps 20000 --lr 5e-7
-
-# Dùng config RL tuỳ chỉnh
-python train_rl.py --cfg configs/hyp.rl.yaml
-```
-
-Script tự động:
-- Load checkpoint từ `checkpoints/<model>/weights/best.pt`
-- Lưu best checkpoint tại `rl_checkpoints/<model>_rl_best.pt` (theo rolling avg 200 bước)
-- Evaluate trên val set mỗi 3,000 bước
-- Log TensorBoard: reward, loss, baseline, val mAP50
-
-```bash
-tensorboard --logdir results/tensorboard
-```
-
-> **Nếu OOM:** giảm `batch_size: 4` trong `configs/hyp.rl.yaml` hoặc thêm `--freeze`.
+`train_rl.py` vẫn có thể dùng cho thử nghiệm cũ nhưng không tạo bộ kết quả chính của báo cáo KB1.
 
 ---
 
-### Giai đoạn 3 – Evaluation & So sánh
+### Giai đoạn 3 – Đánh giá cuối
 
-```bash
-# So sánh tất cả model (supervised vs RL fine-tuned)
-python evaluate.py
-
-# Chỉ evaluate 1 model
-python evaluate.py --model DP-YOLO
-
-# Dùng tập test thay vì val
-python evaluate.py --split test
-```
-
-Kết quả được lưu tại:
-- `results/tables/results_full.csv`  – metrics đầy đủ (mAP50, mAP50-95, APs, APm, recall, FPS)
-- `results/tables/results_delta.csv` – delta RL vs supervised
+Sau khi đã khóa best theo validation, chạy `python evaluate.py --checkpoint-source screening --split test`. So sánh guided với supervised và native-only cho từng model. Dùng test để báo cáo, không dùng để chọn lại checkpoint hoặc hệ số loss.
 
 ---
 
@@ -270,7 +259,7 @@ Label:    PSA (Petal-like Sample Amplification, radius=1 grid)
 
 | Param          | Supervised  | RL Fine-tune |
 |----------------|-------------|--------------|
-| Epochs/Steps   | 200         | 30,000       |
+| Epochs/Steps   | 200         | 10,000       |
 | Learning Rate  | 0.01 (SGD)  | 1e-6 (Adam)  |
 | Batch Size     | 8–16 *      | 8            |
 | Workers        | 8           | 4            |

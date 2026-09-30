@@ -32,7 +32,7 @@ def generate(args):
     if not checkpoint.exists():
         raise FileNotFoundError(checkpoint)
     output = Path(args.output or
-                  SCRIPT_DIR / 'feedback_data' / f'{args.model}_train.jsonl')
+                  SCRIPT_DIR / 'feedback_data_clean' / f'{args.model}_train.jsonl')
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + '.tmp')
     loader = make_loader(args.data_root, args.batch_size,
@@ -65,6 +65,8 @@ def generate(args):
         'model': args.model,
         'checkpoint': str(checkpoint),
         'checkpoint_sha256': sha256(checkpoint),
+        'feedback_sha256': sha256(output),
+        'matching_policy': 'max_cardinality_gt_v2_1',
         'data_root': str(Path(args.data_root).resolve()),
         'img_size': args.img_size,
         'conf_threshold': args.conf,
@@ -91,7 +93,7 @@ def main():
     parser.add_argument('--model', default='yolov8n', choices=CHECKPOINTS)
     parser.add_argument('--checkpoint', default=None)
     parser.add_argument('--data-root',
-                        default=str(REPO_ROOT / 'pre-data/data/v2i'))
+                        default=str(REPO_ROOT / 'pre-data/data/v2i_cleanned'))
     parser.add_argument('--output', default=None)
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--batch-size', type=int, default=8)

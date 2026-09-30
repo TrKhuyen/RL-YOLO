@@ -43,7 +43,7 @@ iou_thres:  0.45
 batch_size: 4
 
 # ── Data ───────────────────────────────────────────────────────────────
-data_root: ../pre-data/data/v2i
+data_root: ../pre-data/data/v2i_cleanned
 
 # ── Architecture ───────────────────────────────────────────────────────
 freeze_backbone: true

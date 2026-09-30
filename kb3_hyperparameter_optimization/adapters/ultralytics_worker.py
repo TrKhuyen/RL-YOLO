@@ -12,7 +12,7 @@ from pathlib import Path
 
 def _args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default="yolov8n.pt")
+    parser.add_argument("--model", default=str(Path(__file__).resolve().parents[2] / "yolov8n.pt"))
     parser.add_argument("--data", required=True)
     parser.add_argument("--total-epochs", type=int, required=True)
     parser.add_argument("--imgsz", type=int, default=640)

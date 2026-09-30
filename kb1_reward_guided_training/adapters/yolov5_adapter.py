@@ -3,7 +3,7 @@ adapters/yolov5_adapter.py – Adapter cho YOLOv5s và DP-YOLO.
 
 Nhiệm vụ:
 - Wrap YOLOv5 model (DetectMultiBackend) về interface chung.
-- forward_with_grad(): giữ gradient qua confidence scores để REINFORCE hoạt động.
+- forward_with_grad(): giữ gradient qua confidence scores để reward-guided surrogate hoạt động.
 - Boxes và labels được tách ra (detach) vì chỉ cần grad qua scores (log_prob).
 """
 

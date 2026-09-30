@@ -62,7 +62,7 @@ def _aggregate(records: list[dict], metric: str) -> tuple[float, float]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("inputs", nargs="+", help="OptionalLabel=path/to/results.json or just a path")
-    parser.add_argument("--output", default="runs/kb3/comparison.csv")
+    parser.add_argument("--output", default="kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/comparison.csv")
     args = parser.parse_args()
     rows = []
     for item in args.inputs:

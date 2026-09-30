@@ -37,7 +37,7 @@ class EarlyStopping:
         self.bad_evaluations = int(state.get('bad_evaluations', 0))
 
 
-def evaluate_adapter(adapter, val_loader, device='cuda', conf=0.25, iou=0.45):
+def evaluate_adapter(adapter, val_loader, device='cuda', conf=0.001, iou=0.45):
     """Compute COCO mAP on validation data without materializing all images."""
     metric = MeanAveragePrecision(
         iou_thresholds=[.50 + .05 * i for i in range(10)],

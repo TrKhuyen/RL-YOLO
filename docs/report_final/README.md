@@ -1,10 +1,10 @@
-﻿# Review logic cuối cho KB1, KB2 và KB3
+# Review logic cuối cho KB1, KB2 và KB3
 
 ## Phạm vi
 
 Báo cáo này chỉ kiểm tra **logic nghiên cứu và logic triển khai hiện có**. Dữ liệu đã được làm lại nhưng các thí nghiệm chưa chạy lại, nên tài liệu này **không dùng số liệu từ các lượt chạy cũ, không đánh giá mức cải thiện và không xếp hạng mô hình**. Các hyperparameter trong code là giá trị triển khai hiện tại, chưa phải cấu hình thực nghiệm cuối đã được chọn và kiểm chứng.
 
-Đọc phân tích riêng: [KB1](KB1.md), [KB2](KB2.md), [KB3](KB3.md).
+Đọc phân tích riêng: [KB1](KB1.md), [KB2](KB2.md), [KB3](KB3.md). Bảng đường dẫn cho lần chạy lại: [CHECKPOINT_PATHS_CLEAN](CHECKPOINT_PATHS_CLEAN.md). Kiểm tra nguồn gốc trọng số: [PRETRAINED_CHECKPOINT_AUDIT](PRETRAINED_CHECKPOINT_AUDIT.md).
 
 ## Kết luận logic
 
@@ -36,4 +36,3 @@ Báo cáo này là danh sách việc cần sửa và tiêu chí kiểm tra logic
 - [DPO gốc](https://arxiv.org/abs/2305.18290): dùng cặp chosen/rejected và reference trong objective. KB2 chỉ lấy cảm hứng từ phản hồi ưu tiên, không cần sao chép DPO cho ngôn ngữ.
 - [Ultralytics validation](https://docs.ultralytics.com/modes/val): cần cố định cách tạo prediction và định nghĩa metric khi so checkpoint.
 - [PyTorch optimizer state](https://docs.pytorch.org/docs/stable/generated/torch.optim.Optimizer.load_state_dict.html): continuity của training state cần được xác minh ở cấp state, không suy ra từ một cờ resume.
-

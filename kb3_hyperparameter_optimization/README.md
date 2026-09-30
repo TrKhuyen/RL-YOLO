@@ -44,7 +44,7 @@ Entry points:
 python -m kb3_hyperparameter_optimization.adaptive_rl.random_schedule --episodes 20
 python -m kb3_hyperparameter_optimization.adaptive_rl.train_agent --agent bandit --episodes 20
 python -m kb3_hyperparameter_optimization.adaptive_rl.train_agent --agent ppo --episodes 20
-python -m kb3_hyperparameter_optimization.adaptive_rl.evaluate_policy --agent ppo --checkpoint POLICY.pt --seeds 101 102 103
+python -m kb3_hyperparameter_optimization.adaptive_rl.evaluate_policy --agent ppo --checkpoint kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/adaptive_rl/ppo_agent.pt --seeds 101 102 103
 ```
 
 ## So sánh đúng
@@ -85,8 +85,8 @@ uv run python -m kb3_hyperparameter_optimization.adaptive_rl.train_agent `
 ```bash
 uv run python -m unittest discover -s kb3_hyperparameter_optimization/tests -v
 uv run python -m kb3_hyperparameter_optimization.compare_hpo \
-  A2=runs/kb3/traditional_optuna_final.json \
-  B2=runs/kb3/adaptive_ppo_evaluation.json
+  A2=kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/traditional_optuna_final.json \
+  B2=kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/adaptive_rl/adaptive_ppo_evaluation.json
 ```
 
 Kế hoạch tổng thể vẫn nằm trong `docs/KB3_IMPLEMENTATION_PLAN.md`.

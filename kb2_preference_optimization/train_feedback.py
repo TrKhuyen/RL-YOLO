@@ -1,6 +1,7 @@
 """Feedback-guided fine-tuning for YOLO using native detection losses."""
 import argparse
 import hashlib
+import json
 import random
 from pathlib import Path
 
@@ -74,8 +75,29 @@ def train(args):
         raise FileNotFoundError(checkpoint)
     if not feedback_path.exists():
         raise FileNotFoundError(feedback_path)
+    summary_path = feedback_path.with_suffix('.summary.json')
+    if not summary_path.is_file():
+        raise FileNotFoundError(f'Missing feedback provenance: {summary_path}')
+    summary = json.loads(summary_path.read_text(encoding='utf-8'))
+    expected = {
+        'model': args.model,
+        'split': 'train',
+        'checkpoint_sha256': sha256(checkpoint),
+        'feedback_sha256': sha256(feedback_path),
+        'matching_policy': 'max_cardinality_gt_v2_1',
+        'data_root': str(Path(args.data_root).resolve()),
+        'img_size': args.img_size,
+    }
+    from feedback import SCHEMA_VERSION
+    expected['schema_version'] = SCHEMA_VERSION
+    for key, value in expected.items():
+        if summary.get(key) != value:
+            raise ValueError(f'Feedback provenance mismatch for {key}: {summary_path}')
 
     adapter = load_adapter(args.model, str(checkpoint), args.device)
+    if not callable(getattr(adapter, 'supervised_loss', None)):
+        raise NotImplementedError(
+            f'{args.model} adapter does not implement supervised_loss for feedback fine-tuning')
     parameters = [p for p in adapter.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(parameters, lr=args.lr, weight_decay=args.weight_decay)
     start_step = 0
@@ -109,6 +131,8 @@ def train(args):
         'base_checkpoint': str(checkpoint),
         'feedback_path': str(feedback_path),
         'feedback_sha256': sha256(feedback_path),
+        'feedback_schema_version': summary['schema_version'],
+        'validation_confidence': args.val_conf,
     })
     output = Path(args.output).resolve()
     best_output = output.with_name(f'{output.stem}_best{output.suffix}')
@@ -201,9 +225,9 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description='Feedback-guided native YOLO fine-tuning')
     parser.add_argument('--model', default='yolov8n', choices=list(CHECKPOINTS))
     parser.add_argument('--checkpoint')
-    parser.add_argument('--feedback', default=str(SCRIPT_DIR / 'feedback_data/yolov8n_train.jsonl'))
-    parser.add_argument('--data-root', default=str(REPO_ROOT / 'pre-data/data/v2i'))
-    parser.add_argument('--output', default=str(SCRIPT_DIR / 'feedback_checkpoints/yolov8n_feedback_last.pt'))
+    parser.add_argument('--feedback')
+    parser.add_argument('--data-root', default=str(REPO_ROOT / 'pre-data/data/v2i_cleanned'))
+    parser.add_argument('--output')
     parser.add_argument('--resume')
     parser.add_argument('--steps', type=int, default=1000)
     parser.add_argument('--batch-size', type=int, default=4)
@@ -226,7 +250,7 @@ def parse_args(argv=None):
     parser.add_argument('--save-interval', type=int, default=500)
     parser.add_argument('--eval-interval', type=int, default=500)
     parser.add_argument('--val-batch-size', type=int, default=8)
-    parser.add_argument('--val-conf', type=float, default=.25)
+    parser.add_argument('--val-conf', type=float, default=.001)
     parser.add_argument('--val-iou', type=float, default=.45)
     parser.add_argument('--patience', type=int, default=5)
     parser.add_argument('--min-delta', type=float, default=1e-4)
@@ -236,6 +260,10 @@ def parse_args(argv=None):
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--device', default='cuda')
     args = parser.parse_args(argv)
+    if args.feedback is None:
+        args.feedback = str(SCRIPT_DIR / 'feedback_data_clean' / f'{args.model}_train.jsonl')
+    if args.output is None:
+        args.output = str(SCRIPT_DIR / 'checkpoint_preference_optimization' / f'{args.model}_feedback_last.pt')
     if not 0 <= args.feedback_alpha <= 1:
         parser.error('--feedback-alpha must be in [0, 1]')
     return args

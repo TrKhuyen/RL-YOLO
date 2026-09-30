@@ -8,6 +8,11 @@ pre-data/
 **/checkpoints/
 **/rl_checkpoints/
 **/smoke_checkpoints/
+**/checkpoint_based/
+**/checkpoint_reward_guide_trainning/
+**/checkpoint_preference_optimization/
+**/checkpoint_hyperparameter_optimization/
+**/feedback_data_clean/
 **/augmented_preview_rotage/
 results/
 **/results/

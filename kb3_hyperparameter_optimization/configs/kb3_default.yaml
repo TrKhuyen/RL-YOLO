@@ -4,7 +4,7 @@ experiment:
   segment_epochs: 5
   patience_segments: 8
   max_seconds: null
-  output_dir: runs/kb3
+  output_dir: kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization
 
 reward:
   delta_map50_95: 0.45

@@ -42,7 +42,7 @@ class YoloHPOEnv:
         return len(OBSERVATION_NAMES) + len(self.space.names)
 
     def _unique_run_dir(self, suffix: str) -> Path:
-        root = Path(self.config.experiment.output_dir)
+        root = Path(self.config.experiment.output_dir) / "adaptive_rl"
         candidate = root / suffix
         if candidate.exists() and any(candidate.iterdir()):
             candidate = root / f"{suffix}_{time.time_ns()}"

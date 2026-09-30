@@ -120,6 +120,7 @@ class UltralyticsAdapter:
         from ultralytics.utils.nms import non_max_suppression as nms_v8
 
         images = images.to(self.device)
+        self.model.eval()  # decoded inference output is required for NMS
 
         # Raw forward – giữ grad
         raw = self.model(images)

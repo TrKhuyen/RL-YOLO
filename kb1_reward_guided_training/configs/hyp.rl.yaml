@@ -5,7 +5,7 @@
 #   - batch_size=8:  giam tu 16 -> 8 tranh OOM khi forward qua NMS + reward
 #   - steps=10000:   gioi han tren; early stopping co the dung som hon
 #   - eval_interval=500: phat hien suy giam truoc khi catastrophic forgetting
-#   - grad_clip=0.5: giu on dinh gradient REINFORCE
+#   - grad_clip=0.5: giu on dinh gradient reward-guided surrogate
 
 # Optimizer
 lr: 5.0e-7
@@ -13,7 +13,7 @@ min_lr: 1.0e-7
 warmup_steps: 500
 scheduler: cosine
 optimizer: adam         # adam | sgd
-grad_clip: 0.5          # tighter clipping for REINFORCE stability
+grad_clip: 0.5          # tighter clipping for reward-guided surrogate stability
 reward_loss_weight: 0.10
 native_supervised_loss_weight: 0.25
 supervised_loss_weight: 0.25
@@ -46,7 +46,7 @@ duplicate_penalty: 0.3  # he so phat prediction thua
 small_thresh: 32        # nguong dien tich (px) cho "vat the nho"
 
 # EMA Baseline
-ema_alpha: 0.99         # EMA decay de giam variance REINFORCE
+ema_alpha: 0.99         # EMA decay de giam variance reward-guided surrogate
 
 # Inference settings (khi lay predictions trong vong lap RL)
 conf_thres: 0.20        # nguong confidence (thap hon train de co du preds)

@@ -83,12 +83,22 @@ def object_feedback_loss_from_predictions(predictions, targets,
 def compute_object_feedback_loss(adapter, images, targets,
                                  cls_weight=1.0, box_weight=1.0,
                                  dynamic=False):
-    predictions = adapter.raw_predictions(images)
     if dynamic:
-        codes = dynamic_object_feedback_codes_from_predictions(
-            predictions, targets)
-        targets = [dict(target, object_feedback_codes=code)
-                   for target, code in zip(targets, codes)]
+        # Error status is defined on actual detections, not on dense candidates.
+        from feedback import build_feedback_record
+        with torch.no_grad():
+            detections = adapter.forward_with_grad(images, 0.25, 0.45)
+            records = [build_feedback_record(detection, target)
+                       for detection, target in zip(detections, targets)]
+        code_map = {'matched': 0, 'wrong_class': 1,
+                    'bad_localization': 2, 'missed': 3}
+        targets = [
+            dict(target, object_feedback_codes=torch.tensor(
+                [code_map[status] for status in record['gt_status']],
+                dtype=torch.long, device=images.device))
+            for target, record in zip(targets, records)
+        ]
+    predictions = adapter.raw_predictions(images)
     return object_feedback_loss_from_predictions(
         predictions, targets, cls_weight, box_weight)
 
@@ -138,7 +148,7 @@ def apply_gradient_conflict_control(adapter, images, targets, alpha=0.01,
         parameter.grad = gradient
     diagnostics.update({
         'native_loss': native_loss.detach(),
-        'feedback_loss': native_loss.detach(),
+        'feedback_loss': feedback_loss.detach(),
         'object_feedback_loss': feedback_loss.detach(),
         'loss_items': loss_items,
     })

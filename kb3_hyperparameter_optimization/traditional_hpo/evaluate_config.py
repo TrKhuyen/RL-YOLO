@@ -26,7 +26,7 @@ def main() -> None:
     parser.add_argument("--hyperparameters-json", required=True)
     parser.add_argument("--seeds", nargs="+", type=int, required=True)
     parser.add_argument("--method-name", default="traditional_hpo_best")
-    parser.add_argument("--output", default="runs/kb3/traditional_best_evaluation.json")
+    parser.add_argument("--output", default="kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/traditional_best_evaluation.json")
     add_backend_arguments(parser)
     args = parser.parse_args()
     config = load_config(args.config)

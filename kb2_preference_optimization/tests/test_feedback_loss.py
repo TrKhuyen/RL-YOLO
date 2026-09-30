@@ -8,7 +8,7 @@ KB2_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KB2_DIR))
 
 from feedback_loss import (blend_native_losses, combine_projected_gradients,
-                           compute_hybrid_loss,
+                           compute_hybrid_loss, compute_object_feedback_loss,
                            dynamic_object_feedback_codes_from_predictions,
                            normalized_difficulty_weights,
                            object_feedback_loss_from_predictions)
@@ -108,6 +108,29 @@ class FeedbackLossTests(unittest.TestCase):
         self.assertEqual(code(1., .1, .9), 1)
         self.assertEqual(code(2.5, .9, .1), 2)
         self.assertEqual(code(1., .1, .1), 3)
+
+    def test_dynamic_loss_uses_post_nms_detection_status(self):
+        class Adapter:
+            def __init__(self):
+                self.predictions = torch.tensor([[
+                    [1.], [1.], [2.], [2.], [.9], [.1],
+                ]], requires_grad=True)
+            def forward_with_grad(self, images, conf, iou):
+                return [{'boxes': torch.zeros((0, 4)),
+                         'labels': torch.zeros(0, dtype=torch.long),
+                         'scores': torch.zeros(0)}]
+            def raw_predictions(self, images):
+                return self.predictions
+
+        adapter = Adapter()
+        target = {'boxes': torch.tensor([[0., 0., 2., 2.]]),
+                  'labels': torch.tensor([0]),
+                  'image_id': torch.tensor([0])}
+        loss = compute_object_feedback_loss(
+            adapter, torch.zeros(1, 3, 4, 4), [target], dynamic=True)
+        self.assertGreater(float(loss), 0)
+        loss.backward()
+        self.assertIsNotNone(adapter.predictions.grad)
 
     def test_gradient_projection_preserves_native_and_removes_conflict(self):
         native = [torch.tensor([1., 0.])]

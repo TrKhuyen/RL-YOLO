@@ -11,7 +11,7 @@ from pathlib import Path
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_root")
-    parser.add_argument("--output", default="runs/kb3/trajectories.csv")
+    parser.add_argument("--output", default="kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/adaptive_rl/trajectories.csv")
     args = parser.parse_args()
     rows = []
     for path in sorted(Path(args.run_root).rglob("trajectory.json")):

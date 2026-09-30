@@ -20,7 +20,7 @@ def main() -> None:
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--seeds", nargs="+", type=int, required=True)
     parser.add_argument("--device", default="cpu")
-    parser.add_argument("--output", default="runs/kb3/evaluation.json")
+    parser.add_argument("--output", default="kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/adaptive_rl/evaluation.json")
     add_backend_arguments(parser)
     args = parser.parse_args()
     config = load_config(args.config)
