@@ -1,4 +1,4 @@
-"""Feedback-guided fine-tuning for YOLO using native detection losses."""
+"""KB2 fine-tuning with native YOLO loss and optional feedback/pairwise terms."""
 import argparse
 import hashlib
 import json
@@ -9,7 +9,8 @@ import numpy as np
 import torch
 
 from feedback_dataset import get_feedback_dataloader
-from feedback_loss import apply_gradient_conflict_control, compute_hybrid_loss
+from feedback_loss import (apply_gradient_conflict_control, compute_hybrid_loss,
+                           compute_pairwise_preference_loss)
 from feedback_validation import EarlyStopping, evaluate_adapter
 from dataloader import get_pest_dataloader
 from train_rl import CHECKPOINTS, load_adapter
@@ -41,7 +42,9 @@ def save_training_checkpoint(path, adapter, optimizer, step, config,
     temporary = path.with_suffix(path.suffix + '.tmp')
     torch.save({
         'format_version': 1,
-        'training_method': 'feedback_guided_native_loss',
+        'training_method': ('pairwise_preference_native_loss'
+                            if config.get('pairwise_alpha', 0) > 0
+                            else 'feedback_guided_native_loss'),
         'step': int(step),
         'state_dict': adapter.state_dict(),
         'optimizer': optimizer.state_dict(),
@@ -54,8 +57,9 @@ def save_training_checkpoint(path, adapter, optimizer, step, config,
 
 def load_training_checkpoint(path, adapter, optimizer, device):
     data = torch.load(path, map_location=device, weights_only=False)
-    if data.get('training_method') != 'feedback_guided_native_loss':
-        raise ValueError(f'{path} is not a feedback-guided checkpoint')
+    if data.get('training_method') not in (
+            'feedback_guided_native_loss', 'pairwise_preference_native_loss'):
+        raise ValueError(f'{path} is not a KB2 training checkpoint')
     adapter.model.load_state_dict(data['state_dict'], strict=True)
     optimizer.load_state_dict(data['optimizer'])
     return int(data['step']), data.get('config', {}), data.get('training_state', {})
@@ -68,6 +72,10 @@ def train(args):
         raise ValueError('gradient conflict control requires positive object feedback alpha')
     if args.gradient_conflict_control and args.feedback_alpha != 0:
         raise ValueError('gradient conflict control requires feedback alpha 0')
+    if args.gradient_conflict_control and args.pairwise_alpha != 0:
+        raise ValueError('gradient conflict control cannot combine pairwise loss')
+    if args.pairwise_alpha < 0 or args.pairwise_margin < 0:
+        raise ValueError('pairwise alpha and margin must be non-negative')
     set_seed(args.seed)
     checkpoint = Path(args.checkpoint or CHECKPOINTS[args.model]).resolve()
     feedback_path = Path(args.feedback).resolve()
@@ -137,14 +145,16 @@ def train(args):
     output = Path(args.output).resolve()
     best_output = output.with_name(f'{output.stem}_best{output.suffix}')
     data_iterator = iter(loader)
-    print(f'[Feedback FT] {args.model} | steps={args.steps} | alpha={args.feedback_alpha}')
+    print(f'[Feedback FT] {args.model} | steps={args.steps} | alpha={args.feedback_alpha} '
+          f'| pairwise_alpha={args.pairwise_alpha}')
     print(f'  feedback images={len(loader.dataset)} | start_step={start_step}')
 
     if val_loader is not None and start_step == 0 and args.eval_before_train:
         metrics = evaluate_adapter(
             adapter, val_loader, args.device, args.val_conf, args.val_iou)
         stopper.update(metrics['mAP50-95'])
-        state = {'early_stopping': stopper.state_dict(), 'validation': metrics}
+        state = {'early_stopping': stopper.state_dict(), 'validation': metrics,
+                 'pairwise_pairs_seen': 0, 'pairwise_active_steps': 0}
         save_training_checkpoint(best_output, adapter, optimizer, 0, config, state)
         print('  val step=0 mAP50-95={:.5f} mAP50={:.5f} AP_small={:.5f} '
               'recall={:.5f}'.format(
@@ -154,6 +164,8 @@ def train(args):
 
     last_step = start_step
     stopped_early = False
+    pairwise_pairs_seen = 0
+    pairwise_active_steps = 0
     for step in range(start_step + 1, args.steps + 1):
         last_step = step
         try:
@@ -174,6 +186,14 @@ def train(args):
                 args.max_feedback_loss_weight, args.object_feedback_alpha,
                 args.object_cls_weight, args.object_box_weight,
                 args.dynamic_object_feedback)
+        pairwise_loss = loss.detach() * 0
+        pair_count = 0
+        if args.pairwise_alpha:
+            pairwise_loss, pair_count = compute_pairwise_preference_loss(
+                adapter, images, targets, args.pairwise_margin)
+            loss = loss + args.pairwise_alpha * pairwise_loss
+            pairwise_pairs_seen += pair_count
+            pairwise_active_steps += int(pair_count > 0)
         if not torch.isfinite(loss):
             raise FloatingPointError(f'non-finite loss at step {step}: {loss}')
         if not args.gradient_conflict_control:
@@ -187,6 +207,7 @@ def train(args):
             print(f'  step={step:6d} total={loss.item():.5f} '
                   f'native={details["native_loss"].item():.5f} '
                   f'feedback={details["feedback_loss"].item():.5f} '
+                  f'pairwise={pairwise_loss.item():.5f} pairs={pair_count} '
                   f'grad={float(grad_norm):.4f}')
         if args.save_interval and step % args.save_interval == 0:
             save_training_checkpoint(output.with_name(
@@ -204,7 +225,9 @@ def train(args):
             ).format(step, metrics['mAP50-95'], metrics['mAP50'],
                      metrics['AP_small'], metrics['Recall'], stopper.best)
             print(metric_line)
-            state = {'early_stopping': stopper.state_dict(), 'validation': metrics}
+            state = {'early_stopping': stopper.state_dict(), 'validation': metrics,
+                     'pairwise_pairs_seen': pairwise_pairs_seen,
+                     'pairwise_active_steps': pairwise_active_steps}
             if improved:
                 save_training_checkpoint(
                     best_output, adapter, optimizer, step, config, state)
@@ -216,7 +239,9 @@ def train(args):
 
     saved = save_training_checkpoint(
         output, adapter, optimizer, last_step, config,
-        {'early_stopping': stopper.state_dict(), 'stopped_early': stopped_early})
+        {'early_stopping': stopper.state_dict(), 'stopped_early': stopped_early,
+         'pairwise_pairs_seen': pairwise_pairs_seen,
+         'pairwise_active_steps': pairwise_active_steps})
     print(f'  saved: {saved}')
     return saved
 
@@ -240,6 +265,8 @@ def parse_args(argv=None):
     parser.add_argument('--sampling-strength', type=float, default=1.0)
     parser.add_argument('--max-sampling-weight', type=float, default=5.0)
     parser.add_argument('--max-feedback-loss-weight', type=float, default=3.0)
+    parser.add_argument('--pairwise-alpha', type=float, default=0.0)
+    parser.add_argument('--pairwise-margin', type=float, default=0.1)
     parser.add_argument('--object-feedback-alpha', type=float, default=0.0)
     parser.add_argument('--object-cls-weight', type=float, default=1.0)
     parser.add_argument('--object-box-weight', type=float, default=1.0)

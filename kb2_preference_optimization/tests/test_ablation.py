@@ -16,6 +16,14 @@ class AblationTests(unittest.TestCase):
             'sampling_strategy': 'feedback', 'feedback_alpha': 0.0})
         self.assertEqual(VARIANTS['hybrid'], {
             'sampling_strategy': 'feedback', 'feedback_alpha': 0.10})
+        self.assertEqual(VARIANTS['pairwise'], {
+            'sampling_strategy': 'shuffle', 'feedback_alpha': 0.0})
+
+    def test_pairwise_requires_positive_weight_but_baseline_allows_zero(self):
+        self.assertEqual(parse_args(['--variants', 'baseline',
+                                     '--pairwise-alpha', '0']).pairwise_alpha, 0)
+        with self.assertRaises(SystemExit):
+            parse_args(['--variants', 'pairwise', '--pairwise-alpha', '0'])
 
     def test_relative_paths_become_absolute_before_child_changes_cwd(self):
         import os
@@ -42,6 +50,13 @@ class AblationTests(unittest.TestCase):
             self.assertEqual(command[command.index('--val-conf') + 1], '0.001')
             self.assertEqual(command[command.index('--img-size') + 1], '640')
             self.assertTrue(command[command.index('--checkpoint') + 1].endswith('best.pt'))
+        self.assertEqual(
+            commands['pairwise'][commands['pairwise'].index('--pairwise-alpha') + 1],
+            '0.01')
+        for name in ('baseline', 'sampling', 'hybrid'):
+            self.assertEqual(
+                commands[name][commands[name].index('--pairwise-alpha') + 1],
+                '0.0')
         outputs = [command[command.index('--output') + 1]
                    for command in commands.values()]
         self.assertEqual(len(outputs), len(set(outputs)))

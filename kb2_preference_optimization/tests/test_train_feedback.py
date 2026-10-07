@@ -38,13 +38,30 @@ class TrainFeedbackTests(unittest.TestCase):
                 self.assertTrue(torch.equal(value, before[name]))
             self.assertAlmostEqual(target_optimizer.param_groups[0]['lr'], .01)
 
+    def test_pairwise_checkpoint_records_method_and_coverage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'pairwise.pt'
+            source = FakeAdapter()
+            optimizer = torch.optim.AdamW(source.model.parameters())
+            save_training_checkpoint(
+                path, source, optimizer, 3, {'pairwise_alpha': .1},
+                {'pairwise_pairs_seen': 12})
+            data = torch.load(path, map_location='cpu', weights_only=False)
+            self.assertEqual(data['training_method'],
+                             'pairwise_preference_native_loss')
+            self.assertEqual(data['training_state']['pairwise_pairs_seen'], 12)
+            target = FakeAdapter()
+            load_training_checkpoint(
+                path, target,
+                torch.optim.AdamW(target.model.parameters()), 'cpu')
+
     def test_rejects_wrong_checkpoint_type(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'wrong.pt'
             torch.save({'training_method': 'old_dpo'}, path)
             adapter = FakeAdapter()
             optimizer = torch.optim.AdamW(adapter.model.parameters())
-            with self.assertRaisesRegex(ValueError, 'not a feedback-guided checkpoint'):
+            with self.assertRaisesRegex(ValueError, 'not a KB2 training checkpoint'):
                 load_training_checkpoint(path, adapter, optimizer, 'cpu')
 
     def test_cli_defaults_and_alpha_validation(self):

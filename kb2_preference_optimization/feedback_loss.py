@@ -1,10 +1,62 @@
-"""Stable feedback-guided objective built on the native YOLO detection loss."""
+"""Feedback and pairwise objectives built on native YOLO detection loss."""
 import torch
+import torch.nn.functional as F
+
+from feedback import box_iou
 
 
 def _xywh_to_xyxy(boxes):
     center, size = boxes[..., :2], boxes[..., 2:]
     return torch.cat((center - size / 2, center + size / 2), dim=-1)
+
+
+def pairwise_preference_loss_from_predictions(
+        predictions, targets, margin=0.1, chosen_iou=0.5,
+        rejected_iou=0.1):
+    """Rank same-class candidates for the same augmented GT by box quality.
+
+    Candidate selection uses detached boxes; class scores retain gradients.
+    Each candidate belongs to its highest-IoU GT, so a positive for one GT
+    cannot be used as a rejected candidate for another.
+    """
+    if margin < 0 or not 0 <= rejected_iou < chosen_iou <= 1:
+        raise ValueError('invalid pairwise margin or IoU thresholds')
+    if predictions.ndim != 3 or predictions.shape[1] < 5:
+        raise ValueError('expected decoded predictions [B, 4 + classes, anchors]')
+    if len(predictions) != len(targets):
+        raise ValueError('prediction and target batch sizes differ')
+    boxes = _xywh_to_xyxy(predictions[:, :4].permute(0, 2, 1)).detach()
+    probabilities = predictions[:, 4:, :].permute(0, 2, 1)
+    losses = []
+    for batch_index, target in enumerate(targets):
+        gt_boxes = target['boxes'].to(predictions.device)
+        gt_labels = target['labels'].to(predictions.device).long()
+        if not len(gt_boxes):
+            continue
+        if gt_labels.min() < 0 or gt_labels.max() >= probabilities.shape[-1]:
+            raise ValueError('GT label outside prediction class range')
+        ious = box_iou(boxes[batch_index], gt_boxes)
+        owner = ious.argmax(dim=1)
+        for gt_index, label in enumerate(gt_labels):
+            same_gt = owner == gt_index
+            quality = ious[:, gt_index]
+            chosen_mask = same_gt & (quality >= chosen_iou)
+            rejected_mask = same_gt & (quality >= rejected_iou) & (quality < chosen_iou)
+            if not chosen_mask.any() or not rejected_mask.any():
+                continue
+            scores = probabilities[batch_index, :, label].clamp(1e-6, 1 - 1e-6)
+            # Choose the best-localized candidate and the hardest lower-IoU one.
+            chosen = quality.masked_fill(~chosen_mask, -1).argmax()
+            rejected = scores.detach().masked_fill(~rejected_mask, -1).argmax()
+            score_gap = torch.logit(scores[chosen]) - torch.logit(scores[rejected])
+            losses.append(F.softplus(margin - score_gap))
+    return ((torch.stack(losses).mean() if losses else predictions.sum() * 0),
+            len(losses))
+
+
+def compute_pairwise_preference_loss(adapter, images, targets, margin=0.1):
+    return pairwise_preference_loss_from_predictions(
+        adapter.raw_predictions(images), targets, margin=margin)
 
 
 def dynamic_object_feedback_codes_from_predictions(

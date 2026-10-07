@@ -13,6 +13,7 @@ VARIANTS = {
     'baseline': {'sampling_strategy': 'shuffle', 'feedback_alpha': 0.0},
     'sampling': {'sampling_strategy': 'feedback', 'feedback_alpha': 0.0},
     'hybrid': {'sampling_strategy': 'feedback', 'feedback_alpha': 0.10},
+    'pairwise': {'sampling_strategy': 'shuffle', 'feedback_alpha': 0.0},
 }
 
 
@@ -32,6 +33,8 @@ def build_command(args, name):
         '--lr', str(args.lr), '--seed', str(args.seed), '--device', args.device,
         '--sampling-strategy', variant['sampling_strategy'],
         '--feedback-alpha', str(variant['feedback_alpha']),
+        '--pairwise-alpha', str(args.pairwise_alpha if name == 'pairwise' else 0.0),
+        '--pairwise-margin', str(args.pairwise_margin),
         '--sampling-strength', str(args.sampling_strength),
         '--eval-interval', str(args.eval_interval),
         '--val-batch-size', str(args.val_batch_size),
@@ -46,8 +49,13 @@ def checkpoint_result(path, name):
     validation = data.get('training_state', {}).get('validation', {})
     if not validation:
         raise ValueError(f'Best checkpoint has no validation metrics: {path}')
+    state = data.get('training_state', {})
     return {'variant': name, 'step': int(data['step']),
-            'checkpoint': str(path), **validation}
+            'checkpoint': str(path),
+            'training_method': data.get('training_method'),
+            'pairwise_pairs_seen': state.get('pairwise_pairs_seen', 0),
+            'pairwise_active_steps': state.get('pairwise_active_steps', 0),
+            **validation}
 
 
 def run(args):
@@ -63,6 +71,8 @@ def run(args):
         'steps': args.steps, 'batch_size': args.batch_size, 'img_size': args.img_size,
         'lr': args.lr, 'checkpoint': str(Path(args.checkpoint).resolve()) if args.checkpoint else None,
         'seed': args.seed, 'eval_interval': args.eval_interval,
+        'pairwise_alpha': args.pairwise_alpha,
+        'pairwise_margin': args.pairwise_margin,
         'selection_metric': 'mAP50-95', 'val_conf': args.val_conf,
         'val_iou': args.val_iou,
     }, 'results': results}
@@ -90,6 +100,8 @@ def parse_args(argv=None):
     parser.add_argument('--lr', type=float, default=1e-6)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--sampling-strength', type=float, default=1.0)
+    parser.add_argument('--pairwise-alpha', type=float, default=0.01)
+    parser.add_argument('--pairwise-margin', type=float, default=0.1)
     parser.add_argument('--eval-interval', type=int, default=250)
     parser.add_argument('--val-batch-size', type=int, default=8)
     parser.add_argument('--val-conf', type=float, default=.001)
@@ -97,7 +109,12 @@ def parse_args(argv=None):
     parser.add_argument('--patience', type=int, default=3)
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--output-dir', default=str(SCRIPT_DIR / 'checkpoint_preference_optimization' / 'ablation'))
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.pairwise_alpha < 0 or args.pairwise_margin < 0:
+        parser.error('pairwise alpha and margin must be non-negative')
+    if 'pairwise' in args.variants and args.pairwise_alpha == 0:
+        parser.error('pairwise variant requires positive --pairwise-alpha')
+    return args
 
 
 if __name__ == '__main__':

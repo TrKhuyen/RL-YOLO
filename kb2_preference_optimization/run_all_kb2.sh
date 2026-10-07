@@ -25,6 +25,8 @@ Usage: bash kb2_preference_optimization/run_all_kb2.sh [options]
   --batch-size N         Fine-tuning batch size (default: 4)
   --feedback-batch-size N  Feedback generation batch size (default: 8)
   --img-size N           Square image size (default: 640)
+  --seed N               Training seed (default: 42)
+  --pairwise-alpha X     Pairwise loss weight (default: 0.01)
   --check-only           Verify dataset, checkpoint provenance and device;
                          do not generate feedback or train
 EOF
@@ -36,10 +38,12 @@ steps=1000
 batch_size=4
 feedback_batch_size=8
 img_size=640
+seed=42
+pairwise_alpha=0.01
 check_only=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --model|--device|--steps|--batch-size|--feedback-batch-size|--img-size)
+    --model|--device|--steps|--batch-size|--feedback-batch-size|--img-size|--seed|--pairwise-alpha)
       if [[ $# -lt 2 ]]; then echo "Missing value for $1" >&2; exit 2; fi
       case "$1" in
         --model) model="$2";;
@@ -48,6 +52,8 @@ while [[ $# -gt 0 ]]; do
         --batch-size) batch_size="$2";;
         --feedback-batch-size) feedback_batch_size="$2";;
         --img-size) img_size="$2";;
+        --seed) seed="$2";;
+        --pairwise-alpha) pairwise_alpha="$2";;
       esac
       shift 2;;
     --check-only) check_only=1; shift;;
@@ -67,6 +73,10 @@ for value in "$steps" "$batch_size" "$feedback_batch_size" "$img_size"; do
     exit 2
   fi
 done
+if [[ ! "$seed" =~ ^[0-9]+$ ]]; then
+  echo "Seed must be a non-negative integer." >&2
+  exit 2
+fi
 if [[ "$device" != cpu && "$device" != cuda ]]; then
   echo "Device must be cpu or cuda." >&2
   exit 2
@@ -144,7 +154,7 @@ for index, record in records.items():
 print(f'PASS: {len(records)} train feedback records, schema 2.1', flush=True)
 PY
 
-  printf '\n[KB2 2/2] Baseline / sampling / hybrid ablation: %s\n' "$model"
+  printf '\n[KB2 2/2] Baseline / sampling / hybrid / pairwise ablation: %s\n' "$model"
   eval_interval=250
   if (( steps < eval_interval )); then eval_interval=$steps; fi
   "$PYTHON" -u run_ablation.py \
@@ -152,6 +162,7 @@ PY
     --data-root "$DATA_ROOT" --feedback "$feedback" \
     --device "$device" --img-size "$img_size" \
     --steps "$steps" --batch-size "$batch_size" \
+    --seed "$seed" --pairwise-alpha "$pairwise_alpha" \
     --eval-interval "$eval_interval" \
     --output-dir "$output_dir"
   echo "KB2 $model complete: $output_dir/ablation_results.json"

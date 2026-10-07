@@ -11,6 +11,7 @@ from feedback_loss import (blend_native_losses, combine_projected_gradients,
                            compute_hybrid_loss, compute_object_feedback_loss,
                            dynamic_object_feedback_codes_from_predictions,
                            normalized_difficulty_weights,
+                           pairwise_preference_loss_from_predictions,
                            object_feedback_loss_from_predictions)
 
 
@@ -95,6 +96,46 @@ class FeedbackLossTests(unittest.TestCase):
         shifted[0, 0, 0] = 2.
         shifted_box = object_feedback_loss_from_predictions(shifted, [target])
         self.assertLess(float(perfect_box), float(shifted_box))
+
+    def test_pairwise_loss_ranks_same_gt_and_backpropagates(self):
+        # Anchor 0 matches GT; anchor 1 is a nearby inferior candidate.
+        predictions = torch.tensor([[[
+            1., 2.2], [1., 1.], [2., 2.], [2., 2.],
+            [.2, .9], [.8, .1],
+        ]], requires_grad=True)
+        target = {'boxes': torch.tensor([[0., 0., 2., 2.]]),
+                  'labels': torch.tensor([0])}
+        loss, count = pairwise_preference_loss_from_predictions(
+            predictions, [target])
+        self.assertEqual(count, 1)
+        loss.backward()
+        self.assertLess(float(predictions.grad[0, 4, 0]), 0)
+        self.assertGreater(float(predictions.grad[0, 4, 1]), 0)
+        self.assertTrue(torch.equal(predictions.grad[0, :4],
+                                    torch.zeros_like(predictions.grad[0, :4])))
+        better = predictions.detach().clone()
+        better[0, 4, 0] = .9
+        better[0, 4, 1] = .2
+        better_loss, _ = pairwise_preference_loss_from_predictions(
+            better, [target])
+        self.assertLess(float(better_loss), float(loss))
+
+    def test_pairwise_rejects_other_gt_positive_and_handles_no_pair(self):
+        predictions = torch.tensor([[[
+            1., 5.], [1., 1.], [2., 2.], [2., 2.],
+            [.8, .9],
+        ]], requires_grad=True)
+        targets = [{'boxes': torch.tensor([[0., 0., 2., 2.],
+                                           [4., 0., 6., 2.]]),
+                    'labels': torch.tensor([0, 0])}]
+        loss, count = pairwise_preference_loss_from_predictions(
+            predictions, targets)
+        self.assertEqual(count, 0)
+        loss.backward()
+        self.assertTrue(torch.equal(predictions.grad, torch.zeros_like(predictions)))
+        with self.assertRaisesRegex(ValueError, 'thresholds'):
+            pairwise_preference_loss_from_predictions(
+                predictions, targets, chosen_iou=.1, rejected_iou=.5)
 
     def test_dynamic_feedback_classifies_current_error_types(self):
         target = {'boxes': torch.tensor([[0., 0., 2., 2.]]),
