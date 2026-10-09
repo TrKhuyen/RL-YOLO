@@ -18,6 +18,13 @@ class AblationTests(unittest.TestCase):
             'sampling_strategy': 'feedback', 'feedback_alpha': 0.10})
         self.assertEqual(VARIANTS['pairwise'], {
             'sampling_strategy': 'shuffle', 'feedback_alpha': 0.0})
+        self.assertEqual(VARIANTS['dpo'], VARIANTS['baseline'])
+
+    def test_dpo_requires_valid_scale_and_positive_weight(self):
+        for options in (['--dpo-alpha', '0'], ['--dpo-beta', '0'],
+                        ['--dpo-beta', 'nan'], ['--dpo-alpha', 'inf']):
+            with self.assertRaises(SystemExit):
+                parse_args(['--variants', 'dpo', *options])
 
     def test_pairwise_requires_positive_weight_but_baseline_allows_zero(self):
         self.assertEqual(parse_args(['--variants', 'baseline',
@@ -60,6 +67,10 @@ class AblationTests(unittest.TestCase):
         outputs = [command[command.index('--output') + 1]
                    for command in commands.values()]
         self.assertEqual(len(outputs), len(set(outputs)))
+        for name, command in commands.items():
+            self.assertEqual(command[command.index('--dpo-alpha') + 1],
+                             '0.1' if name == 'dpo' else '0.0')
+        self.assertEqual(commands['dpo'][commands['dpo'].index('--pairwise-alpha') + 1], '0.0')
 
 
 if __name__ == '__main__': unittest.main(verbosity=2)

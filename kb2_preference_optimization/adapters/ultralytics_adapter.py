@@ -1,13 +1,14 @@
 """
-adapters/ultralytics_adapter.py – Adapter cho YOLOv8 và YOLOv11 (Ultralytics).
+adapters/ultralytics_adapter.py – Adapter cho YOLOv8, YOLOv11 và YOLO26.
 
 Tương tự YOLOv5Adapter nhưng dành cho framework Ultralytics mới hơn.
 YOLOv8/v11 là anchor-free: output format khác YOLOv5.
 
 Output raw của Ultralytics DetectionModel:
     Tensor (B, 4+nc, num_anchors) với num_anchors = 8400 (default 640px input)
-    - [:4, :]  = raw box regression (cxcywh, chưa decode)
-    - [4:, :]  = class logits (chưa sigmoid)
+    - [:4, :]  = decoded cxcywh boxes
+    - [4:, :]  = class probabilities (đã sigmoid)
+YOLO26 dùng one-to-many cho inference, native loss giữ cả hai nhánh.
 """
 
 import torch
@@ -18,9 +19,9 @@ from typing import Optional
 
 class UltralyticsAdapter:
     """
-    Adapter cho YOLOv8n/s và YOLOv11n/s từ Ultralytics.
+    Adapter cho YOLOv8n/s, YOLOv11n/s và YOLO26n từ Ultralytics.
 
-    Cần: pip install ultralytics>=8.0.0
+    Cần: pip install ultralytics>=8.4.163
     """
 
     def __init__(self, checkpoint: str, device: str = 'cuda'):
@@ -35,6 +36,12 @@ class UltralyticsAdapter:
         yolo = YOLO(checkpoint)
         # Lấy nn.Module bên trong để có full control
         inner: DetectionModel = yolo.model.to(self.device)
+        # Pairwise/DPO score dense candidates from the one-to-many head.
+        # Native YOLO26 loss still trains both branches.
+        if getattr(inner, 'end2end', False):
+            if getattr(inner.model[-1], 'cv2', None) is None:
+                raise ValueError('Feedback requires an unfused one-to-many detection head')
+            inner.end2end = False
         if isinstance(inner.args, dict):
             inner.args = get_cfg(overrides=inner.args)
         inner.requires_grad_(True)

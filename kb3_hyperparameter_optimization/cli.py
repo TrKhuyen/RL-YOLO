@@ -25,7 +25,12 @@ def build_trainer(args: argparse.Namespace, config: KB3Config):
         return SimulatedTrainerAdapter()
     if not args.trainer_command:
         raise ValueError("--trainer-command is required for command backend")
-    command = shlex.split(args.trainer_command, posix=False)
+    # The command is a shell-style argument string, including quoted paths.
+    # posix=False retains quote characters and breaks paths containing spaces.
+    command = shlex.split(args.trainer_command, posix=True)
+    if ("kb3_hyperparameter_optimization.adapters.ultralytics_worker" in command
+            and config.reward.delta_ap_small > 0 and "--canonical-eval" not in command):
+        raise ValueError("KB3 AP_small reward requires --canonical-eval in the Ultralytics worker command")
     if command and command[0].lower() in {"python", "python.exe", "python3", "python3.exe"}:
         # The child must use the exact uv/venv interpreter running KB3. On
         # Windows a bare `python` can otherwise resolve to uv's toolchain

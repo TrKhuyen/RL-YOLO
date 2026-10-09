@@ -18,15 +18,21 @@ export NO_ALBUMENTATIONS_UPDATE=1
 usage() {
   cat <<'EOF'
 Usage: bash kb2_preference_optimization/run_all_kb2.sh [options]
-  --model NAME           all (default): yolov8n, yolov8s, yolov11n, yolov11s;
+  --model NAME           all (default): yolov8n, yolov8s, yolov11n, yolov11s, yolo26n;
                          or one of these model names
   --device DEVICE        cuda (default) or cpu
-  --steps N              Updates per ablation variant (default: 1000)
+  --steps N              Maximum updates per ablation variant (default: 15000)
+  --eval-interval N      Validate every N updates (default: 1000)
+  --patience N           Stop after N validations without improvement (default: 5)
+  --save-interval N      Save intermediate checkpoint every N updates (default: 2000)
   --batch-size N         Fine-tuning batch size (default: 4)
   --feedback-batch-size N  Feedback generation batch size (default: 8)
   --img-size N           Square image size (default: 640)
   --seed N               Training seed (default: 42)
   --pairwise-alpha X     Pairwise loss weight (default: 0.01)
+  --dpo-alpha X          DPO loss weight (default: 0.1)
+  --dpo-beta X           DPO log-ratio scale (default: 0.1)
+  --variants NAMES...    Variants to run (default: baseline sampling hybrid pairwise dpo)
   --check-only           Verify dataset, checkpoint provenance and device;
                          do not generate feedback or train
 EOF
@@ -34,42 +40,67 @@ EOF
 
 model=all
 device=cuda
-steps=1000
+steps=15000
+eval_interval=1000
+patience=5
+save_interval=2000
 batch_size=4
 feedback_batch_size=8
 img_size=640
 seed=42
 pairwise_alpha=0.01
+dpo_alpha=0.1
+dpo_beta=0.1
+variants=(baseline sampling hybrid pairwise dpo)
 check_only=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --model|--device|--steps|--batch-size|--feedback-batch-size|--img-size|--seed|--pairwise-alpha)
+    --model|--device|--steps|--eval-interval|--patience|--save-interval|--batch-size|--feedback-batch-size|--img-size|--seed|--pairwise-alpha|--dpo-alpha|--dpo-beta)
       if [[ $# -lt 2 ]]; then echo "Missing value for $1" >&2; exit 2; fi
       case "$1" in
         --model) model="$2";;
         --device) device="$2";;
         --steps) steps="$2";;
+        --eval-interval) eval_interval="$2";;
+        --patience) patience="$2";;
+        --save-interval) save_interval="$2";;
         --batch-size) batch_size="$2";;
         --feedback-batch-size) feedback_batch_size="$2";;
         --img-size) img_size="$2";;
         --seed) seed="$2";;
         --pairwise-alpha) pairwise_alpha="$2";;
+        --dpo-alpha) dpo_alpha="$2";;
+        --dpo-beta) dpo_beta="$2";;
       esac
       shift 2;;
+    --variants)
+      shift
+      variants=()
+      while [[ $# -gt 0 && "$1" != --* && "$1" != -h ]]; do
+        variants+=("$1")
+        shift
+      done
+      if [[ ${#variants[@]} -eq 0 ]]; then echo 'Missing --variants names' >&2; exit 2; fi;;
     --check-only) check_only=1; shift;;
     -h|--help) usage; exit 0;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 2;;
   esac
 done
+for variant in "${variants[@]}"; do
+  case "$variant" in
+    baseline|sampling|hybrid|pairwise|dpo) ;;
+    *) echo "Unknown variant: $variant" >&2; exit 2;;
+  esac
+done
 case "$model" in
-  all) models=(yolov8n yolov8s yolov11n yolov11s);;
-  yolov8n|yolov8s|yolov11n|yolov11s) models=("$model");;
+  all) models=(yolov8n yolov8s yolov11n yolov11s yolo26n);;
+  yolov8n|yolov8s|yolov11n|yolov11s|yolo26n) models=("$model");;
   yolov5s|dp_yolo) echo "$model lacks the supervised_loss adapter required by feedback training." >&2; exit 2;;
   *) echo "Unknown model: $model" >&2; exit 2;;
 esac
-for value in "$steps" "$batch_size" "$feedback_batch_size" "$img_size"; do
+for value in "$steps" "$eval_interval" "$patience" "$save_interval" "$batch_size" "$feedback_batch_size" "$img_size"; do
   if [[ ! "$value" =~ ^[1-9][0-9]*$ ]]; then
-    echo "Steps, batch sizes and img-size must be positive integers." >&2
+    echo "Steps, intervals, patience, batch sizes and img-size must be positive integers." >&2
     exit 2
   fi
 done
@@ -85,6 +116,16 @@ fi
 cd "$KB2_DIR"
 trap 'echo "KB2 stopped at line $LINENO. Inspect the command above." >&2' ERR
 printf '[KB2 preflight] models: %s | device: %s\n' "${models[*]}" "$device"
+"$PYTHON" - "$pairwise_alpha" "$dpo_alpha" "$dpo_beta" "${variants[@]}" <<'PY'
+import math
+import sys
+pairwise, dpo, beta = map(float, sys.argv[1:4])
+variants = sys.argv[4:]
+if not all(math.isfinite(v) for v in (pairwise, dpo, beta)) or min(pairwise, dpo) < 0 or beta <= 0:
+    raise SystemExit('Invalid pairwise/DPO weights or beta')
+if ('pairwise' in variants and pairwise == 0) or ('dpo' in variants and dpo == 0):
+    raise SystemExit('Selected preference variant requires a positive loss weight')
+PY
 "$PYTHON" - "$device" "${models[@]}" <<'PY'
 import sys
 from pathlib import Path
@@ -154,16 +195,19 @@ for index, record in records.items():
 print(f'PASS: {len(records)} train feedback records, schema 2.1', flush=True)
 PY
 
-  printf '\n[KB2 2/2] Baseline / sampling / hybrid / pairwise ablation: %s\n' "$model"
-  eval_interval=250
-  if (( steps < eval_interval )); then eval_interval=$steps; fi
+  printf '\n[KB2 2/2] Ablation (%s): %s\n' "${variants[*]}" "$model"
+  model_eval_interval=$eval_interval
+  if (( steps < model_eval_interval )); then model_eval_interval=$steps; fi
   "$PYTHON" -u run_ablation.py \
     --model "$model" --checkpoint "$checkpoint" \
     --data-root "$DATA_ROOT" --feedback "$feedback" \
     --device "$device" --img-size "$img_size" \
     --steps "$steps" --batch-size "$batch_size" \
     --seed "$seed" --pairwise-alpha "$pairwise_alpha" \
-    --eval-interval "$eval_interval" \
+    --dpo-alpha "$dpo_alpha" --dpo-beta "$dpo_beta" \
+    --variants "${variants[@]}" \
+    --eval-interval "$model_eval_interval" --patience "$patience" \
+    --save-interval "$save_interval" \
     --output-dir "$output_dir"
   echo "KB2 $model complete: $output_dir/ablation_results.json"
 done

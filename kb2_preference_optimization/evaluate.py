@@ -42,6 +42,7 @@ SUPERVISED = {
     'YOLOv8s':  KB1_DIR / 'checkpoint_based/yolov8s/weights/best.pt',
     'YOLOv11n': KB1_DIR / 'checkpoint_based/yolov11n/weights/best.pt',
     'YOLOv11s': KB1_DIR / 'checkpoint_based/yolov11s/weights/best.pt',
+    'YOLO26n':  KB1_DIR / 'checkpoint_based/yolo26n/weights/best.pt',
     'DP-YOLO':  KB1_DIR / 'checkpoint_based/dp_yolo/weights/best.pt',
 }
 
@@ -72,6 +73,11 @@ RL_CHECKPOINTS = {
         'l2': 'checkpoint_preference_optimization/yolov11s_rl_l2_anchor_dpo_best.pt',
         'l3': 'checkpoint_preference_optimization/yolov11s_rl_l3_best.pt',
     },
+    'YOLO26n': {
+        'l1': 'checkpoint_preference_optimization/yolo26n_rl_l1_best.pt',
+        'l2': 'checkpoint_preference_optimization/yolo26n_rl_l2_anchor_dpo_best.pt',
+        'l3': 'checkpoint_preference_optimization/yolo26n_rl_l3_best.pt',
+    },
     'DP-YOLO': {
         'l1': 'checkpoint_preference_optimization/dp_yolo_rl_l1_best.pt',
         'l2': 'checkpoint_preference_optimization/dp_yolo_rl_l2_anchor_dpo_best.pt',
@@ -92,6 +98,7 @@ FRAMEWORKS = {
     'YOLOv8s':  'ultralytics',
     'YOLOv11n': 'ultralytics',
     'YOLOv11s': 'ultralytics',
+    'YOLO26n':  'ultralytics',
     'DP-YOLO':  'v5',
 }
 
@@ -356,7 +363,7 @@ def main():
     parser = argparse.ArgumentParser(description='Evaluate RL Fine-tuning Comparison')
     parser.add_argument('--model', default='all',
                         choices=['all', 'YOLOv5s', 'YOLOv8n', 'YOLOv8s',
-                                 'YOLOv11n', 'YOLOv11s', 'DP-YOLO'])
+                                 'YOLOv11n', 'YOLOv11s', 'YOLO26n', 'DP-YOLO'])
     parser.add_argument('--levels', type=int, nargs='+', default=[1, 2, 3],
                         help='RL levels to compare (e.g. --levels 2 3)')
     parser.add_argument('--split',  default='val', choices=['val', 'test'])

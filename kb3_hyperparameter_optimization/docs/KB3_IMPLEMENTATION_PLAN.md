@@ -44,7 +44,7 @@ KB3 không dùng RL để cập nhật trực tiếp trọng số YOLO. Trọng 
 ## 4. Thiết kế thí nghiệm tổng quát
 
 ```text
-Cấu hình ban đầu + pretrained checkpoint
+Cấu hình ban đầu + kiến trúc YAML, trọng số ngẫu nhiên theo seed
                     |
                     v
           Huấn luyện K epoch/segment
@@ -184,7 +184,7 @@ Các phương pháp cần so sánh:
 
 Mọi phương pháp phải dùng:
 
-- Cùng model initialization hoặc cùng tập pretrained checkpoint.
+- Cùng kiến trúc và model initialization từ đầu theo seed.
 - Cùng train/validation/test split.
 - Cùng augmentation search space.
 - Cùng giới hạn số trial, epoch hoặc GPU-hours.
@@ -306,7 +306,7 @@ Mỗi run cần lưu:
 
 - Git commit, phiên bản thư viện, GPU và CUDA.
 - Dataset manifest/checksum.
-- Model, pretrained checkpoint và seed.
+- Model YAML, initialization từ đầu và seed.
 - State, raw metric, normalized state, action và reward từng step.
 - Hyperparameter trước và sau action.
 - Thời gian train/eval, GPU-hour và peak VRAM.

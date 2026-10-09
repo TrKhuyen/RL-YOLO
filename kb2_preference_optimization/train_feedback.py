@@ -1,7 +1,9 @@
-"""KB2 fine-tuning with native YOLO loss and optional feedback/pairwise terms."""
+"""KB2 native YOLO fine-tuning with feedback, pairwise or candidate DPO."""
 import argparse
+import copy
 import hashlib
 import json
+import math
 import random
 from pathlib import Path
 
@@ -10,13 +12,43 @@ import torch
 
 from feedback_dataset import get_feedback_dataloader
 from feedback_loss import (apply_gradient_conflict_control, compute_hybrid_loss,
-                           compute_pairwise_preference_loss)
+                           compute_pairwise_preference_loss, compute_dpo_preference_loss,
+                           DPO_PAIR_SOURCE, DPO_OBJECTIVE_VERSION)
 from feedback_validation import EarlyStopping, evaluate_adapter
 from dataloader import get_pest_dataloader
 from train_rl import CHECKPOINTS, load_adapter
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
+DPO_POLICY = 'gt_class_anchor_softmax_v1'
+
+
+def training_method(config):
+    if config.get('dpo_alpha', 0) > 0:
+        return 'candidate_selection_dpo_native_loss'
+    if config.get('pairwise_alpha', 0) > 0:
+        return 'pairwise_preference_native_loss'
+    return 'feedback_guided_native_loss'
+
+
+def make_frozen_reference(adapter):
+    reference = copy.deepcopy(adapter)
+    reference.model.requires_grad_(False)
+    reference.eval_mode()
+    return reference
+
+
+def validate_objective_args(args):
+    for name in ('pairwise_alpha', 'pairwise_margin', 'dpo_alpha'):
+        value = getattr(args, name)
+        if not math.isfinite(value) or value < 0:
+            raise ValueError(f'{name} must be finite and non-negative')
+    if not math.isfinite(args.dpo_beta) or args.dpo_beta <= 0:
+        raise ValueError('dpo_beta must be finite and positive')
+    if args.dpo_alpha and (args.pairwise_alpha or args.feedback_alpha
+                           or args.object_feedback_alpha or args.gradient_conflict_control
+                           or args.sampling_strategy != 'shuffle'):
+        raise ValueError('DPO requires shuffle sampling and no other auxiliary loss')
 
 
 def set_seed(seed):
@@ -42,9 +74,7 @@ def save_training_checkpoint(path, adapter, optimizer, step, config,
     temporary = path.with_suffix(path.suffix + '.tmp')
     torch.save({
         'format_version': 1,
-        'training_method': ('pairwise_preference_native_loss'
-                            if config.get('pairwise_alpha', 0) > 0
-                            else 'feedback_guided_native_loss'),
+        'training_method': training_method(config),
         'step': int(step),
         'state_dict': adapter.state_dict(),
         'optimizer': optimizer.state_dict(),
@@ -55,17 +85,31 @@ def save_training_checkpoint(path, adapter, optimizer, step, config,
     return path
 
 
-def load_training_checkpoint(path, adapter, optimizer, device):
+def load_training_checkpoint(path, adapter, optimizer, device, expected_config=None):
     data = torch.load(path, map_location=device, weights_only=False)
     if data.get('training_method') not in (
-            'feedback_guided_native_loss', 'pairwise_preference_native_loss'):
+            'feedback_guided_native_loss', 'pairwise_preference_native_loss',
+            'candidate_selection_dpo_native_loss'):
         raise ValueError(f'{path} is not a KB2 training checkpoint')
+    if expected_config is not None:
+        if data['training_method'] != training_method(expected_config):
+            raise ValueError('Resume training method differs from the requested objective')
+        if expected_config.get('dpo_alpha', 0):
+            # Rebuild the reference from the ORIGINAL base, never resumed policy.
+            for key in ('model', 'base_checkpoint_sha256', 'feedback_sha256',
+                        'reference_checkpoint_sha256',
+                        'dpo_alpha', 'dpo_beta', 'dpo_policy', 'dpo_pair_source',
+                        'dpo_objective_version',
+                        'img_size', 'batch_size', 'seed', 'lr', 'weight_decay'):
+                if data.get('config', {}).get(key) != expected_config.get(key):
+                    raise ValueError(f'DPO resume provenance/config mismatch: {key}')
     adapter.model.load_state_dict(data['state_dict'], strict=True)
     optimizer.load_state_dict(data['optimizer'])
     return int(data['step']), data.get('config', {}), data.get('training_state', {})
 
 
 def train(args):
+    validate_objective_args(args)
     if args.steps < 1 or args.batch_size < 1:
         raise ValueError('steps and batch-size must be positive')
     if args.gradient_conflict_control and args.object_feedback_alpha <= 0:
@@ -106,14 +150,14 @@ def train(args):
     if not callable(getattr(adapter, 'supervised_loss', None)):
         raise NotImplementedError(
             f'{args.model} adapter does not implement supervised_loss for feedback fine-tuning')
+    # Copy before resume and before constructing native loss. No random draws,
+    # so initialization of a reference does not change the shared data ordering.
+    reference = make_frozen_reference(adapter) if args.dpo_alpha else None
     parameters = [p for p in adapter.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(parameters, lr=args.lr, weight_decay=args.weight_decay)
     start_step = 0
     stopper = EarlyStopping(args.patience, args.min_delta)
-    if args.resume:
-        start_step, _, training_state = load_training_checkpoint(
-            args.resume, adapter, optimizer, args.device)
-        stopper.load_state_dict(training_state.get('early_stopping', {}))
+    training_state = {}
 
     if args.sampling_strategy == 'feedback':
         loader = get_feedback_dataloader(
@@ -137,25 +181,56 @@ def train(args):
     config = vars(args).copy()
     config.update({
         'base_checkpoint': str(checkpoint),
+        'base_checkpoint_sha256': expected['checkpoint_sha256'],
         'feedback_path': str(feedback_path),
         'feedback_sha256': sha256(feedback_path),
         'feedback_schema_version': summary['schema_version'],
         'validation_confidence': args.val_conf,
+        'dpo_policy': DPO_POLICY if reference is not None else None,
+        'dpo_pair_source': DPO_PAIR_SOURCE if reference is not None else None,
+        'dpo_objective_version': DPO_OBJECTIVE_VERSION if reference is not None else None,
+        'reference_checkpoint_sha256': expected['checkpoint_sha256'] if reference is not None else None,
     })
+    if args.resume:
+        start_step, _, training_state = load_training_checkpoint(
+            args.resume, adapter, optimizer, args.device, config)
+        stopper.load_state_dict(training_state.get('early_stopping', {}))
     output = Path(args.output).resolve()
     best_output = output.with_name(f'{output.stem}_best{output.suffix}')
+    metrics_path = output.with_name(f'{output.stem}_metrics.jsonl')
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if not args.resume:
+        metrics_path.write_text('', encoding='utf-8')
+    def record_metrics(event):
+        with metrics_path.open('a', encoding='utf-8') as stream:
+            stream.write(json.dumps(event, allow_nan=False) + '\n')
+    pairwise_pairs_seen = training_state.get('pairwise_pairs_seen', 0)
+    pairwise_active_steps = training_state.get('pairwise_active_steps', 0)
+    dpo_pairs_seen = training_state.get('dpo_pairs_seen', 0)
+    dpo_active_steps = training_state.get('dpo_active_steps', 0)
+    dpo_diagnostics = training_state.get('dpo_diagnostics', {})
+    def current_state(**extra):
+        return {'early_stopping': stopper.state_dict(),
+                'pairwise_pairs_seen': pairwise_pairs_seen,
+                'pairwise_active_steps': pairwise_active_steps,
+                'dpo_pairs_seen': dpo_pairs_seen, 'dpo_active_steps': dpo_active_steps,
+                'dpo_diagnostics': dpo_diagnostics, **extra}
     data_iterator = iter(loader)
     print(f'[Feedback FT] {args.model} | steps={args.steps} | alpha={args.feedback_alpha} '
-          f'| pairwise_alpha={args.pairwise_alpha}')
+          f'| pairwise_alpha={args.pairwise_alpha} '
+          f'| dpo_alpha={args.dpo_alpha} beta={args.dpo_beta}')
     print(f'  feedback images={len(loader.dataset)} | start_step={start_step}')
+    if reference is not None:
+        print(f'  DPO objective={DPO_OBJECTIVE_VERSION} | pairs={DPO_PAIR_SOURCE} '
+              '| reference=frozen KB1 scores only')
 
     if val_loader is not None and start_step == 0 and args.eval_before_train:
         metrics = evaluate_adapter(
             adapter, val_loader, args.device, args.val_conf, args.val_iou)
         stopper.update(metrics['mAP50-95'])
-        state = {'early_stopping': stopper.state_dict(), 'validation': metrics,
-                 'pairwise_pairs_seen': 0, 'pairwise_active_steps': 0}
+        state = current_state(validation=metrics)
         save_training_checkpoint(best_output, adapter, optimizer, 0, config, state)
+        record_metrics({'event': 'validation', 'step': 0, **metrics})
         print('  val step=0 mAP50-95={:.5f} mAP50={:.5f} AP_small={:.5f} '
               'recall={:.5f}'.format(
                   metrics['mAP50-95'], metrics['mAP50'], metrics['AP_small'],
@@ -164,8 +239,6 @@ def train(args):
 
     last_step = start_step
     stopped_early = False
-    pairwise_pairs_seen = 0
-    pairwise_active_steps = 0
     for step in range(start_step + 1, args.steps + 1):
         last_step = step
         try:
@@ -187,6 +260,7 @@ def train(args):
                 args.object_cls_weight, args.object_box_weight,
                 args.dynamic_object_feedback)
         pairwise_loss = loss.detach() * 0
+        dpo_loss = loss.detach() * 0
         pair_count = 0
         if args.pairwise_alpha:
             pairwise_loss, pair_count = compute_pairwise_preference_loss(
@@ -194,6 +268,15 @@ def train(args):
             loss = loss + args.pairwise_alpha * pairwise_loss
             pairwise_pairs_seen += pair_count
             pairwise_active_steps += int(pair_count > 0)
+        if reference is not None:
+            dpo_loss, diagnostic = compute_dpo_preference_loss(
+                adapter, reference, images, targets, args.dpo_beta)
+            loss = loss + args.dpo_alpha * dpo_loss
+            dpo_count = diagnostic['pair_count']
+            dpo_pairs_seen += dpo_count
+            dpo_active_steps += int(dpo_count > 0)
+            dpo_diagnostics = {key: int(value) if key == 'pair_count' else float(value)
+                               for key, value in diagnostic.items()}
         if not torch.isfinite(loss):
             raise FloatingPointError(f'non-finite loss at step {step}: {loss}')
         if not args.gradient_conflict_control:
@@ -208,12 +291,25 @@ def train(args):
                   f'native={details["native_loss"].item():.5f} '
                   f'feedback={details["feedback_loss"].item():.5f} '
                   f'pairwise={pairwise_loss.item():.5f} pairs={pair_count} '
+                  f'dpo={dpo_loss.item():.5f} dpo_pairs={dpo_diagnostics.get("pair_count", 0):.0f} '
                   f'grad={float(grad_norm):.4f}')
+            if reference is not None:
+                print(f'    GT IoU chosen={dpo_diagnostics["chosen_iou"]:.4f} '
+                      f'rejected={dpo_diagnostics["rejected_iou"]:.4f} '
+                      f'policy_win={dpo_diagnostics["policy_win_rate"]:.1%} '
+                      f'relative_win={dpo_diagnostics["relative_win_rate"]:.1%}')
+            record_metrics({'event': 'train', 'step': step,
+                            'total_loss': float(loss.detach()),
+                            'native_loss': float(details['native_loss']),
+                            'pairwise_loss': float(pairwise_loss.detach()),
+                            'dpo_loss': float(dpo_loss.detach()),
+                            'grad_norm': float(grad_norm),
+                            'dpo_diagnostics': dpo_diagnostics})
         if args.save_interval and step % args.save_interval == 0:
             save_training_checkpoint(output.with_name(
                 f'{output.stem}_step{step}{output.suffix}'),
                 adapter, optimizer, step, config,
-                {'early_stopping': stopper.state_dict()})
+                current_state())
 
         if val_loader is not None and step % args.eval_interval == 0:
             metrics = evaluate_adapter(
@@ -225,9 +321,8 @@ def train(args):
             ).format(step, metrics['mAP50-95'], metrics['mAP50'],
                      metrics['AP_small'], metrics['Recall'], stopper.best)
             print(metric_line)
-            state = {'early_stopping': stopper.state_dict(), 'validation': metrics,
-                     'pairwise_pairs_seen': pairwise_pairs_seen,
-                     'pairwise_active_steps': pairwise_active_steps}
+            state = current_state(validation=metrics)
+            record_metrics({'event': 'validation', 'step': step, **metrics})
             if improved:
                 save_training_checkpoint(
                     best_output, adapter, optimizer, step, config, state)
@@ -239,9 +334,7 @@ def train(args):
 
     saved = save_training_checkpoint(
         output, adapter, optimizer, last_step, config,
-        {'early_stopping': stopper.state_dict(), 'stopped_early': stopped_early,
-         'pairwise_pairs_seen': pairwise_pairs_seen,
-         'pairwise_active_steps': pairwise_active_steps})
+        current_state(stopped_early=stopped_early))
     print(f'  saved: {saved}')
     return saved
 
@@ -254,7 +347,7 @@ def parse_args(argv=None):
     parser.add_argument('--data-root', default=str(REPO_ROOT / 'pre-data/data/v2i_cleanned'))
     parser.add_argument('--output')
     parser.add_argument('--resume')
-    parser.add_argument('--steps', type=int, default=1000)
+    parser.add_argument('--steps', type=int, default=15000)
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--img-size', type=int, default=640)
     parser.add_argument('--workers', type=int, default=0)
@@ -267,6 +360,8 @@ def parse_args(argv=None):
     parser.add_argument('--max-feedback-loss-weight', type=float, default=3.0)
     parser.add_argument('--pairwise-alpha', type=float, default=0.0)
     parser.add_argument('--pairwise-margin', type=float, default=0.1)
+    parser.add_argument('--dpo-alpha', type=float, default=0.0)
+    parser.add_argument('--dpo-beta', type=float, default=0.1)
     parser.add_argument('--object-feedback-alpha', type=float, default=0.0)
     parser.add_argument('--object-cls-weight', type=float, default=1.0)
     parser.add_argument('--object-box-weight', type=float, default=1.0)
@@ -274,8 +369,8 @@ def parse_args(argv=None):
     parser.add_argument('--gradient-conflict-control', action='store_true')
     parser.add_argument('--grad-clip', type=float, default=1.0)
     parser.add_argument('--log-interval', type=int, default=10)
-    parser.add_argument('--save-interval', type=int, default=500)
-    parser.add_argument('--eval-interval', type=int, default=500)
+    parser.add_argument('--save-interval', type=int, default=2000)
+    parser.add_argument('--eval-interval', type=int, default=1000)
     parser.add_argument('--val-batch-size', type=int, default=8)
     parser.add_argument('--val-conf', type=float, default=.001)
     parser.add_argument('--val-iou', type=float, default=.45)
@@ -293,6 +388,10 @@ def parse_args(argv=None):
         args.output = str(SCRIPT_DIR / 'checkpoint_preference_optimization' / f'{args.model}_feedback_last.pt')
     if not 0 <= args.feedback_alpha <= 1:
         parser.error('--feedback-alpha must be in [0, 1]')
+    try:
+        validate_objective_args(args)
+    except ValueError as error:
+        parser.error(str(error))
     return args
 
 

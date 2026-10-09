@@ -1,0 +1,29 @@
+# Four detector trainings in total, including the matched scratch anchor.
+protocol: kb3_tpe_v1_kb1_start
+method: tpe
+rl_enabled: false
+recipe_source: kb1_supervised
+initialization: scratch
+trials: 4
+seed: 42
+sampler_seed: 42
+# Default Optuna startup=10 would make a four-trial experiment entirely random.
+# Trial 0 is enqueued KB1; trial 1 is local random; trials 2/3 use TPE.
+n_startup_trials: 2
+n_ei_candidates: 24
+# Limit the first small experiment to two dimensions around the actual KB1 recipe.
+local_factors:
+  lr0: [0.5, 1.5]
+  weight_decay: [0.5, 2.0]
+# Momentum and augmentation stay at the KB1 starting values.
+epochs: 300
+segment_epochs: 5
+search_patience: 50
+search_min_epochs: 100
+search_min_delta: 0.0005
+warmup_epochs: null
+lrf: null
+batch_size: null
+img_size: null
+workers: 0
+device: '0'

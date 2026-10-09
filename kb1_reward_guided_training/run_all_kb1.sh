@@ -39,7 +39,7 @@ if [[ "${1:-}" == "--check-only" ]]; then
 fi
 
 printf '\n[KB1 2/4] Supervised training or verified resume\n'
-for model in yolov5s yolov8n yolov8s yolov11n yolov11s dp_yolo; do
+for model in yolov5s yolov8n yolov8s yolov11n yolov11s yolo26n dp_yolo; do
   checkpoint="checkpoint_based/$model/weights/best.pt"
   manifest="checkpoint_based/$model/supervised_manifest.json"
   if [[ -e "$checkpoint" || -e "$manifest" ]]; then
@@ -106,13 +106,13 @@ with full.open(newline='', encoding='utf-8-sig') as stream:
 with deltas.open(newline='', encoding='utf-8-sig') as stream:
     delta_rows = list(csv.DictReader(stream))
 labels = {'yolov5s': 'YOLOv5s', 'yolov8n': 'YOLOv8n', 'yolov8s': 'YOLOv8s',
-          'yolov11n': 'YOLOv11n', 'yolov11s': 'YOLOv11s', 'dp_yolo': 'DP-YOLO'}
-expected = {(label, stage) for label in labels.values()
+          'yolov11n': 'YOLOv11n', 'yolov11s': 'YOLOv11s', 'yolo26n': 'YOLO26n', 'dp_yolo': 'DP-YOLO'}
+expected = {(labels[model], stage) for model in MODELS
             for stage in ('supervised', 'native_only', 'kb1b')}
 actual = {(row['Model'], row['Stage']) for row in rows}
 if len(rows) != len(expected) or actual != expected:
     raise SystemExit(f'Incomplete test table: {len(rows)}/{len(expected)} model-stage rows')
-if len(delta_rows) != len(labels) or {row['Model'] for row in delta_rows} != set(labels.values()):
+if len(delta_rows) != len(MODELS) or {row['Model'] for row in delta_rows} != {labels[model] for model in MODELS}:
     raise SystemExit('Incomplete test delta table')
 by_key = {(row['Model'], row['Stage']): row for row in rows}
 for row in rows:
@@ -141,7 +141,7 @@ lines += ['', f'Highest guided test score: {labels[test_leader]}. This is descri
           f'Full metrics: `{full.as_posix()}`; paired deltas: `{deltas.as_posix()}`.', '']
 report = Path('docs/KB1_FINAL_CLEAN_REPORT.md')
 report.write_text('\n'.join(lines), encoding='utf-8')
-print('PASS: all 18 model-stage test rows verified', flush=True)
+print(f'PASS: all {len(expected)} model-stage test rows verified', flush=True)
 print('Final report:', report.resolve(), flush=True)
 PY
 printf '\nKB1 COMPLETE\n'

@@ -1,6 +1,54 @@
 ﻿# KB3 — Review logic hyperparameter optimization
 
-## 1. Ranh giới hai kịch bản
+## Cập nhật triển khai 2026-10-08
+
+**Protocol hiện tại (09/10/2026): A–TPE, bốn lượt tổng cộng, không chạy B.**
+Xem [thiết kế A–TPE](../../kb3_hyperparameter_optimization/docs/KB3_A_TPE_PROTOCOL.md)
+và [báo cáo B tương lai](../../kb3_hyperparameter_optimization/docs/KB3_B_FUTURE_RESEARCH_REPORT.md).
+Các mô tả quality v2/v3/v4 và RL phía dưới ghi lại lịch sử, không phải luồng mặc định hiện tại.
+
+**Protocol mới ưu tiên chất lượng:** xem
+[KB3_QUALITY_PROTOCOL.md](../../kb3_hyperparameter_optimization/docs/KB3_QUALITY_PROTOCOL.md)
+và `run_quality_kb3.sh`. Review bên dưới mô tả luồng legacy/pilot;
+không gộp kết quả legacy với thí nghiệm quality mới.
+
+**Cập nhật 09/10/2026:** quality v2 dùng checkpoint supervised KB1 làm đối chứng
+pretrained và args.yaml KB1 làm recipe. A/B vẫn scratch. `run_all_kb3.sh` hiện
+chạy quality v2; tên script lịch sử trong review bên dưới là `run_legacy_kb3.sh`.
+Checkpoint pilot scratch 300 epoch đã xóa theo yêu cầu; log/đánh giá lịch sử giữ lại.
+
+Review lại cùng ngày: quality v3 xuất cấu hình khởi đầu đầy đủ, preflight 5 model,
+sửa RNG CUDA/chuẩn hóa số học canonical và thêm frozen test. Xem
+[KB3_KB1_START_REVIEW.md](../../kb3_hyperparameter_optimization/docs/KB3_KB1_START_REVIEW.md).
+
+KB3 hiện **train từ đầu** bằng YAML kiến trúc và `pretrained=False`, mỗi trial/
+episode khởi tạo theo seed. RL điều chỉnh `lr0`, `weight_decay`, `momentum`,
+`augmentation_strength`; detection loss và SGD cập nhật trọng số YOLO.
+
+- K3-L1: bổ sung raw model, optimizer và EMA đủ precision, scheduler vào
+  checkpoint; resume khôi phục các state này. `nbs=batch` tránh mất gradient đang
+  tích lũy. Dataloader/RNG vẫn được tái tạo mỗi process nên chưa kết luận trajectory
+  tương đương train liên tục; cần fixed-segmented control cho thí nghiệm nghiên cứu.
+- K3-L6: sửa scheduler base LR sau resume; tắt warmup/LR decay/close-mosaic cho
+  mọi phương pháp để tham số RL có hiệu lực trong toàn segment.
+- K3-L3: CLI từ chối Ultralytics worker thiếu canonical evaluation khi reward dùng
+  AP-small; script run-all luôn bật canonical evaluation.
+- Best epoch lấy từ checkpoint thật. Epoch 0 chỉ làm mốc reward, segment thành
+  công đầu luôn cung cấp checkpoint, kể cả mAP=0. Environment giữ bản sao best
+  đã chọn để checkpoint native bị ghi đè không làm lệch cặp metric–weights.
+- `run_legacy_kb3.sh` chạy baseline/HPO/RL, khóa config/policy và retrain trên cùng
+  seed mới, rồi xuất `comparison.csv`. Test set chưa dùng để chọn phương pháp.
+
+Unit test, pipeline mô phỏng, preflight dataset/5 kiến trúc và integration test
+train thật qua hai segment trên YOLOv8n/YOLO26n đã được kiểm tra. Chưa chạy lại
+thí nghiệm nhiều seed trên dataset đầy đủ để kết luận RL tốt hơn baseline.
+
+Phần dưới là bản review trước các sửa đổi trên, giữ để theo dõi các hạn chế
+nghiên cứu còn lại. Native mAP vẫn chọn best checkpoint bên trong worker;
+canonical evaluator chấm lại checkpoint đó. Comparator chưa xác thực metadata
+tùy ý, nhưng run-all tạo các input cùng model/split/seed/budget/evaluator.
+
+## 1. Ranh giới hai kịch bản (review trước sửa)
 
 ### KB3-A: Traditional HPO
 

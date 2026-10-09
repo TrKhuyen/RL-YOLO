@@ -11,7 +11,7 @@ Một bộ hyperparameter cố định được tối ưu trước khi train có
 ```text
 Chọn một cấu hình tuyệt đối
           ↓
-Khởi tạo YOLO từ cùng pretrained checkpoint
+Khởi tạo YOLO từ YAML kiến trúc, trọng số ngẫu nhiên theo seed
           ↓
 Train toàn bộ số epoch, không thay đổi cấu hình
           ↓
@@ -58,7 +58,7 @@ Cập nhật policy, rồi chuyển sang segment tiếp theo
 
 Hai kịch bản phải dùng chung:
 
-- Pretrained checkpoint và kiến trúc YOLO.
+- Cùng kiến trúc YAML và cách khởi tạo từ đầu theo seed, không dùng pretrained.
 - Dataset manifest và train/validation/test split.
 - Miền giá trị của hyperparameter.
 - Tổng ngân sách epoch hoặc GPU-hour.

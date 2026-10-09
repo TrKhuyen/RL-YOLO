@@ -1,8 +1,12 @@
-"""Feedback and pairwise objectives built on native YOLO detection loss."""
+"""Feedback, pairwise ranking and candidate-selection DPO objectives."""
+import math
 import torch
 import torch.nn.functional as F
 
 from feedback import box_iou
+
+DPO_PAIR_SOURCE = 'online_policy_gt_iou_v2'
+DPO_OBJECTIVE_VERSION = 'candidate_selection_online_dpo_v2'
 
 
 def _xywh_to_xyxy(boxes):
@@ -10,24 +14,27 @@ def _xywh_to_xyxy(boxes):
     return torch.cat((center - size / 2, center + size / 2), dim=-1)
 
 
-def pairwise_preference_loss_from_predictions(
-        predictions, targets, margin=0.1, chosen_iou=0.5,
-        rejected_iou=0.1):
-    """Rank same-class candidates for the same augmented GT by box quality.
+def select_preference_pairs(predictions, targets, chosen_iou=0.5, rejected_iou=0.1,
+                            return_quality=False, rank_all_lower_iou=False):
+    """Return [image, GT class, chosen anchor, rejected anchor] indices.
 
     Candidate selection uses detached boxes; class scores retain gradients.
     Each candidate belongs to its highest-IoU GT, so a positive for one GT
     cannot be used as a rejected candidate for another.
+    With return_quality=True, also return detached [IoU(A), IoU(B)] per pair.
+    rank_all_lower_iou includes inferior candidates above chosen_iou as well;
+    the default retains the original binary-cutoff pairwise ablation.
     """
-    if margin < 0 or not 0 <= rejected_iou < chosen_iou <= 1:
-        raise ValueError('invalid pairwise margin or IoU thresholds')
+    if not 0 <= rejected_iou < chosen_iou <= 1:
+        raise ValueError('invalid preference IoU thresholds')
     if predictions.ndim != 3 or predictions.shape[1] < 5:
         raise ValueError('expected decoded predictions [B, 4 + classes, anchors]')
     if len(predictions) != len(targets):
         raise ValueError('prediction and target batch sizes differ')
     boxes = _xywh_to_xyxy(predictions[:, :4].permute(0, 2, 1)).detach()
     probabilities = predictions[:, 4:, :].permute(0, 2, 1)
-    losses = []
+    pairs = []
+    qualities = []
     for batch_index, target in enumerate(targets):
         gt_boxes = target['boxes'].to(predictions.device)
         gt_labels = target['labels'].to(predictions.device).long()
@@ -41,17 +48,104 @@ def pairwise_preference_loss_from_predictions(
             same_gt = owner == gt_index
             quality = ious[:, gt_index]
             chosen_mask = same_gt & (quality >= chosen_iou)
-            rejected_mask = same_gt & (quality >= rejected_iou) & (quality < chosen_iou)
-            if not chosen_mask.any() or not rejected_mask.any():
+            if not chosen_mask.any():
+                continue
+            chosen = quality.masked_fill(~chosen_mask, -1).argmax()
+            cutoff = quality[chosen] - 1e-6 if rank_all_lower_iou else chosen_iou
+            rejected_mask = same_gt & (quality >= rejected_iou) & (quality < cutoff)
+            if not rejected_mask.any():
                 continue
             scores = probabilities[batch_index, :, label].clamp(1e-6, 1 - 1e-6)
-            # Choose the best-localized candidate and the hardest lower-IoU one.
-            chosen = quality.masked_fill(~chosen_mask, -1).argmax()
+            # Highest-IoU A; highest GT-class score among inferior candidates B.
             rejected = scores.detach().masked_fill(~rejected_mask, -1).argmax()
-            score_gap = torch.logit(scores[chosen]) - torch.logit(scores[rejected])
-            losses.append(F.softplus(margin - score_gap))
-    return ((torch.stack(losses).mean() if losses else predictions.sum() * 0),
-            len(losses))
+            pairs.append((batch_index, int(label), int(chosen), int(rejected)))
+            if return_quality:
+                qualities.append(torch.stack((quality[chosen], quality[rejected])))
+    pairs = torch.tensor(pairs, device=predictions.device, dtype=torch.long).reshape(-1, 4)
+    if return_quality:
+        return pairs, (torch.stack(qualities) if qualities else boxes.new_empty((0, 2)))
+    return pairs
+
+
+def pairwise_preference_loss_from_predictions(
+        predictions, targets, margin=0.1, chosen_iou=0.5, rejected_iou=0.1):
+    """Rank candidates selected from the current model, preserving the old loss."""
+    if not math.isfinite(margin) or margin < 0:
+        raise ValueError('invalid pairwise margin')
+    pairs = select_preference_pairs(predictions, targets, chosen_iou, rejected_iou)
+    if not len(pairs):
+        return predictions.sum() * 0, 0
+    image, label, chosen, rejected = pairs.unbind(1)
+    logits = torch.logit(predictions[:, 4:, :].clamp(1e-6, 1 - 1e-6))
+    gaps = logits[image, label, chosen] - logits[image, label, rejected]
+    return F.softplus(margin - gaps).mean(), len(pairs)
+
+
+def candidate_selection_log_probs(predictions):
+    """Categorical policy over anchor indices, conditional on image and GT class.
+
+    YOLO's independent sigmoid class scores are converted to logits, then
+    softmax-normalized over ALL anchors for that class. This defines a policy
+    for selecting an anchor; it is not a likelihood of a complete detection set.
+    """
+    if predictions.ndim != 3 or predictions.shape[1] < 5 or predictions.shape[2] < 1:
+        raise ValueError('expected decoded predictions [B, 4 + classes, anchors]')
+    # Keep the policy calculation stable if inference later uses fp16/bfloat16.
+    scores = predictions[:, 4:, :].float()
+    if not torch.isfinite(scores).all() or (scores < 0).any() or (scores > 1).any():
+        raise ValueError('candidate class probabilities must be finite and in [0, 1]')
+    return F.log_softmax(torch.logit(scores.clamp(1e-6, 1 - 1e-6)), dim=-1)
+
+
+def dpo_preference_loss_from_predictions(predictions, reference_predictions,
+                                         targets, beta=0.1):
+    """Online DPO: current policy box quality against GT supplies preferences.
+
+    Detached CURRENT predictions select A/B; reference geometry never labels
+    preferences. Both policies score the same selected anchor indices. This is
+    a candidate-index policy, not a likelihood of complete detection sets.
+    The discrete choice has no gradient; native loss still learns box regression.
+    Online labels can change next step as the current geometry changes, unlike
+    the original offline DPO data distribution. Reference scores are detached.
+    """
+    if not math.isfinite(beta) or beta <= 0:
+        raise ValueError('dpo beta must be finite and positive')
+    if predictions.shape != reference_predictions.shape:
+        raise ValueError('policy and reference prediction shapes must match')
+    reference_predictions = reference_predictions.detach()
+    log_policy = candidate_selection_log_probs(predictions)
+    log_reference = candidate_selection_log_probs(reference_predictions)
+    pairs, qualities = select_preference_pairs(
+        predictions.detach(), targets, return_quality=True, rank_all_lower_iou=True)
+    zero = predictions.sum() * 0
+    if not len(pairs):
+        return zero, {'pair_count': 0, 'relative_margin': zero.detach(),
+                      'policy_win_rate': zero.detach(), 'reference_win_rate': zero.detach(),
+                      'relative_win_rate': zero.detach(), 'policy_margin': zero.detach(),
+                      'chosen_iou': zero.detach(), 'rejected_iou': zero.detach(),
+                      'quality_gap': zero.detach()}
+    image, label, chosen, rejected = pairs.unbind(1)
+    policy_gap = log_policy[image, label, chosen] - log_policy[image, label, rejected]
+    reference_gap = (log_reference[image, label, chosen]
+                     - log_reference[image, label, rejected])
+    relative_margin = policy_gap - reference_gap
+    loss = -F.logsigmoid(beta * relative_margin).mean()
+    return loss, {'pair_count': len(pairs),
+                  'relative_margin': relative_margin.detach().mean(),
+                  'policy_win_rate': (policy_gap.detach() > 0).float().mean(),
+                  'reference_win_rate': (reference_gap > 0).float().mean(),
+                  'relative_win_rate': (relative_margin.detach() > 0).float().mean(),
+                  'policy_margin': policy_gap.detach().mean(),
+                  'chosen_iou': qualities[:, 0].mean(),
+                  'rejected_iou': qualities[:, 1].mean(),
+                  'quality_gap': (qualities[:, 0] - qualities[:, 1]).mean()}
+
+
+def compute_dpo_preference_loss(adapter, reference, images, targets, beta=0.1):
+    with torch.no_grad():
+        reference_predictions = reference.raw_predictions(images)
+    return dpo_preference_loss_from_predictions(
+        adapter.raw_predictions(images), reference_predictions, targets, beta)
 
 
 def compute_pairwise_preference_loss(adapter, images, targets, margin=0.1):

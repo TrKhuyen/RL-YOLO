@@ -118,7 +118,7 @@ def load_adapter(model_name: str, checkpoint: str, device: str):
 
     if model_name in ('yolov5s', 'dp_yolo'):
         return YOLOv5Adapter(checkpoint, device=device)
-    elif model_name in ('yolov8n', 'yolov8s', 'yolov11n', 'yolov11s'):
+    elif model_name in ('yolov8n', 'yolov8s', 'yolov11n', 'yolov11s', 'yolo26n'):
         return UltralyticsAdapter(checkpoint, device=device)
     else:
         raise ValueError(f"Unknown model: {model_name}")
@@ -628,6 +628,7 @@ CHECKPOINTS = {
     'yolov8s':  REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov8s/weights/best.pt',
     'yolov11n': REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov11n/weights/best.pt',
     'yolov11s': REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolov11s/weights/best.pt',
+    'yolo26n':  REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/yolo26n/weights/best.pt',
     'dp_yolo':  REPO_ROOT / 'kb1_reward_guided_training/checkpoint_based/dp_yolo/weights/best.pt',
 }
 

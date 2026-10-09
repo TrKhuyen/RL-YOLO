@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent
 OUTPUT = ROOT / 'checkpoint_reward_guide_trainning' / 'screening_seed42_v1'
 PREFLIGHT = ROOT / 'checkpoint_reward_guide_trainning' / 'preflight_seed42_v1'
 REPORT = ROOT / 'docs' / 'KB1_SCREENING_CLEAN_REPORT.md'
-MODELS = ['yolov5s', 'yolov8n', 'yolov8s', 'yolov11n', 'yolov11s', 'dp_yolo']
+MODELS = ['yolov5s', 'yolov8n', 'yolov8s', 'yolov11n', 'yolov11s', 'yolo26n', 'dp_yolo']
 MODES = ['native_only', 'kb1b']
 METRICS = ['mAP50', 'mAP50_95', 'AR300', 'precision', 'operating_recall', 'f1', 'macro_f1']
 

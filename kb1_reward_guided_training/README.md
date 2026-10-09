@@ -180,6 +180,7 @@ python train_supervised.py --model dp_yolo
 | yolov8s  | 8     | Ultralytics  | Anchor-free nặng hơn       |
 | yolov11n | 16    | Ultralytics  | Anchor-free mới nhất       |
 | yolov11s | 8     | Ultralytics  | YOLOv11 lớn hơn            |
+| yolo26n  | 16    | Ultralytics  | YOLO26 nano, regression không dùng DFL |
 | dp_yolo  | 4     | YOLOv5+patch | **Main model** (D2C3/D3C3) |
 
 > **DP-YOLO:** `dp_yolo_train.py` tự động apply patches (W3F_MPDIoU, PSA, custom modules)  

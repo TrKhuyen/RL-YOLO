@@ -293,7 +293,7 @@ def load_adapter(model_name: str, checkpoint: str, device: str):
         return YOLOv5Adapter(checkpoint, device=device)
     if model_name == 'yolov5s':
         return YOLOv5Adapter(checkpoint, device=device)
-    elif model_name in ('yolov8n', 'yolov8s', 'yolov11n', 'yolov11s'):
+    elif model_name in ('yolov8n', 'yolov8s', 'yolov11n', 'yolov11s', 'yolo26n'):
         return UltralyticsAdapter(checkpoint, device=device)
     else:
         raise ValueError(
@@ -375,7 +375,7 @@ def rl_finetune(
     has_native_loss = hasattr(adapter, 'native_detection_loss')
     if mode == 'native-only' and not has_native_loss:
         raise ValueError(
-            'native-only currently supports YOLOv8/YOLOv11 only')
+            'native-only currently supports YOLOv8/YOLOv11/YOLO26 only')
     if mode == 'native-only':
         method_name = 'native_only_control'
         checkpoint_tag = 'native_only'
@@ -683,6 +683,7 @@ CHECKPOINTS = {
     'yolov8s':  PROJECT_ROOT / 'checkpoint_based/yolov8s/weights/best.pt',
     'yolov11n': PROJECT_ROOT / 'checkpoint_based/yolov11n/weights/best.pt',
     'yolov11s': PROJECT_ROOT / 'checkpoint_based/yolov11s/weights/best.pt',
+    'yolo26n':  PROJECT_ROOT / 'checkpoint_based/yolo26n/weights/best.pt',
     'dp_yolo':  PROJECT_ROOT / 'checkpoint_based/dp_yolo/weights/best.pt',
 }
 

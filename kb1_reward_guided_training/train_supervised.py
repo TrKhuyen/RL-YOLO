@@ -46,6 +46,10 @@ MODELS = {
         'framework': 'ultralytics',
         'weights':   'yolo11s.pt',
     },
+    'yolo26n': {
+        'framework': 'ultralytics',
+        'weights':   'yolo26n.pt',
+    },
     'dp_yolo': {
         'framework': 'v5',
         'weights':   'yolov5s.pt',
@@ -78,6 +82,7 @@ MODEL_BATCH = {
     'yolov8s':   8,   # anchor-free nặng hơn
     'yolov11n': 16,   # anchor-free mới
     'yolov11s':  8,   # anchor-free lớn
+    'yolo26n':  16,
     'dp_yolo':  4,    # DCNv2/DCNv3 tốn VRAM hơn YOLOv5s
 }
 
@@ -134,7 +139,7 @@ def train_yolov5(name: str, cfg: dict):
 
 
 def train_ultralytics(name: str, cfg: dict):
-    """Train YOLOv8 / YOLOv11 qua Ultralytics Python API."""
+    """Train YOLOv8 / YOLOv11 / YOLO26 qua Ultralytics Python API."""
     from ultralytics import YOLO
 
     batch = MODEL_BATCH.get(name, 16)  # [HW] batch size theo model

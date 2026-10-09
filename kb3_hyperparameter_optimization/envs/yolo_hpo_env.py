@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import shutil
 import time
 from pathlib import Path
 from typing import Sequence
@@ -59,7 +60,10 @@ class YoloHPOEnv:
             output_dir=str(self.run_dir), evaluate=True,
         )
         self.metrics.validate()
-        self.best_map = self.metrics.map50_95
+        # Epoch-zero validation is the reward reference, not a trained candidate.
+        # The first successful segment must supply a real checkpoint even when
+        # random-initialized detectors still have mAP=0.
+        self.best_map = -math.inf
         self.best_metrics = self.metrics
         self.best_checkpoint = None
         self.stale_segments = 0
@@ -115,6 +119,13 @@ class YoloHPOEnv:
         if improved:
             self.best_map, self.best_metrics = candidate.map50_95, candidate
             self.best_checkpoint = result.metadata.get("best_checkpoint") or result.checkpoint
+            # Native best.pt may be replaced later even if the canonical score
+            # decreases. Keep the selected weights paired with these metrics.
+            if self.best_checkpoint and Path(self.best_checkpoint).is_file():
+                selected = self.run_dir / "selected_best.pt"
+                if Path(self.best_checkpoint).resolve() != selected.resolve():
+                    shutil.copy2(self.best_checkpoint, selected)
+                self.best_checkpoint = str(selected)
             self.stale_segments = 0
         else:
             self.stale_segments += 1

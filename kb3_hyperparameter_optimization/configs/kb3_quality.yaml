@@ -1,0 +1,31 @@
+# KB1 supervised checkpoint is an external pretrained reference, never KB3 initialization.
+# Null values inherit the selected model's actual KB1 args.yaml.
+protocol: kb3_quality_v4_staged_search
+recipe_source: kb1_supervised
+initialization: scratch
+# Keep 300 for scratch: the historical scratch pilot peaked at epoch 255.
+# This is a fixed horizon for ALL KB3 methods, not a promise of convergence.
+epochs: 300
+segment_epochs: 5
+warmup_epochs: null
+lrf: null
+# Search is exploratory: finish four trials/episodes, inspect, then explicitly extend.
+# Eight is the automatic target; explicit --search-target can extend before selection.
+# This is not a claim that PPO converges in eight episodes.
+trials: 8
+episodes: 8
+search_batch_size: 4
+search_patience: 50
+search_min_epochs: 100
+search_min_delta: 0.0005
+# Update after complete episodes; force an update at each saved candidate boundary.
+rollout_steps: 64
+minibatch_size: 32
+policy_validation_every: 4
+seed: 42
+tuning_seeds: [5001, 5002]
+eval_seeds: [10001, 10002, 10003]
+batch_size: null
+img_size: null
+workers: 0
+device: '0'

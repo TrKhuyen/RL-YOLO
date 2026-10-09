@@ -3,7 +3,7 @@ torch==2.0.1
 torchvision==0.15.2
 
 # YOLO frameworks
-ultralytics>=8.0.0       # YOLOv8 + YOLOv11
+ultralytics>=8.4.163     # YOLOv8 + YOLOv11 + YOLO26; tested dual-head/loss API
 yolov5>=7.0.0            # YOLOv5
 
 # Metrics
@@ -24,6 +24,7 @@ matplotlib>=3.7.0
 pandas>=2.0.0
 tabulate>=0.9.0          # df.to_markdown()
 PyYAML>=6.0
+optuna==4.5.0            # Current KB3-A TPE experiment
 
 # Deformable convolution (for D2C3/D3C3)
 # Option A: torchvision built-in (requires torch>=1.8)

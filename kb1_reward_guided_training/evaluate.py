@@ -56,6 +56,11 @@ EXPERIMENTS = {
         'rl':         'checkpoint_reward_guide_trainning/yolov11s_seed42_rl_best.pt',
         'framework':  'ultralytics',
     },
+    'YOLO26n': {
+        'supervised': 'checkpoint_based/yolo26n/weights/best.pt',
+        'rl':         'checkpoint_reward_guide_trainning/yolo26n_seed42_rl_best.pt',
+        'framework':  'ultralytics',
+    },
     'DP-YOLO': {
         'supervised': 'checkpoint_based/dp_yolo/weights/best.pt',
         'rl':         'checkpoint_reward_guide_trainning/dp_yolo_seed42_rl_best.pt',
@@ -298,7 +303,7 @@ def evaluate_model(checkpoint, dataloader, framework='ultralytics',
                    device='cuda', conf_thres=0.001, iou_thres=0.60,
                    supervised_ckpt=None, model_name=None, max_det=300):
     path = str(supervised_ckpt or checkpoint).lower()
-    names = ('dp_yolo', 'yolov11n', 'yolov11s', 'yolov8n', 'yolov8s', 'yolov5s')
+    names = ('dp_yolo', 'yolov11n', 'yolov11s', 'yolov8n', 'yolov8s', 'yolov5s', 'yolo26n')
     model_name = model_name or next((n for n in names if n in path), None)
     if model_name is None:
         raise ValueError('model_name cannot be inferred')
