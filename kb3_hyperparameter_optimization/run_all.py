@@ -93,7 +93,7 @@ def _preflight(args, models):
             raise SystemExit(f"Missing or unpaired images/labels: {split}")
         print(f"PASS dataset {split}: {len(stems)} images", flush=True)
     from ultralytics import YOLO
-    for model in models:
+    for model in models if getattr(args, 'check_architecture', True) else []:
         detector = YOLO(MODELS[model])
         if detector.ckpt:
             raise RuntimeError("Scratch model unexpectedly loaded a pretrained checkpoint")

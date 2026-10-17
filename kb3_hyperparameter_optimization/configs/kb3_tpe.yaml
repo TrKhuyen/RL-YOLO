@@ -1,11 +1,11 @@
-# Four detector trainings in total, including the matched scratch anchor.
-protocol: kb3_tpe_v1_kb1_start
+# Four trials by default; --trials sets a cumulative budget explicitly.
+protocol: kb3_tpe_v2_kb1_pretrained
 method: tpe
 rl_enabled: false
 recipe_source: kb1_supervised
-initialization: scratch
+initialization: pretrained
 trials: 4
-seed: 42
+seed: null
 sampler_seed: 42
 # Default Optuna startup=10 would make a four-trial experiment entirely random.
 # Trial 0 is enqueued KB1; trial 1 is local random; trials 2/3 use TPE.
@@ -16,14 +16,13 @@ local_factors:
   lr0: [0.5, 1.5]
   weight_decay: [0.5, 2.0]
 # Momentum and augmentation stay at the KB1 starting values.
-epochs: 300
-segment_epochs: 5
-search_patience: 50
-search_min_epochs: 100
-search_min_delta: 0.0005
+# These must inherit the actual selected model's supervised KB1 args.yaml.
+# yolov8n currently resolves to epochs=200, patience=30, seed=0, batch=16.
+epochs: null
+patience: null
 warmup_epochs: null
 lrf: null
 batch_size: null
 img_size: null
-workers: 0
-device: '0'
+workers: null
+device: null

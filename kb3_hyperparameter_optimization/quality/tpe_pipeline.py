@@ -19,12 +19,14 @@ import yaml
 
 from ..run_all import MODELS, ROOT, _preflight
 from ..search_space import DiscreteSearchSpace
-from .detector import atomic_json, file_hash, train_detector, training_overrides
-from .reference import read_recipe, prepare_reference, evaluate_reference
+from .detector import atomic_json, file_hash
+from .pretrained_detector import train_detector, training_overrides, SELECTION
+from .pretrained_reference import resolve_pretrained_recipe, prepare_pretrained_reference, INHERITED_SETTINGS
+from .reference import evaluate_reference
 from .tpe_reporting import write_evaluation
 
 
-PROTOCOL = 'kb3_tpe_v1_kb1_start'
+PROTOCOL = 'kb3_tpe_v2_kb1_pretrained'
 
 
 def parse_args(argv=None):
@@ -48,34 +50,31 @@ def settings_from(args):
     if (settings.get('protocol') != PROTOCOL or settings.get('method') != 'tpe'
             or settings.get('rl_enabled') is not False):
         raise ValueError('This entry point requires the A-only TPE protocol, with rl_enabled=false')
-    if settings.get('recipe_source') != 'kb1_supervised' or settings.get('initialization') != 'scratch':
-        raise ValueError('Use the actual KB1 recipe, with scratch detector initialization')
-    raw, recipe, _ = read_recipe(args.model)
+    if settings.get('recipe_source') != 'kb1_supervised' or settings.get('initialization') != 'pretrained':
+        raise ValueError('Use the complete KB1 recipe, including its original pretrained initialization')
+    raw, recipe, source = resolve_pretrained_recipe(args.model)
     settings['trainer_recipe'] = recipe
+    settings['pretrained_source'] = source
     settings['smoke'] = args.smoke
-    for target, source in (('warmup_epochs', 'warmup_epochs'), ('lrf', 'lrf'),
-                           ('batch_size', 'batch'), ('img_size', 'imgsz')):
+    for target, name in INHERITED_SETTINGS.items():
         if settings.get(target) is None:
-            settings[target] = raw[source]
+            settings[target] = raw[name]
+        elif not args.smoke and str(settings[target]) != str(raw[name]):
+            raise ValueError(f'{target} must inherit KB1 YAML; only lr0/weight_decay are searched')
     if args.smoke:
-        settings.update(epochs=3, segment_epochs=1, warmup_epochs=0,
-                        search_patience=0, search_min_epochs=0, search_min_delta=0.0)
+        settings.update(epochs=3, warmup_epochs=0, patience=0)
         settings['trainer_recipe'] = {**recipe, 'nbs': settings['batch_size'], 'close_mosaic': 1}
-    for name in ('trials', 'epochs', 'segment_epochs', 'batch_size', 'img_size',
+    for name in ('trials', 'epochs', 'batch_size', 'img_size',
                  'n_startup_trials', 'n_ei_candidates'):
         if not isinstance(settings.get(name), int) or settings[name] <= 0:
             raise ValueError(f'{name} must be a positive integer')
     if args.trials is not None and args.trials <= 0:
         raise ValueError('--trials must be positive')
-    for name in ('seed', 'sampler_seed', 'search_patience', 'search_min_epochs'):
+    for name in ('seed', 'sampler_seed', 'patience'):
         if not isinstance(settings.get(name), int) or settings[name] < 0:
             raise ValueError(f'{name} must be a nonnegative integer')
-    if not 0 <= settings['search_min_epochs'] <= settings['epochs']:
-        raise ValueError('search_min_epochs must not exceed the maximum horizon')
-    if not 0 <= settings['warmup_epochs'] <= settings['segment_epochs'] <= settings['epochs']:
-        raise ValueError('Warmup must complete within the shared stopping segment')
-    if not math.isfinite(settings['search_min_delta']) or settings['search_min_delta'] < 0:
-        raise ValueError('search_min_delta must be finite and nonnegative')
+    if not math.isfinite(settings['warmup_epochs']) or not 0 <= settings['warmup_epochs'] <= settings['epochs']:
+        raise ValueError('Warmup must be finite and within the inherited horizon')
     if settings['workers'] != 0 or not 0 < settings['lrf'] <= 1:
         raise ValueError('Use workers=0 and lrf in (0,1]')
     settings['device'] = str(settings['device'])
@@ -118,7 +117,8 @@ def fingerprint(args, settings, space):
     identity = dict(protocol=PROTOCOL, settings=settings, space=asdict(space), model=args.model,
                     architecture=MODELS[args.model], sources=sources, dataset=dataset, dependencies=dependencies,
                     data_config_sha256=file_hash(args.data_config),
-                    objective='canonical_validation_mAP50_95_best_trained_epoch',
+                    objective='canonical_validation_mAP50_95_of_kb1_native_best_checkpoint',
+                    checkpoint_selection=SELECTION,
                     detector_seed_rule='same seed for every trial',
                     sampler_seed_rule='sampler_seed + logical trial number, conditioned on completed history',
                     test_used_for_selection=False)
@@ -154,6 +154,10 @@ def validated_result(path, *, parameters, seed):
         raise RuntimeError(f'Invalid completed result or checkpoint: {path}')
     if result['hyperparameters'] != parameters or result['seed'] != seed or result['decisions'] != 0:
         raise RuntimeError('Completed detector does not match the fixed TPE trial contract')
+    if result.get('initialization') != 'pretrained' or result.get('checkpoint_selection') != SELECTION:
+        raise RuntimeError('Completed result uses scratch initialization or a different checkpoint selection protocol')
+    if result.get('pretrained_backbone_verified') is not True:
+        raise RuntimeError('Completed result has no verified pretrained backbone transfer')
     score = result['metrics']['map50_95']
     if not math.isfinite(score) or not 0 <= score <= 1:
         raise RuntimeError('Invalid canonical validation objective')
@@ -173,6 +177,8 @@ class TPEExperiment:
             directory = self.output / 'tpe' / f'trial_{number:04d}'
             spec = json.loads((directory / 'trial_spec.json').read_text(encoding='utf-8'))
             result = validated_result(directory / 'result.json', parameters=spec['parameters'], seed=self.settings['seed'])
+            if result.get('pretrained_source') != self.settings['pretrained_source']:
+                raise RuntimeError('Completed trial used a different pretrained source')
             records.append(dict(number=number, proposal=spec, result=result))
         if len({r['result']['initial_weights_sha256'] for r in records}) != 1:
             raise RuntimeError('Trial initial weights differ despite the common detector seed')
@@ -231,13 +237,13 @@ class TPEExperiment:
                 atomic_json(self.output / 'status.json', dict(protocol=PROTOCOL, stage='search', status='running',
                             active_trial=number, completed_trials=len(history), requested_trials=self.target,
                             parameters=spec['parameters'], epoch_log=str(directory / 'epochs.json')))
-                settings = {**self.settings, 'early_stopping': dict(patience=self.settings['search_patience'],
-                            min_epochs=self.settings['search_min_epochs'], min_delta=self.settings['search_min_delta'])}
-                train_detector(settings=settings, data_yaml=self.output / 'dataset.yaml', data_root=self.args.data_root,
-                               model=MODELS[self.args.model], seed=self.settings['seed'], output_dir=directory,
+                train_detector(settings=self.settings, data_yaml=self.output / 'dataset.yaml', data_root=self.args.data_root,
+                               model=self.settings['pretrained_source']['checkpoint'], seed=self.settings['seed'], output_dir=directory,
                                space_config=self.space, parameters=spec['parameters'],
                                agent=None, learn=False, random_schedule=False)
             result = validated_result(result_path, parameters=spec['parameters'], seed=self.settings['seed'])
+            if result.get('pretrained_source') != self.settings['pretrained_source']:
+                raise RuntimeError('Completed trial used a different pretrained source')
             if history and result['initial_weights_sha256'] != history[0]['result']['initial_weights_sha256']:
                 raise RuntimeError('Initial detector weights changed between fixed-seed trials')
             history.append(dict(number=number, proposal=spec, result=result))
@@ -259,7 +265,7 @@ def run_models(args):
         raise ValueError('--resume requires the original output directory')
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     root = Path(args.output_dir or ROOT / 'kb3_hyperparameter_optimization' /
-                'checkpoint_hyperparameter_optimization' / 'quality' / f'tpe_all_{stamp}').resolve()
+                'checkpoint_hyperparameter_optimization' / 'quality' / f'tpe_pretrained_all_{stamp}').resolve()
     commands = []
     for model in MODELS:
         command = [sys.executable, '-u', '-m', 'kb3_hyperparameter_optimization.quality.tpe_pipeline',
@@ -295,24 +301,27 @@ def main(argv=None):
     settings = settings_from(args)
     target = args.trials if args.trials is not None else settings['trials']
     print(json.dumps(dict(protocol=PROTOCOL, model=args.model, stage=args.stage, requested_trials=target,
+                         initialization='pretrained', pretrained_source=settings['pretrained_source']['checkpoint'],
+                         detector_seed=settings['seed'], epochs_per_trial=settings['epochs'], native_patience=settings['patience'],
                          maximum_epochs=target * settings['epochs'], extra_evaluation_training_runs=0,
                          rl_training_runs=0, test_evaluations=0), indent=2), flush=True)
-    preflight = SimpleNamespace(config=args.space_config, with_optuna=True, backend='command', device=settings['device'],
+    preflight = SimpleNamespace(config=args.space_config, with_optuna=True, backend='command', check_architecture=False, device=settings['device'],
                                 data_root=args.data_root, data_config=args.data_config)
     config, data = _preflight(preflight, [args.model])
     if len(data['names']) != 28:
         raise ValueError('Canonical pest evaluation requires 28 classes')
-    space = prepare_reference(args, settings, config.search_space)
+    space = prepare_pretrained_reference(args, settings, config.search_space)
     distributions = local_distributions(settings, space)
     identity = fingerprint(args, settings, space)
     if args.resume and not args.output_dir:
         raise ValueError('--resume requires the original output directory')
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     output = Path(args.output_dir or ROOT / 'kb3_hyperparameter_optimization' /
-                  'checkpoint_hyperparameter_optimization' / 'quality' / f'tpe_{stamp}' / args.model).resolve()
-    start = dict(model=MODELS[args.model], data=str(output / 'dataset.yaml'), seed=settings['seed'],
+                  'checkpoint_hyperparameter_optimization' / 'quality' / f'tpe_pretrained_{stamp}' / args.model).resolve()
+    start = dict(model=settings['pretrained_source']['checkpoint'], data=str(output / 'dataset.yaml'),
                  **training_overrides(settings, DiscreteSearchSpace(space).initial_values()))
-    snapshots = {'dataset.yaml': data, 'kb1_recipe.yaml': settings['trainer_recipe'], 'starting_train.yaml': start}
+    snapshots = {'dataset.yaml': data, 'kb1_recipe.yaml': yaml.safe_load(Path(settings['pretrained_source']['recipe_path']).read_text(encoding='utf-8')),
+                 'starting_train.yaml': start}
     if args.resume:
         old = json.loads((output / 'manifest.json').read_text(encoding='utf-8'))
         if old['sha256'] != identity['sha256']:
@@ -333,13 +342,14 @@ def main(argv=None):
             atomic_json(output / 'manifest.json', identity)
             for filename, payload in snapshots.items():
                 (output / filename).write_text(yaml.safe_dump(payload, sort_keys=False), encoding='utf-8')
-            atomic_json(output / 'train_contract.json', dict(protocol=PROTOCOL, initialization='scratch',
+            atomic_json(output / 'train_contract.json', dict(protocol=PROTOCOL, initialization='pretrained',
+                        pretrained_source=settings['pretrained_source'],
                         kb1_checkpoint_role='comparison_only', initial_parameters=DiscreteSearchSpace(space).initial_values(),
                         local_search={k: dict(low=v.low, high=v.high, log=v.log) for k, v in distributions.items()},
                         frozen_parameters=['momentum', 'augmentation_strength'],
-                        stopping=dict(metric='canonical_validation_mAP50_95', patience=settings['search_patience'],
-                                      min_epochs=settings['search_min_epochs'], min_delta=settings['search_min_delta']),
-                        native_patience_role='disabled; the canonical stopper controls search',
+                        stopping=dict(metric='ultralytics_native_validation_fitness', patience=settings['patience']),
+                        checkpoint_selection=SELECTION,
+                        native_patience_role='inherited from KB1 YAML; no canonical/segment stopper',
                         detector_seed=settings['seed'], test_used=False))
         experiment = TPEExperiment(args, settings, space, output)
         stages = ('baseline', 'search', 'evaluate') if args.stage == 'all' else (args.stage,)

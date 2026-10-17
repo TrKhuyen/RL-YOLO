@@ -10,8 +10,8 @@ Repository được tổ chức theo tên kịch bản:
   reward-guided weight tuning.
 - kb2_preference_optimization: kịch bản preference optimization/DPO đang
   nghiên cứu và chưa được xác nhận thực nghiệm.
-- kb3_hyperparameter_optimization: hiện chạy A–TPE bốn lượt từ recipe KB1,
-  train scratch và so với checkpoint supervised KB1. Xem
+- kb3_hyperparameter_optimization: hiện chạy A–TPE từ đầy đủ YAML supervised KB1,
+  khởi tạo bằng pretrained nguồn KB1 và so với best checkpoint supervised KB1. Xem
   [protocol A–TPE](kb3_hyperparameter_optimization/docs/KB3_A_TPE_PROTOCOL.md)
   và [báo cáo B tương lai](kb3_hyperparameter_optimization/docs/KB3_B_FUTURE_RESEARCH_REPORT.md).
 

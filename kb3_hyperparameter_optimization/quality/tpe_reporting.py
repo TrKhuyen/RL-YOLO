@@ -12,15 +12,18 @@ def trajectory_diagnostics(record):
     path = Path(result['run_dir']) / 'epochs.json'
     history = json.loads(path.read_text(encoding='utf-8')) if path.exists() else []
     best, final = result['metrics'], result['final_metrics']
+    trajectory_protocol = result.get('trajectory_metrics_protocol', 'canonical_validation')
+    curve_best = result.get('native_best_metrics', best)
     decline = None
     # Describe the observed curve; this alone cannot establish overfitting.
     eligible = [r['metrics'] for r in history if r['metrics']['epoch'] > best['epoch']]
     for start in range(max(0, len(eligible) - 4)):
         window = eligible[start:start + 5]
-        if len(window) == 5 and all(r['map50_95'] < best['map50_95'] - .005 for r in window):
+        if len(window) == 5 and all(r['map50_95'] < curve_best['map50_95'] - .005 for r in window):
             decline = window[0]['epoch']
             break
     return dict(best_epoch=best['epoch'], actual_epochs=result['actual_epochs'],
+                trajectory_metrics_protocol=trajectory_protocol,
                 final_minus_best_map_points=100 * (final['map50_95'] - best['map50_95']),
                 minimum_val_loss_epoch=min(history, key=lambda r: r['metrics']['val_loss'])['metrics']['epoch'] if history else None,
                 first_sustained_map_decline_epoch=decline, decline_window=5, decline_threshold_map=.005,
@@ -47,7 +50,7 @@ def write_evaluation(output, records, reference, settings, *, protocol):
                    checkpoint=result['best_checkpoint'], checkpoint_sha256=result['checkpoint_sha256'],
                    diagnostics=trajectory_diagnostics(record), early_stopped=result['stopped_early'],
                    elapsed_hours=result['elapsed_seconds'] / 3600,
-                   delta_scratch_anchor_map_points=100 * (result['metrics']['map50_95'] - anchor),
+                   delta_pretrained_anchor_map_points=100 * (result['metrics']['map50_95'] - anchor),
                    delta_kb1_pretrained_map_points=100 * (result['metrics']['map50_95'] - reference_map)
                    if reference_map is not None else None)
         rows.append(row)
@@ -56,12 +59,15 @@ def write_evaluation(output, records, reference, settings, *, protocol):
                     best_trial=ranked[0]['number'], best_checkpoint=ranked[0]['result']['best_checkpoint'],
                     best_checkpoint_sha256=ranked[0]['result']['checkpoint_sha256'],
                     ranking=[r['number'] for r in ranked], trials=rows, kb1_pretrained_reference=reference,
-                    paired_scratch_anchor_trial=0, detector_seed=settings['seed'], independent_detector_seeds=1,
+                    paired_pretrained_anchor_trial=0, detector_seed=settings['seed'], independent_detector_seeds=1,
+                    initialization='pretrained', pretrained_source=settings['pretrained_source'],
+                    checkpoint_selection='kb1_native_validation_fitness_best_ema',
+                    trajectory_metrics_protocol='ultralytics_native_validation',
                     extra_training_performed=False, rl_training_runs=0, test_evaluated=False,
                     actual_epochs=sum(r['result']['actual_epochs'] for r in records),
                     detector_hours=sum(r['result']['elapsed_seconds'] for r in records) / 3600,
                     comparison_caveat='Exploratory in-sample validation selection with one detector seed; no proof of general superiority. '
-                                      'KB1 pretrained weights have different initialization and historical training/selection budget.')
+                                      'KB1 supervised best is a historical checkpoint; matching recipe/source does not guarantee exact reproduction.')
     report_dir = output / 'reports' / f'trials_{len(records):04d}'
     report_dir.mkdir(parents=True, exist_ok=True)
     atomic_json(report_dir / 'evaluation.json', document)
@@ -69,7 +75,7 @@ def write_evaluation(output, records, reference, settings, *, protocol):
     columns = ('trial', 'mode', 'seed', 'lr0', 'weight_decay', 'momentum', 'augmentation_strength',
                'mAP50_95', 'mAP50', 'APs', 'precision', 'operating_recall', 'f1', 'AR300',
                'best_epoch', 'actual_epochs', 'early_stopped', 'elapsed_hours',
-               'delta_scratch_anchor_map_points', 'delta_kb1_pretrained_map_points', 'checkpoint')
+               'delta_pretrained_anchor_map_points', 'delta_kb1_pretrained_map_points', 'checkpoint')
     for target in (report_dir / 'comparison.csv', output / 'comparison.csv'):
         with target.open('w', encoding='utf-8-sig', newline='') as handle:
             writer = csv.DictWriter(handle, fieldnames=columns)
@@ -83,43 +89,48 @@ def write_evaluation(output, records, reference, settings, *, protocol):
 
     lines = [f'# KB3 A–TPE: {len(records)} lượt thử trên validation', '',
              f'Protocol: `{protocol}`. Seed detector chung: {settings["seed"]}.', '',
-             'Mỗi lượt train từ YAML kiến trúc, lấy recipe ban đầu từ supervised KB1. '
-             'Checkpoint KB1 chỉ được đánh giá, không nạp để train tiếp.', '',
-             f'Lượt 0 là mốc scratch đúng tham số KB1; các lượt trước {settings["n_startup_trials"]} '
+             'Mỗi lượt khởi tạo lại từ pretrained ban đầu được args.yaml supervised KB1 chỉ định. '
+             'Best checkpoint KB1 chỉ được đánh giá, không nạp để train tiếp.', '',
+             f'Pretrained nguồn: `{settings["pretrained_source"]["checkpoint"]}`. '
+             f'Horizon tối đa {settings["epochs"]}, native patience {settings["patience"]}; kế thừa YAML KB1.', '',
+             f'Lượt 0 giữ cấu hình KB1 và cùng nguồn pretrained; các lượt trước {settings["n_startup_trials"]} '
              f'lấy mẫu khởi tạo; từ lượt {settings["n_startup_trials"]} dùng TPE. '
              'Chỉ tìm lr0/weight_decay, giữ momentum và augmentation theo KB1.', '',
-             '| Trial | Cách chọn | mAP50–95 | mAP50 | AP small | Best epoch | Epoch thực | Δ scratch (điểm %) |',
+             '| Trial | Cách chọn | mAP50–95 | mAP50 | AP small | Best epoch | Epoch thực | Δ pretrained anchor (điểm %) |',
              '|---:|---|---:|---:|---:|---:|---:|---:|']
     for row in rows:
         lines.append(f'| {row["trial"]} | {row["mode"]} | {percent(row["scores"]["mAP50_95"])} | '
                      f'{percent(row["scores"].get("mAP50"))} | {percent(row["scores"].get("APs"))} | '
                      f'{row["diagnostics"]["best_epoch"]} | {row["diagnostics"]["actual_epochs"]} | '
-                     f'{row["delta_scratch_anchor_map_points"]:+.3f} |')
+                     f'{row["delta_pretrained_anchor_map_points"]:+.3f} |')
     lines += ['', f'Trial được chọn bằng validation: **{document["best_trial"]}**. '
-              'Đây là checkpoint tốt nhất trong các lượt đã thử, chưa phải cấu hình tối ưu được chứng minh.', '',
+              'Mỗi detector chọn checkpoint theo native validation fitness như KB1; TPE xếp các checkpoint đó '
+              'bằng canonical validation mAP50–95. Đây chưa phải cấu hình tối ưu được chứng minh.', '',
               f'Tổng train: {document["actual_epochs"]} epoch, {document["detector_hours"]:.3f} giờ detector. '
               'Báo cáo không tạo thêm lượt train; chưa đánh giá test.', '']
     if reference:
         lines += [f'Mốc KB1 pretrained: mAP50–95 **{percent(reference_map)}**, '
                   f'mAP50 {percent(reference["metrics"].get("mAP50"))}. '
-                  'Cùng evaluator nhưng khác khởi tạo và ngân sách lịch sử; không dùng riêng phép so sánh này '
-                  'để quy cải thiện cho TPE.', '']
+                  'Cùng canonical evaluator, cùng recipe/nguồn khởi tạo được YAML chỉ định. '
+                  'Đây vẫn là checkpoint lịch sử; trial 0 kiểm tra mức tái lập của cấu hình gốc.', '']
     lines += ['## Diễn biến train', '',
               'Các mốc dưới đây mô tả đường validation đã quan sát. Mốc mAP giảm liên tiếp không đủ '
-              'để khẳng định overfit bắt đầu chính xác tại epoch đó; cần đọc thêm train/val loss và các seed khác.', '']
+              'để khẳng định overfit bắt đầu chính xác tại epoch đó; cần đọc thêm train/val loss và các seed khác. '
+              'Đường mỗi epoch là metric native Ultralytics, không phải canonical. '
+              'Bảng checkpoint bên trên và final-minus-best dùng canonical evaluator; không trộn hai loại điểm.', '']
     for row in rows:
         diagnostic = row['diagnostics']
         lines.append(f'- Trial {row["trial"]}: best epoch {diagnostic["best_epoch"]}, '
                      f'val loss thấp nhất ở {diagnostic["minimum_val_loss_epoch"]}, '
                      f'final − best mAP {diagnostic["final_minus_best_map_points"]:+.3f} điểm %. '
-                     f'Mốc giảm mAP ít nhất 0,5 điểm % trong 5 epoch liên tiếp: '
+                     f'Mốc giảm native mAP ít nhất 0,5 điểm % trong 5 epoch liên tiếp: '
                      f'{diagnostic["first_sustained_map_decline_epoch"]}. Early stop: {row["early_stopped"]}.')
     lines += ['', '## Giới hạn và bước tiếp theo', '',
               f'- {len(records)} lượt gồm một mốc và {len(records)-1} cấu hình mới; '
               f'{sum(r["proposal"]["mode"] == "tpe" for r in records)} proposal được chọn bằng TPE.',
               '- Một seed chung giúp giảm nhiễu khởi tạo, chưa đo được độ ổn định qua nhiều seed.',
               '- Search và chọn best đều dùng validation; điểm thắng có thể lạc quan do chọn nhiều cấu hình/epoch.',
-              '- Early stopping có thể bỏ lỡ cấu hình cải thiện muộn; lịch LR vẫn theo horizon tối đa.',
+              '- Native early stopping kế thừa KB1; có thể bỏ lỡ cải thiện muộn. Lịch LR vẫn theo horizon tối đa.',
               '- Đây là A–TPE thử nghiệm, chưa có kết quả RL và chưa có so sánh với B.',
               '- Nếu cần mở rộng, dùng --trials với tổng số lượt mong muốn và --resume; giữ cấu hình/source cố định. '
               'Chỉ dùng test sau khi chốt thiết kế và checkpoint.', '']
@@ -154,7 +165,7 @@ def write_plot(path, records):
         axes[0].plot(x, [100 * row['map50_95'] for row in values], label=label)
         axes[1].plot(x, [row['train_loss'] for row in values], label=label)
         axes[2].plot(x, [row['val_loss'] for row in values], label=label)
-    for axis, title in zip(axes, ('Canonical validation mAP50-95 (%)', 'Train loss', 'Validation loss')):
+    for axis, title in zip(axes, ('Native validation mAP50-95 (%)', 'Train loss', 'Native validation loss')):
         axis.set_title(title)
         axis.set_xlabel('Epoch')
         axis.grid(alpha=.25)

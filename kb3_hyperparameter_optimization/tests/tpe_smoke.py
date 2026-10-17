@@ -39,15 +39,18 @@ def run():
         assert report['rl_training_runs'] == 0 and not report['test_evaluated']
         assert report['kb1_pretrained_reference'] is None
         assert not (output / 'ppo').exists()
-        assert len({r['initial_weights_sha256'] for r in
-                   [json.loads(p.read_text()) for p in (output / 'tpe').glob('trial_*/result.json')]}) == 1
+        records = [json.loads(p.read_text()) for p in (output / 'tpe').glob('trial_*/result.json')]
+        assert len({r['initial_weights_sha256'] for r in records}) == 1
+        assert all(r['initialization'] == 'pretrained' and r['pretrained_backbone_verified'] for r in records)
+        assert report['initialization'] == 'pretrained'
+        assert (output / 'reports/trials_0004/trajectories.png').is_file()
         with patch('kb3_hyperparameter_optimization.quality.tpe_pipeline.train_detector',
                    side_effect=AssertionError('Resume/evaluate must not train again')):
             main([*common, '--trials', '4', '--resume'])
             main([*common, '--trials', '4', '--resume', '--stage', 'evaluate'])
         snapshot = (output / 'starting_train.yaml').read_bytes()
         tampered = yaml.safe_load(snapshot)
-        tampered['pretrained'] = True
+        tampered['pretrained'] = False
         (output / 'starting_train.yaml').write_text(yaml.safe_dump(tampered))
         try:
             main([*common, '--resume', '--check-only'])
@@ -55,7 +58,7 @@ def run():
             assert 'starting_train.yaml changed' in str(error)
         else:
             raise AssertionError('Tampered initialization accepted')
-        print('A-TPE REAL CPU SMOKE PASS: four trials/12 epochs, identical initial weights, two-to-four resume, no RL/test/extra training.')
+        print('A-TPE PRETRAINED CPU SMOKE PASS: four trials/12 epochs, verified pretrained transfer, identical initial weights, two-to-four resume, no RL/test/extra training.')
 
 
 if __name__ == '__main__':

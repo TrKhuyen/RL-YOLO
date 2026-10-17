@@ -1,16 +1,17 @@
 # KB3 — Hyperparameter optimization for YOLO
 
-**Luồng hiện tại chỉ chạy A–TPE**, protocol `kb3_tpe_v1_kb1_start`.
+**Luồng hiện tại chỉ chạy A–TPE pretrained**, protocol `kb3_tpe_v2_kb1_pretrained`.
 Đọc [protocol A–TPE](docs/KB3_A_TPE_PROTOCOL.md) và
 [báo cáo B để nghiên cứu tương lai](docs/KB3_B_FUTURE_RESEARCH_REPORT.md).
-`run_all_kb3.sh` đánh giá checkpoint supervised KB1, chạy **4 detector trainings tổng cộng**,
+`run_all_kb3.sh` đánh giá checkpoint supervised KB1, mặc định chạy **4 detector trial tổng cộng**,
 rồi xuất báo cáo validation. Không chạy B, không train lại để tạo báo cáo.
 
-Trial 0 giữ recipe KB1 làm scratch anchor; trial 1 startup random trong vùng hẹp;
+Trial 0 giữ cấu hình KB1 làm pretrained anchor; trial 1 startup random trong vùng hẹp;
 trial 2/3 dùng TPE. Chỉ tìm `lr0`/`weight_decay`, giữ momentum/augmentation theo KB1.
-Mọi trial khởi tạo từ YAML kiến trúc, cùng seed 42; best checkpoint KB1 chỉ làm đối chứng pretrained.
-Tối đa 300 epoch/trial, canonical early stopping từ epoch 100 với patience 50;
-tổng tối đa 1.200 epoch. Resume không tự mở rộng số lượt. Pilot chưa đánh giá test.
+Mọi trial tải lại pretrained nguồn được args.yaml KB1 chỉ định; best KB1 chỉ làm đối chứng.
+Kế thừa epoch/seed/patience KB1: yolov8n hiện là tối đa 200 epoch, seed 0, native patience 30.
+Giữ native best/early stopping như KB1; chấm checkpoint bằng canonical evaluator chung.
+Resume không tự mở rộng số lượt. Pilot chưa đánh giá test.
 Mặc định chỉ `yolov8n`; `--model all` là 4 trial mỗi model, tổng 20 detector.
 TPE là HPO truyền thống, chưa phải kết quả tối ưu bằng RL.
 
@@ -18,8 +19,8 @@ TPE là HPO truyền thống, chưa phải kết quả tối ưu bằng RL.
 bash kb3_hyperparameter_optimization/run_quality_kb3.sh --check-only
 bash kb3_hyperparameter_optimization/run_quality_kb3.sh --model all --check-only
 bash kb3_hyperparameter_optimization/run_quality_kb3.sh --stage baseline
-# Chạy bốn lượt; dùng thư mục mới, không resume manifest A/B cũ:
-bash kb3_hyperparameter_optimization/run_all_kb3.sh --model yolov8n --trials 4 --output-dir kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_start_v1/yolov8n
+# Chạy lại tám lượt pretrained; thư mục mới, không resume tám trial scratch cũ:
+bash kb3_hyperparameter_optimization/run_all_kb3.sh --model yolov8n --trials 8 --output-dir kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n
 ```
 
 ## Các hướng A/B và lệnh legacy (lịch sử, không chạy bởi script hiện tại)

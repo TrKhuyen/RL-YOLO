@@ -4,6 +4,12 @@ Ngày review: 09/10/2026. Phạm vi: YOLO phát hiện sâu bệnh, tối ưu qu
 
 ## 1. Quyết định hiện tại và câu hỏi nghiên cứu
 
+**Cập nhật 14/10/2026:** A đã đổi sang pretrained theo đầy đủ YAML supervised KB1,
+protocol `kb3_tpe_v2_kb1_pretrained`; xem [protocol A](KB3_A_TPE_PROTOCOL.md).
+Các mô tả A scratch và đề xuất B scratch bên dưới ghi lại thiết kế tại thời điểm review.
+Nếu triển khai B quanh A pretrained mới, phải thống nhất nguồn khởi tạo/đối chứng/recipe tương ứng.
+Mã B vẫn giữ nguyên và chưa chạy trong luồng hiện tại.
+
 Mục tiêu chung của KB1, KB2, KB3 vẫn là cải thiện YOLO bằng RL theo những cách khác nhau. A–TPE là HPO truyền thống dùng làm thử nghiệm và xây mốc cho KB3; TPE **không phải RL**. B là hướng RL điều khiển hyperparameter trong quá trình SGD train YOLO. Tạm dừng B không đồng nghĩa bác bỏ tính khả thi lý thuyết của hướng này.
 
 Câu hỏi cần kiểm chứng là: sau khi đã có cấu hình và lịch train thông thường tốt, policy sử dụng phản hồi trong train có cải thiện chất lượng trên dữ liệu chưa dùng để học/chọn policy không? Cần phân biệt ba mức kết quả: code đổi tham số đúng; policy học được hành vi hữu ích; hành vi đó làm tốt hơn đối chứng trên seed/model hoặc dữ liệu mới. Chỉ mức đầu đã có các kiểm thử kỹ thuật; hai mức sau vẫn cần thực nghiệm.

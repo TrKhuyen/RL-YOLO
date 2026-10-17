@@ -2,7 +2,10 @@
 
 ## Cập nhật triển khai 2026-10-08
 
-**Protocol hiện tại (09/10/2026): A–TPE, bốn lượt tổng cộng, không chạy B.**
+**Protocol hiện tại (14/10/2026): A–TPE pretrained `kb3_tpe_v2_kb1_pretrained`, không chạy B.**
+Kế thừa args.yaml supervised KB1 gồm pretrained nguồn, epoch, seed và patience.
+Best checkpoint KB1 chỉ là đối chứng. Tám trial scratch v1 đã xóa trọng số theo yêu cầu;
+log/review scratch dưới đây là lịch sử, không phải kết quả pretrained.
 Xem [thiết kế A–TPE](../../kb3_hyperparameter_optimization/docs/KB3_A_TPE_PROTOCOL.md)
 và [báo cáo B tương lai](../../kb3_hyperparameter_optimization/docs/KB3_B_FUTURE_RESEARCH_REPORT.md).
 Các mô tả quality v2/v3/v4 và RL phía dưới ghi lại lịch sử, không phải luồng mặc định hiện tại.

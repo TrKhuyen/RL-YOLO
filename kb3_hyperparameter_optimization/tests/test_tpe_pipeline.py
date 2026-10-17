@@ -14,6 +14,7 @@ from kb3_hyperparameter_optimization.quality.detector import atomic_json, file_h
 from kb3_hyperparameter_optimization.quality.tpe_pipeline import (
     TPEExperiment, exclusive_run, parse_args, settings_from, validated_result)
 from kb3_hyperparameter_optimization.quality.tpe_reporting import trajectory_diagnostics
+from kb3_hyperparameter_optimization.quality.pretrained_detector import SELECTION
 
 
 class TPEPipelineTests(unittest.TestCase):
@@ -30,7 +31,9 @@ class TPEPipelineTests(unittest.TestCase):
         self.assertIsNone(kwargs['agent'])
         self.assertFalse(kwargs['learn'])
         self.assertFalse(kwargs['random_schedule'])
-        self.assertEqual(kwargs['settings']['early_stopping']['min_epochs'], 100)
+        self.assertEqual(kwargs['settings']['epochs'], 200)
+        self.assertEqual(kwargs['settings']['patience'], 30)
+        self.assertEqual(kwargs['model'], self.settings['pretrained_source']['checkpoint'])
         self.calls.append(kwargs)
         output = Path(kwargs['output_dir'])
         checkpoint = output / 'selected_best.pt'
@@ -40,6 +43,8 @@ class TPEPipelineTests(unittest.TestCase):
                        train_loss=3., val_loss=4.)
         atomic_json(output / 'epochs.json', [dict(metrics=metrics)])
         result = dict(failed=False, best_checkpoint=str(checkpoint), checkpoint_sha256=file_hash(checkpoint),
+                      initialization='pretrained', pretrained_source=self.settings['pretrained_source'],
+                      checkpoint_selection=SELECTION, pretrained_backbone_verified=True,
                       seed=kwargs['seed'], hyperparameters=kwargs['parameters'], decisions=0,
                       initial_weights_sha256='same-initial-model', actual_epochs=100, elapsed_seconds=1.,
                       metrics=metrics, final_metrics=metrics, run_dir=str(output), stopped_early=True)
@@ -65,7 +70,7 @@ class TPEPipelineTests(unittest.TestCase):
             self.assertEqual([r['proposal']['mode'] for r in records], ['kb1_anchor', 'startup_random', 'tpe', 'tpe'])
             for record in records:
                 hp = record['result']['hyperparameters']
-                self.assertEqual(record['result']['seed'], 42)
+                self.assertEqual(record['result']['seed'], 0)
                 self.assertEqual(hp['momentum'], .937)
                 self.assertEqual(hp['augmentation_strength'], .5)
                 self.assertTrue(.005 <= hp['lr0'] <= .015)
