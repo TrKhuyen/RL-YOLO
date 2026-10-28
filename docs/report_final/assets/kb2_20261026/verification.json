@@ -1,0 +1,295 @@
+{
+  "date": "2026-10-26",
+  "objective": "structured_detection_dpo_v1",
+  "scope": "CPU technical smoke only; 8 train images, 2 updates, 2 validation images. No full validation, no test, no claim of AP improvement.",
+  "unit_tests": {
+    "command": ".venv-ubuntu/bin/python -m unittest discover -s kb2_preference_optimization/tests -q",
+    "passed": 18,
+    "failed": 0
+  },
+  "cleanup": {
+    "deleted_files": 251,
+    "deleted_bytes": 6630304190,
+    "manifest": "../../../../kb2_preference_optimization/legacy/cleanup_manifest.json"
+  },
+  "provenance": {
+    "model": "yolov8n",
+    "source_checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt",
+    "source_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+    "dataset": {
+      "root": "/home/celine/Celine/graduate/RL-YOLO/pre-data/data/v2i_cleanned",
+      "config": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/configs/pest.yaml",
+      "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+      "counts": {
+        "train": {
+          "images": 2411,
+          "labels": 2411,
+          "known_augmented_images": 667
+        },
+        "valid": {
+          "images": 479,
+          "labels": 479,
+          "known_augmented_images": 0
+        },
+        "test": {
+          "images": 239,
+          "labels": 239,
+          "known_augmented_images": 0
+        }
+      },
+      "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+    },
+    "supervised": {
+      "model": "yolov8n",
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+      "checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "dataset": {
+        "root": "D:\\graduate\\RL-YOLO\\pre-data\\data\\v2i_cleanned",
+        "config": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\configs\\pest.yaml",
+        "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+        "counts": {
+          "train": {
+            "images": 2411,
+            "labels": 2411,
+            "known_augmented_images": 667
+          },
+          "valid": {
+            "images": 479,
+            "labels": 479,
+            "known_augmented_images": 0
+          },
+          "test": {
+            "images": 239,
+            "labels": 239,
+            "known_augmented_images": 0
+          }
+        },
+        "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+      },
+      "pretrained_name": "yolov8n.pt",
+      "pretrained_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "data_config_sha256": "cbc7c93bee7848ea6bf4f0f6b52e444ba78aee8a203987578f7addfdeadae308",
+      "dp_flags": {
+        "w3f": false,
+        "psa": false
+      }
+    },
+    "runtime": {
+      "python": "3.10.20",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "versions": {
+        "torch": "2.5.1+cu121",
+        "torchvision": "0.20.1+cu121",
+        "ultralytics": "8.4.163",
+        "torchmetrics": "1.9.0",
+        "faster-coco-eval": "1.7.2",
+        "albumentations": "2.0.8",
+        "numpy": "2.2.6",
+        "opencv-python": "4.13.0.92",
+        "PyYAML": "6.0.3",
+        "scipy": "1.15.3"
+      },
+      "cuda": "12.1",
+      "cudnn": 90100,
+      "ultralytics_code_sha256": {
+        "utils/loss.py": "c1d4847a833da3f3ca71afdace689e0b0d78949face65c207723fcc0563a9533",
+        "nn/tasks.py": "50ffe702b9b122150f06105b50ea7b8c7990b709b990c50681a7de670717fe9e",
+        "nn/modules/head.py": "617b5bdd6e2d609c7187e00df11500fd40825f3d2232a349e6d8f3f07656d979"
+      }
+    },
+    "code_sha256": {
+      "__init__.py": "911b5dc5b7f3e00efa2d287ce13c895cfbd41889254b528a79ef8c955078c1bd",
+      "adapter.py": "059f7932e673ac2a025649a34f2b403885dfd740eb008a20aa7ba16a1f6c7ef3",
+      "artifacts.py": "18e7243c15e19d46d0fc5ad61b0079a5f8e8b8d9e7b3fdd49aef1f0b5783908a",
+      "data.py": "788799c890c95c7557e9c4140a083d19dd5d82958277bbfa84ae4ec66089997f",
+      "evaluate.py": "bd12c085a592a00f66aee429f8a7ae598c9aa281b1450b2ad6636484db42dc44",
+      "generate_preferences.py": "0a7b009af6bebc76729a8050d2d96a52470e4cab554750534da9ab2f85d7dc9a",
+      "metrics.py": "3e014f9b07b2fc00deb12aa5337bc8d4cce919a1987121133cd10564e6622ed6",
+      "policy.py": "53110e27ee2d8c29ecc00c70f2aaae235180611f86446bed153f6c242a24eae0",
+      "preferences.py": "613a37254833cb3993974b8567efacdd8517edc416c1a5ed4d0e3e6f3002fc29",
+      "preview.py": "76ca589315c5a99c4b9239402b637f7103b750e9e8688d5e2d2f06601b525ce4",
+      "quality.py": "5f90d14b9d6fdad3a4a93c4163233a9a5ab684a1333c8132d996e5ccb033c764",
+      "run.py": "4657f9fe31e1fbf10b16403c33519ee427eb577c95ef08dd79efbc6b5eb70390",
+      "train_dpo.py": "85a2dbfde54c9d36d501ac471315863bdddfb54d2c4e9b8a459bc1efb454681f"
+    },
+    "objective_version": "structured_detection_dpo_v1",
+    "transform_version": "longest_max_size_center_pad114_rgb_unit_v1"
+  },
+  "policy": {
+    "class_temperature": 1.0,
+    "box_temperature": 1.0,
+    "background_logit": 0.0,
+    "nms_iou": 0.6,
+    "max_det": 300
+  },
+  "quality": {
+    "detection_weight": 0.8,
+    "min_gap": 0.02
+  },
+  "preference_summary": {
+    "images_seen": 8,
+    "pairs_kept": 8,
+    "images_tied_or_identical": 0,
+    "sampled_outputs": 32,
+    "empty_outputs": 0,
+    "pairwise_comparisons": 48,
+    "distinct_output_comparisons": 47,
+    "classes_in_kept_gt": {
+      "21": 1,
+      "17": 1,
+      "4": 1,
+      "27": 1,
+      "11": 1,
+      "12": 2,
+      "10": 1,
+      "3": 1
+    },
+    "quality_gaps": [
+      0.38034524599711095,
+      0.16449885008030374,
+      0.3148968648910523,
+      0.17631326675415038,
+      0.020392063240503022,
+      0.028530937119649935,
+      0.128,
+      0.13320542551489434
+    ]
+  },
+  "training_config": {
+    "model": "yolov8n",
+    "preferences": "/tmp/kb2-structured-v1-verified/preferences",
+    "output": "/tmp/kb2-structured-v1-verified/training",
+    "device": "cpu",
+    "steps": 2,
+    "batch_size": 2,
+    "val_batch_size": 8,
+    "lr": 1e-06,
+    "weight_decay": 0.0005,
+    "dpo_weight": 0.01,
+    "beta": 0.1,
+    "grad_clip": 1.0,
+    "eval_interval": 1,
+    "patience": 5,
+    "log_interval": 10,
+    "gradient_interval": 100,
+    "audit_images": 8,
+    "eval_limit": 2,
+    "seed": 42,
+    "image_size": 640,
+    "head_only": true,
+    "native_weight": 1.0,
+    "policy": {
+      "class_temperature": 1.0,
+      "box_temperature": 1.0,
+      "background_logit": 0.0,
+      "nms_iou": 0.6,
+      "max_det": 300
+    },
+    "preference_manifest_sha256": "9c750f2fa7f7467450e8ff45eda94a346fba07e993cd65a9774c44b5300ed96f",
+    "pairs_sha256": "05dcd3709406ddc55cb1ac7077a308e01ed65ea0e2470ff4dc1bd32c75bd1161",
+    "pilot": true
+  },
+  "training_completion": {
+    "status": "complete",
+    "pilot": true,
+    "steps": 2,
+    "termination": "budget",
+    "best_step": 0,
+    "best_mAP50_95": 0.7277227640151978,
+    "best_sha256": "474cb3a790d3aeda1aeaa7d114cc7a562a3729984b8e1ebe9e330a7a56ba5bd1",
+    "last_sha256": "fad1694b2623781d885de4d146d03aff2ad60bbe36aac34fde3697de317ab7ae",
+    "manifest_sha256": "4745c93378e9317dca66078f939d23de2b5e7c953ab3c0d2b854ac0d93c8cefd",
+    "reference_immutable": true,
+    "wall_seconds": 4.903036763999808,
+    "cuda_peak_allocated_bytes": 0
+  },
+  "train_events": [
+    {
+      "event": "train",
+      "step": 1,
+      "native_loss": 2.32332181930542,
+      "dpo_loss": 0.6931471805599453,
+      "total_loss": 2.330253291111019,
+      "grad_norm_before_clip": 2.198863983154297,
+      "clipped_update_fraction": 1.0,
+      "relative_margin": 0.0,
+      "relative_win_rate": 0.0,
+      "absolute_chosen_win_rate": 1.0,
+      "policy_logp_gap": 67.23551903985208,
+      "native_grad_norm": 2.144334316253662,
+      "weighted_dpo_grad_norm": 0.40083247423171997,
+      "weighted_dpo_native_norm_ratio": 0.18692630529403687,
+      "gradient_cosine": 0.04431026801466942
+    }
+  ],
+  "fixed_train_audits": [
+    {
+      "step": 0,
+      "pairs": 8,
+      "scope": "fixed_train_audit_not_independent_validation",
+      "dpo_loss": 0.6931471805599453,
+      "relative_margin": 0.0,
+      "absolute_chosen_win_rate": 0.75,
+      "sampled_mean_quality": 0.5118430761730575,
+      "sampled_mean_detections": 32.3125,
+      "sampled_empty_rate": 0.0
+    },
+    {
+      "step": 1,
+      "pairs": 8,
+      "scope": "fixed_train_audit_not_independent_validation",
+      "dpo_loss": 0.6921887905484325,
+      "relative_margin": 0.01923148436981137,
+      "absolute_chosen_win_rate": 0.75,
+      "sampled_mean_quality": 0.5118430761730575,
+      "sampled_mean_detections": 32.3125,
+      "sampled_empty_rate": 0.0
+    },
+    {
+      "step": 2,
+      "pairs": 8,
+      "scope": "fixed_train_audit_not_independent_validation",
+      "dpo_loss": 0.6915905355445167,
+      "relative_margin": 0.0313115256412857,
+      "absolute_chosen_win_rate": 0.75,
+      "sampled_mean_quality": 0.5136028408034542,
+      "sampled_mean_detections": 32.375,
+      "sampled_empty_rate": 0.0
+    }
+  ],
+  "evaluation": {
+    "pilot": true,
+    "selected_step": 2,
+    "delta": {
+      "mAP50_95": 0.0,
+      "mAP50": 0.0,
+      "mAP75": 0.0,
+      "AR300": 0.0,
+      "precision": 0.0,
+      "operating_recall": 0.0,
+      "f1": 0.0,
+      "fp_per_image": 0.0,
+      "fn_rate": 0.0
+    }
+  },
+  "supported_model_head_checks": {
+    "yolov8n": {
+      "DFL_bins": 16,
+      "classes": 28
+    },
+    "yolov8s": {
+      "DFL_bins": 16,
+      "classes": 28
+    },
+    "yolov11n": {
+      "DFL_bins": 16,
+      "classes": 28
+    },
+    "yolov11s": {
+      "DFL_bins": 16,
+      "classes": 28
+    }
+  },
+  "dependency_lock_check": "uv lock --check --offline passed (137 packages)",
+  "artifact_directory": "/tmp/kb2-structured-v1-verified"
+}

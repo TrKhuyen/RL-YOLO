@@ -1,0 +1,49 @@
+{
+  "protocol": {
+    "steps": 1000,
+    "batch_size": 4,
+    "img_size": 640,
+    "lr": 1e-06,
+    "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+    "seed": 42,
+    "eval_interval": 250,
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.001,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "baseline",
+      "step": 750,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\ablation\\20260929T053020Z_352\\yolov8n\\baseline_last_best.pt",
+      "mAP50-95": 0.38559821248054504,
+      "mAP50": 0.5025312900543213,
+      "AP_small": 0.05961594730615616,
+      "Recall": 0.5566430687904358,
+      "FPS": 68.48372204385501,
+      "num_images": 479
+    },
+    {
+      "variant": "sampling",
+      "step": 500,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\ablation\\20260929T053020Z_352\\yolov8n\\sampling_last_best.pt",
+      "mAP50-95": 0.3861842155456543,
+      "mAP50": 0.5019211173057556,
+      "AP_small": 0.056900814175605774,
+      "Recall": 0.5572934150695801,
+      "FPS": 68.0046145358964,
+      "num_images": 479
+    },
+    {
+      "variant": "hybrid",
+      "step": 500,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\ablation\\20260929T053020Z_352\\yolov8n\\hybrid_last_best.pt",
+      "mAP50-95": 0.38624683022499084,
+      "mAP50": 0.5018318295478821,
+      "AP_small": 0.05673082172870636,
+      "Recall": 0.5580148100852966,
+      "FPS": 71.16190878834894,
+      "num_images": 479
+    }
+  ]
+}

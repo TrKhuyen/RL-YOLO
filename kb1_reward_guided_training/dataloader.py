@@ -112,9 +112,10 @@ class PestDataset(Dataset):
 
         # Lấy tất cả file ảnh
         exts = {'.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff'}
+        # Keep Windows Path ordering after relocation to Linux (seed/batch parity).
         self.img_paths = sorted([
             p for p in img_dir.iterdir() if p.suffix.lower() in exts
-        ])
+        ], key=lambda p: p.name.lower())
 
         # Map ảnh → label (cùng tên, khác extension)
         self.label_paths = []

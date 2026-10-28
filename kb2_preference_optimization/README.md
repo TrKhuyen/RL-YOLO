@@ -1,95 +1,141 @@
-# KB2: Feedback, Pairwise and Candidate-selection DPO for YOLO
+# KB2 — DPO cho toàn bộ kết quả detection
 
-KB2 fine-tune YOLO bằng phản hồi sinh từ prediction và ground truth trên tập
-train. DPO cung cấp ý tưởng chosen/rejected và reference constraint; native
-YOLO detection loss vẫn là objective chính.
+Thiết kế hiện hành từ **26/10/2026**: KB2 chỉ nghiên cứu DPO. KB1, KB2 và
+KB3 độc lập, cùng lấy best checkpoint supervised của KB1 theo từng kiến trúc
+làm điểm xuất phát và mốc so sánh. Không dùng checkpoint reward-guided/HPO
+làm đầu vào KB2.
 
-Chạy thử:
+## Pipeline
 
-    python generate_feedback.py --model yolov8n --device cuda
-
-Môi trường Python dùng chung nằm tại root RL-YOLO:
-
-- .venv
-- pyproject.toml
-- uv.lock
-- requirements.txt
-- .gitignore
-
-Chạy script từ root bằng Python trong .venv hoặc chuyển vào thư mục kịch bản
-theo hướng dẫn của từng script.
-
-## Pairwise preference branch
-
-The `pairwise` ablation now optimizes a real chosen/rejected ranking loss
-alongside native YOLO detection loss. On each augmented training image, decoded
-dense candidates are assigned to their highest-IoU ground truth object. A
-candidate with IoU >= 0.5 is chosen; a candidate for the same object with
-0.1 <= IoU < 0.5 is rejected. The loss is
-
-    native_loss + pairwise_alpha * softplus(
-        pairwise_margin - (logit(score_chosen) - logit(score_rejected)))
-
-The score is the current model probability for the GT class. Candidate and GT
-selection use detached boxes; gradients flow through both class scores. The
-native detection loss continues to train box coordinates and classification.
-Pairs are rebuilt online because stored teacher prediction indices cannot be
-mapped reliably after augmentation or model updates. Stored feedback pairs
-remain diagnostic data and are not used by this branch. This is pairwise
-preference optimization, not DPO: there is no reference model or policy
-log-ratio.
-
-The controlled runner includes `baseline`, `sampling`, `hybrid`, `pairwise`,
-and `dpo`. The pairwise branch uses the same shuffle sampling as baseline,
-so their difference isolates the ranking objective. It writes pair counts in
-the checkpoint and ablation report. Example:
-
-    bash kb2_preference_optimization/run_all_kb2.sh --model yolov8n --pairwise-alpha 0.01 --seed 42
-
-For an additional seed or loss weight using existing schema-2.1 feedback:
-
-    python kb2_preference_optimization/run_ablation.py --model yolov8n --feedback PATH_TO_SCHEMA_2_1_JSONL --variants baseline pairwise --seed 43 --pairwise-alpha 0.01 --output-dir PATH_TO_OUTPUT
-
-Choose loss weight on validation only and reserve the locked test split for
-final evaluation. Short pilots verify that the branch runs; they do not
-establish a reliable mAP gain. The 1000-update four-model comparison
-and three-seed YOLOv8n check are recorded in
-[KB2 report](../docs/report_final/KB2.md); they do not show a
-consistent validation mAP improvement.
-
-## Candidate-selection DPO branch
-
-The `dpo` branch applies the reference-relative objective from
-[the DPO paper](https://arxiv.org/abs/2305.18290) to a categorical policy for
-selecting a dense candidate. It uses a frozen copy of the original KB1 checkpoint,
-GT-derived chosen/rejected pairs from the CURRENT model on each augmented train
-image, and the same selected candidate indices for policy and reference. A is
-the best-IoU candidate for its GT; B has strictly lower current IoU and the
-highest GT-class score among eligible inferior candidates, including those
-above IoU 0.5. Reference geometry does not decide which candidate is preferred.
-This is an online adaptation of the DPO loss. Native YOLO loss
-remains the main objective. This policy covers candidate selection, rather than
-the probability of an entire set of bounding boxes. See [DPO.md](docs/DPO.md)
-for the policy definition, equation, limitations, and experiment results.
-
-The new pair source is `online_policy_gt_iou_v2`, with objective version
-`candidate_selection_online_dpo_v2`. Checkpoints using reference-selected
-pairs (`frozen_reference_same_gt_v1`) cannot resume as v2. Their reported
-metrics describe the historical method; v2 must be trained in a new output
-directory from the original KB1 checkpoint.
-
-Run only DPO (no baseline/pairwise retraining):
-
-```bash
-bash kb2_preference_optimization/run_all_kb2.sh --model yolov8n --variants dpo --steps 15000 --patience 5 --dpo-alpha 0.1 --dpo-beta 0.1
+```text
+S0 supervised → policy và reference có cùng trọng số
+Train image → policy phân phối class/background và bốn phía hộp DFL
+            → lấy mẫu nhiều action hoàn chỉnh → decode/NMS cố định → A/B
+Train GT → chấm toàn bộ A/B → chosen/rejected
+Replay cùng ảnh, cùng action → native loss + λ DPO loss → cập nhật policy
+Ordinary deterministic inference → canonical validation → best checkpoint
 ```
 
-The script generates train feedback and writes a new timestamped output directory.
-Training defaults to at most 15,000 updates (about 25 train passes at batch 4),
-validation every 1,000 updates, patience 5, and intermediate checkpoints every
-2,000 updates. This gives validation more time to settle; convergence still
-requires inspecting the training and validation curves. Override these with
-`--steps`, `--eval-interval`, `--patience`, and `--save-interval`.
-The default now runs all five variants on all five supported models. Select
-`--variants baseline pairwise dpo` for a focused comparison. To reuse existing
-feedback, use `run_ablation.py` as shown in [DPO.md](docs/DPO.md).
+**Đã triển khai và hoàn tất run dài YOLOv8n seed 42/43/44 với cùng S0 và fixed preferences.** Phiên bản
+`structured_detection_dpo_v1` học phân phối của *toàn bộ action có candidate
+indices*, nhận preference từ chất lượng bộ detection. Nó không tuyên bố tính
+likelihood biên của tập hộp không thứ tự sau NMS. DFL sampling là thiết kế mới
+của dự án, không phải inference YOLO chuẩn hoặc bảo đảm bất định được hiệu chỉnh.
+
+## Hỗ trợ và phạm vi
+
+- YOLOv8n/s và YOLO11n/s có head DFL; chạy đầu tiên với YOLOv8n.
+- YOLO26, YOLOv5, DP-YOLO chưa có policy tọa độ tương ứng trong bản này;
+  CLI từ chối thay vì dùng confidence proxy.
+- Chỉ train Detect head; backbone/neck, DFL integral và BN running stats cố định.
+- Offline preferences chỉ trên train; input resize/pad xác định, không augmentation
+  ngẫu nhiên khi replay. Native loss cũng dùng chính ảnh/GT đã replay đó.
+- Reference đóng băng và chấm cùng batch với policy ở mỗi update/audit.
+  Cached log-prob từ lúc sinh cặp chỉ dùng để kiểm tra replay/truy vết;
+  không dùng làm mẫu số DPO khi train batch khác kích thước.
+- Không hỗ trợ resume trong v1; checkpoint lưu optimizer/RNG phục vụ truy vết,
+  không hứa exact resume khi chưa lưu/replay batch cursor.
+
+## Chạy
+
+Môi trường hiện có: `.venv-ubuntu` (Ultralytics 8.4.163). Các lệnh dưới dùng
+GPU qua CUDA; runner cũng mặc định `--device cuda`. Từ repo root:
+
+```bash
+bash kb2_preference_optimization/run_all_kb2.sh --model yolov8n --device cuda --check-only
+
+# Pilot: không phải kết quả full validation hoặc bằng chứng gain.
+bash kb2_preference_optimization/run_all_kb2.sh \
+  --model yolov8n --device cuda --output-root /tmp/kb2_pilot_NEW \
+  --pilot-images 16 --image-size 192 --draws 4 \
+  --steps 2 --batch-size 2 --eval-interval 1 --eval-limit 2
+
+# Run nghiên cứu mới trên đầy đủ train/valid; chỉ chạy sau audit pilot.
+bash kb2_preference_optimization/run_all_kb2.sh \
+  --model yolov8n --device cuda \
+  --output-root kb2_preference_optimization/outputs/yolov8n_s42_NEW \
+  --steps 15000 --batch-size 4 --eval-interval 1000
+```
+
+Mỗi run cần thư mục mới, không ghi đè artifact. Không có `--variants` hoặc
+`--level`: sampling/hybrid/candidate-pairwise không thuộc pipeline hiện tại.
+Runner chạy một model mỗi lần để audit từng policy trước khi nhân rộng.
+
+Các bước có thể chạy riêng, dùng `python -m` từ repo root:
+
+```bash
+.venv-ubuntu/bin/python -m kb2_preference_optimization.generate_preferences \
+  --model yolov8n --device cuda --output /path/to/NEW_preferences
+
+.venv-ubuntu/bin/python -m kb2_preference_optimization.train_dpo \
+  --model yolov8n --device cuda --preferences /path/to/NEW_preferences \
+  --output /path/to/NEW_training
+
+.venv-ubuntu/bin/python -m kb2_preference_optimization.evaluate \
+  --model yolov8n --device cuda --checkpoint /path/to/NEW_training/best.pt \
+  --split valid --output /path/to/NEW_comparison.json
+```
+
+Chỉ chuyển `--split test` sau khi khóa phương pháp/checkpoint. Không dùng test
+để chọn sampler, β, λ, quality weights hoặc confidence. Pilot bị chặn khỏi
+evaluation test-final. Không đối chiếu trực tiếp AP lịch sử dùng NMS 0.45/cap100
+với AP mới dùng canonical NMS 0.60/cap300; evaluator mới đo lại S0 và DPO.
+
+## Tham số thử ban đầu
+
+| Tham số | Giá trị | Ý nghĩa |
+|---|---:|---|
+| Class/box temperature | 1 / 1 | Thang categorical sampling, dùng cùng khi sample và score |
+| Background logit | 0 | Lựa chọn background trong categorical C+1 |
+| Draws/ảnh | 4 | Sinh nhiều output; lấy best/worst đủ gap |
+| Minimum quality gap | 0.02 | Bỏ cặp gần hòa, không ép tạo pair |
+| Detection/localization quality | 0.8 / 0.2 | Heuristic được version trong manifest |
+| Native coefficient | 1 | Native detection loss |
+| DPO weight λ / β | 0.01 / 0.1 | Giá trị pilot, **chưa được tối ưu** |
+| AdamW LR / weight decay | 1e-6 / 5e-4 | Fine-tune head |
+| Train batch / input | 4 / 640 | Full-size protocol |
+| Clip norm | 1 | Toàn bộ tham số được học |
+| Validation / patience | 1000 / 5 | Step 0 được tham gia chọn best; min delta 1e-4 |
+
+Tổng log-prob là tổng trên action đầy đủ, không chia riêng theo số hộp chosen
+hoặc rejected. Tăng độ phân giải có thể thay đổi thang log-ratio; cần audit β/λ.
+Không suy λ=0.01 là DPO chiếm đúng 1% gradient. Pilot input640 cho thấy
+λ=0.1 có weighted DPO/native gradient norm khoảng 1.87 ở batch đầu; vì vậy
+mặc định thử được hạ xuống 0.01. Một batch chưa xác nhận strength toàn run.
+
+## Metric và kiểm chứng
+
+- Chọn checkpoint bằng **validation mAP50–95**.
+- mAP50, mAP75, AR300, APs/m/l kèm area support, AP/AR/support theo lớp.
+- P/R/F1 tại confidence 0.25, IoU 0.5; FP/ảnh, FN rate.
+- Matched mean IoU kèm GT coverage và GT-normalized IoU; không bỏ qua FN.
+- Fixed train audit: DPO loss, relative/absolute gap, chất lượng output lấy mẫu,
+  số detection, empty rate. Đây không phải đánh giá holdout độc lập.
+- Gradient norm/cosine native–DPO và tỷ lệ update bị clipping.
+- `evaluation_wall_seconds` là thời gian evaluator, không phải FPS/latency thuần.
+- Chạy nhiều seed continuation và báo paired delta với cùng S0 sau khi pilot đạt.
+
+```bash
+YOLO_CONFIG_DIR=/tmp MPLCONFIGDIR=/tmp/kb2-matplotlib \
+  .venv-ubuntu/bin/python -m unittest discover -s kb2_preference_optimization/tests -v
+```
+
+Chi tiết xác suất, bộ chấm và giới hạn: [docs/DPO.md](docs/DPO.md).
+Kết quả kiểm chứng kỹ thuật và phạm vi đã dọn:
+[KB2_REDESIGN_20261026.md](../docs/report_final/KB2_REDESIGN_20261026.md).
+Sửa reference cùng batch và kết quả pilot GPU:
+[KB2_REFERENCE_BATCH_FIX_20261026.md](../docs/report_final/KB2_REFERENCE_BATCH_FIX_20261026.md).
+Run dài YOLOv8n seed 42: early stop 14k, best 9k; validation mAP50–95
+37,8084% → 38,2432%, precision tăng nhưng recall giảm. Đã đánh giá GPU lại
+best/S0 trên đủ 479 ảnh; chưa đánh giá test. Xem
+[KB2_FULL_RUN_REVIEW_20261026.md](../docs/report_final/KB2_FULL_RUN_REVIEW_20261026.md).
+Ba continuation seed: best validation mAP50–95 trung bình **38,2523% ± 0,0429 điểm**,
+gain **+0,4438 điểm** so S0. Precision/F1 tăng nhưng recall giảm ở cả ba seed;
+lớp Corn Gray leaf spot (14 GT valid) đóng góp khoảng 95,33% net gain trung bình.
+Đã đánh giá GPU lại cả ba best/S0. Xem
+[KB2_MULTISEED_REVIEW_20261026.md](../docs/report_final/KB2_MULTISEED_REVIEW_20261026.md).
+Sau sinh preference, thư mục `preferences/previews/` có tối đa 8 ảnh so sánh
+GT/chosen/rejected để kiểm tra trực quan trước khi train dài.
+Các artifact cũ đã dọn theo yêu cầu: [legacy/cleanup_manifest.json](legacy/cleanup_manifest.json).
+Source và bảng số nhỏ cũ được giữ trong `legacy/`; không dùng chúng làm kết quả
+của objective mới. Checkpoint KB1 và dữ liệu chung không bị dọn.

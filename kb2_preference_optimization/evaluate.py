@@ -1,378 +1,78 @@
-"""
-evaluate.py – Đánh giá và so sánh: Supervised vs RL Level 1/2/3.
-
-So sánh:
-  - Supervised-only checkpoint (baseline)
-  - RL Level 1 (REINFORCE + EMA)
-  - RL Level 2 (GRPO-style Group Aug)
-  - RL Level 3 (GRPO + DAPO)
-
-Metrics: mAP@50, mAP@50-95, AP_small, Recall, FPS.
-
-Chạy:
-    cd kb2_preference_optimization
-    python evaluate.py
-    python evaluate.py --model dp_yolo --split test
-    python evaluate.py --levels 1 2 3  # so sánh cả 3 levels
-"""
-
+"""Compare S0 and a completed structured-DPO checkpoint with identical inference."""
 import argparse
-import time
+import json
 from pathlib import Path
 
-import pandas as pd
 import torch
-from torchmetrics.detection import MeanAveragePrecision
 
-from dataloader import get_pest_dataloader
-
-
-# =============================================================================
-# Cấu hình experiments
-# =============================================================================
-
-# Supervised checkpoints (từ kb1_reward_guided_training hoặc train riêng)
-SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent
-KB1_DIR = REPO_ROOT / 'kb1_reward_guided_training'
-
-SUPERVISED = {
-    'YOLOv5s':  KB1_DIR / 'checkpoint_based/yolov5s/weights/best.pt',
-    'YOLOv8n':  KB1_DIR / 'checkpoint_based/yolov8n/weights/best.pt',
-    'YOLOv8s':  KB1_DIR / 'checkpoint_based/yolov8s/weights/best.pt',
-    'YOLOv11n': KB1_DIR / 'checkpoint_based/yolov11n/weights/best.pt',
-    'YOLOv11s': KB1_DIR / 'checkpoint_based/yolov11s/weights/best.pt',
-    'YOLO26n':  KB1_DIR / 'checkpoint_based/yolo26n/weights/best.pt',
-    'DP-YOLO':  KB1_DIR / 'checkpoint_based/dp_yolo/weights/best.pt',
-}
-
-# RL checkpoints (từ train_rl.py – mỗi level có 1 best.pt)
-RL_CHECKPOINTS = {
-    'YOLOv5s': {
-        'l1': 'checkpoint_preference_optimization/yolov5s_rl_l1_best.pt',
-        'l2': 'checkpoint_preference_optimization/yolov5s_rl_l2_anchor_dpo_best.pt',
-        'l3': 'checkpoint_preference_optimization/yolov5s_rl_l3_best.pt',
-    },
-    'YOLOv8n': {
-        'l1': 'checkpoint_preference_optimization/yolov8n_rl_l1_best.pt',
-        'l2': SCRIPT_DIR / 'checkpoint_preference_optimization/yolov8n_rl_l2_anchor_dpo_best.pt',
-        'l3': 'checkpoint_preference_optimization/yolov8n_rl_l3_best.pt',
-    },
-    'YOLOv8s': {
-        'l1': 'checkpoint_preference_optimization/yolov8s_rl_l1_best.pt',
-        'l2': 'checkpoint_preference_optimization/yolov8s_rl_l2_anchor_dpo_best.pt',
-        'l3': 'checkpoint_preference_optimization/yolov8s_rl_l3_best.pt',
-    },
-    'YOLOv11n': {
-        'l1': 'checkpoint_preference_optimization/yolov11n_rl_l1_best.pt',
-        'l2': 'checkpoint_preference_optimization/yolov11n_rl_l2_anchor_dpo_best.pt',
-        'l3': 'checkpoint_preference_optimization/yolov11n_rl_l3_best.pt',
-    },
-    'YOLOv11s': {
-        'l1': 'checkpoint_preference_optimization/yolov11s_rl_l1_best.pt',
-        'l2': 'checkpoint_preference_optimization/yolov11s_rl_l2_anchor_dpo_best.pt',
-        'l3': 'checkpoint_preference_optimization/yolov11s_rl_l3_best.pt',
-    },
-    'YOLO26n': {
-        'l1': 'checkpoint_preference_optimization/yolo26n_rl_l1_best.pt',
-        'l2': 'checkpoint_preference_optimization/yolo26n_rl_l2_anchor_dpo_best.pt',
-        'l3': 'checkpoint_preference_optimization/yolo26n_rl_l3_best.pt',
-    },
-    'DP-YOLO': {
-        'l1': 'checkpoint_preference_optimization/dp_yolo_rl_l1_best.pt',
-        'l2': 'checkpoint_preference_optimization/dp_yolo_rl_l2_anchor_dpo_best.pt',
-        'l3': 'checkpoint_preference_optimization/dp_yolo_rl_l3_best.pt',
-    },
-}
-
-for levels in RL_CHECKPOINTS.values():
-    for level, checkpoint in levels.items():
-        checkpoint_path = Path(checkpoint)
-        levels[level] = checkpoint_path if checkpoint_path.is_absolute() else SCRIPT_DIR / checkpoint_path
+from . import OBJECTIVE_VERSION
+from .adapter import DFLAdapter, SUPPORTED_MODELS
+from .artifacts import (assert_provenance, atomic_json, sha256,
+                        source_checkpoint, source_provenance)
+from .data import detection_loader
+from .metrics import evaluate_adapter
 
 
-# Framework mapping
-FRAMEWORKS = {
-    'YOLOv5s':  'v5',
-    'YOLOv8n':  'ultralytics',
-    'YOLOv8s':  'ultralytics',
-    'YOLOv11n': 'ultralytics',
-    'YOLOv11s': 'ultralytics',
-    'YOLO26n':  'ultralytics',
-    'DP-YOLO':  'v5',
-}
+def evaluate(args):
+    destination = Path(args.output)
+    if destination.exists():
+        raise FileExistsError(destination)
+    provenance = source_provenance(args.model)
+    adapter = DFLAdapter(source_checkpoint(args.model), args.device)
+    payload = None
+    image_size = args.image_size
+    if args.checkpoint:
+        checkpoint = Path(args.checkpoint).resolve()
+        payload = torch.load(checkpoint, map_location='cpu', weights_only=False)
+        if payload.get('objective_version') != OBJECTIVE_VERSION:
+            raise ValueError('Historical candidate-DPO checkpoints are incompatible')
+        manifest_path = checkpoint.parent / 'manifest.json'
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        completed = json.loads((checkpoint.parent / 'completed.json').read_text(encoding='utf-8'))
+        if (manifest != payload['manifest'] or completed['status'] != 'complete'
+                or completed['manifest_sha256'] != sha256(manifest_path)):
+            raise ValueError('Run metadata is incomplete or mismatched')
+        if checkpoint.name not in ('best.pt', 'last.pt'):
+            raise ValueError('Only completed best.pt/last.pt are supported')
+        if sha256(checkpoint) != completed[f'{checkpoint.stem}_sha256']:
+            raise ValueError('Checkpoint hash mismatch')
+        assert_provenance(manifest['provenance'], provenance)
+        image_size = manifest['config']['image_size']
+        if args.split == 'test' and (manifest['config']['pilot'] or args.limit):
+            raise ValueError('Pilot runs/partial evaluation cannot be presented as final test')
+    loader = detection_loader(args.split, image_size, args.batch_size)
+    report = {'provenance': provenance, 'split': args.split, 'image_size': image_size,
+              'supervised': evaluate_adapter(adapter, loader, args.device, args.limit)}
+    if payload is not None:
+        adapter.model.load_state_dict(payload['state_dict'], strict=True)
+        report['dpo'] = evaluate_adapter(adapter, loader, args.device, args.limit)
+        report['checkpoint'] = str(Path(args.checkpoint).resolve())
+        report['checkpoint_sha256'] = sha256(args.checkpoint)
+        report['selected_step'] = payload['step']
+        report['pilot'] = payload['manifest']['config']['pilot']
+        report['delta'] = {key: report['dpo'][key] - report['supervised'][key]
+                           for key in ('mAP50_95', 'mAP50', 'mAP75', 'AR300', 'precision',
+                                       'operating_recall', 'f1', 'fp_per_image', 'fn_rate')}
+    atomic_json(destination, report)
+    print(json.dumps(report, indent=2, ensure_ascii=False))
+    return report
 
 
-# =============================================================================
-# Load model (xử lý cả supervised và RL checkpoint)
-# =============================================================================
-
-def _load_model_for_eval(
-    checkpoint:      str,
-    framework:       str,
-    device:          str,
-    conf_thres:      float = 0.25,
-    iou_thres:       float = 0.45,
-    supervised_ckpt: str   = None,
-):
-    """
-    Load model về dạng callable để evaluate.
-    Xử lý 2 loại checkpoint:
-      1. Standard (supervised): ultralytics/torch format
-      2. RL checkpoint (dict với is_rl_checkpoint=True)
-
-    Returns:
-        callable(images) → list[dict(boxes, scores, labels)]
-    """
-    ckpt_path = Path(checkpoint)
-    if not ckpt_path.exists():
-        return None
-
-    # Thử detect RL checkpoint
-    try:
-        data = torch.load(str(ckpt_path), map_location='cpu', weights_only=False)
-        is_rl = isinstance(data, dict) and data.get('is_rl_checkpoint', False)
-    except Exception:
-        is_rl = False
-
-    if is_rl:
-        # RL checkpoint: cần load architecture từ supervised ckpt trước
-        assert supervised_ckpt and Path(supervised_ckpt).exists(), (
-            f"RL checkpoint cần supervised_ckpt để load architecture: {supervised_ckpt}"
-        )
-        model = _load_standard(supervised_ckpt, framework, device)
-        # Apply RL weights
-        state = data.get('state_dict', data)
-        if hasattr(model, 'model'):
-            model.model.load_state_dict(state, strict=False)
-        else:
-            model.load_state_dict(state, strict=False)
-        print(f"    RL checkpoint loaded (step={data.get('step', '?')}, "
-              f"level={data.get('level', '?')})")
-    else:
-        model = _load_standard(str(ckpt_path), framework, device)
-
-    model.eval() if hasattr(model, 'eval') else None
-    return model
-
-
-def _load_standard(checkpoint: str, framework: str, device: str):
-    """Load standard (non-RL) checkpoint."""
-    if framework == 'v5':
-        import sys
-        sys.path.insert(0, 'yolov5')
-        from models.common import DetectMultiBackend
-        return DetectMultiBackend(checkpoint, device=torch.device(device))
-    else:
-        from ultralytics import YOLO
-        return YOLO(checkpoint).to(device)
-
-
-# =============================================================================
-# Evaluate single checkpoint
-# =============================================================================
-
-def evaluate_checkpoint(
-    model,
-    val_loader,
-    framework:  str,
-    device:     str   = 'cuda',
-    conf_thres: float = 0.25,
-    iou_thres:  float = 0.45,
-) -> dict:
-    """
-    Evaluate 1 model checkpoint trên val/test set.
-    Trả về dict: mAP50, mAP50-95, AP_small, Recall, FPS.
-    """
-    metric = MeanAveragePrecision(
-        iou_thresholds=[0.50 + 0.05 * i for i in range(10)],
-        extended_summary=False,
-        class_metrics=False,
-        backend='faster_coco_eval',
-    )
-
-    t0 = time.time()
-    n_imgs = 0
-
-    with torch.no_grad():
-        for batch_i, (images, targets) in enumerate(val_loader, 1):
-            images = images.to(device)
-            preds_batch, targets_batch = [], []
-
-            if framework == 'ultralytics':
-                results = model(images, conf=conf_thres, iou=iou_thres,
-                                max_det=100, verbose=False)
-                for r, t in zip(results, targets):
-                    boxes = r.boxes.xyxy.cpu()
-                    scores = r.boxes.conf.cpu()
-                    labels = r.boxes.cls.int().cpu()
-                    finite = torch.isfinite(boxes).all(1) & torch.isfinite(scores)
-                    preds_batch.append({
-                        'boxes': boxes[finite], 'scores': scores[finite],
-                        'labels': labels[finite],
-                    })
-                    targets_batch.append({
-                        'boxes':  t['boxes'].cpu(),
-                        'labels': t['labels'].int().cpu(),
-                    })
-            else:
-                # YOLOv5 style
-                from utils.general import non_max_suppression
-                out = model.model(images)
-                if isinstance(out, tuple):
-                    out = out[0]
-                dets = non_max_suppression(out.detach(), conf_thres, iou_thres)
-                for det, t in zip(dets, targets):
-                    if det is not None and len(det):
-                        preds_batch.append({
-                            'boxes':  det[:, :4].cpu(),
-                            'scores': det[:, 4].cpu(),
-                            'labels': det[:, 5].int().cpu(),
-                        })
-                    else:
-                        preds_batch.append({
-                            'boxes':  torch.zeros((0, 4)),
-                            'scores': torch.zeros(0),
-                            'labels': torch.zeros(0, dtype=torch.int),
-                        })
-                    targets_batch.append({
-                        'boxes':  t['boxes'].cpu(),
-                        'labels': t['labels'].int().cpu(),
-                    })
-
-            n_imgs += len(images)
-            metric.update(preds_batch, targets_batch)
-            if batch_i % 10 == 0 or batch_i == len(val_loader):
-                print(f'    eval {batch_i}/{len(val_loader)} batches '
-                      f'({n_imgs} images)', flush=True)
-
-    elapsed = time.time() - t0
-    fps = n_imgs / elapsed
-
-    res = metric.compute()
-
-    return {
-        'mAP50':    float(res.get('map_50',    torch.tensor(0.0)).item()),
-        'mAP50-95': float(res.get('map',       torch.tensor(0.0)).item()),
-        'AP_small': float(res.get('map_small', torch.tensor(0.0)).item()),
-        'Recall':   float(res.get('mar_100',   torch.tensor(0.0)).item()),
-        'FPS':      fps,
-    }
-
-
-# =============================================================================
-# Run full comparison
-# =============================================================================
-
-def run_comparison(args):
-    """So sánh supervised vs RL Level 1/2/3 cho tất cả model."""
-    device = args.device
-    models_to_eval = (
-        list(SUPERVISED.keys()) if args.model == 'all'
-        else [args.model]
-    )
-    levels_to_eval = args.levels
-
-    data_root = args.data_root
-    split     = args.split
-    loader    = get_pest_dataloader(
-        data_root, split=split, batch_size=16, img_size=640
-    )
-
-    rows = []
-
-    for model_name in models_to_eval:
-        framework = FRAMEWORKS.get(model_name, 'ultralytics')
-        sup_ckpt  = SUPERVISED.get(model_name, '')
-        rl_ckpts  = RL_CHECKPOINTS.get(model_name, {})
-
-        # ── Supervised baseline ─────────────────────────────────────────
-        if Path(sup_ckpt).exists():
-            print(f'Evaluating {model_name} [supervised]...')
-            model = _load_model_for_eval(sup_ckpt, framework, device)
-            if model:
-                m = evaluate_checkpoint(model, loader, framework, device)
-                rows.append({'Model': model_name, 'Stage': 'supervised', **m})
-                print(f'  mAP50={m["mAP50"]:.4f} AP_small={m["AP_small"]:.4f} '
-                      f'Recall={m["Recall"]:.4f} FPS={m["FPS"]:.1f}')
-        else:
-            print(f'  SKIP {model_name} [supervised]: not found at {sup_ckpt}')
-
-        # ── RL levels ───────────────────────────────────────────────────
-        for level_key in [f'l{l}' for l in levels_to_eval]:
-            rl_ckpt = rl_ckpts.get(level_key, '')
-            if not rl_ckpt or not Path(rl_ckpt).exists():
-                print(f'  SKIP {model_name} [{level_key}]: not found at {rl_ckpt}')
-                continue
-
-            print(f'Evaluating {model_name} [RL {level_key}]...')
-            model = _load_model_for_eval(
-                rl_ckpt, framework, device, supervised_ckpt=sup_ckpt
-            )
-            if model:
-                m = evaluate_checkpoint(model, loader, framework, device)
-                rows.append({'Model': model_name, 'Stage': f'RL {level_key}', **m})
-                print(f'  mAP50={m["mAP50"]:.4f} AP_small={m["AP_small"]:.4f} '
-                      f'Recall={m["Recall"]:.4f} FPS={m["FPS"]:.1f}')
-
-    if not rows:
-        print('\nNo results. Run train_rl.py first.')
-        return None
-
-    df = pd.DataFrame(rows)
-
-    # ── Tính delta RL - Supervised ──────────────────────────────────────
-    print(f'\n{"="*70}')
-    print('COMPARISON: RL vs Supervised')
-    print(f'{"="*70}')
-
-    for model_name in df['Model'].unique():
-        df_m = df[df['Model'] == model_name]
-        sup_row = df_m[df_m['Stage'] == 'supervised']
-        if sup_row.empty:
-            continue
-        print(f'\n{model_name}:')
-        for _, rl_row in df_m[df_m['Stage'].str.startswith('RL')].iterrows():
-            stage = rl_row['Stage']
-            for metric in ['mAP50', 'AP_small', 'Recall']:
-                sup_val = sup_row[metric].values[0]
-                rl_val  = rl_row[metric]
-                delta   = rl_val - sup_val
-                sign    = '+' if delta >= 0 else ''
-                print(f'  {stage} | {metric}: {sup_val:.4f} → {rl_val:.4f} '
-                      f'({sign}{delta:.4f})')
-
-    # ── Lưu kết quả ─────────────────────────────────────────────────────
-    out_dir = SCRIPT_DIR / 'results' / 'tables_clean'
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_csv = out_dir / f'comparison_{split}.csv'
-    df.to_csv(out_csv, index=False)
-
-    print(f'\n{"="*70}')
-    print(f'Full table ({split}):')
-    print(df.to_markdown(index=False, floatfmt='.4f'))
-    print(f'\nSaved: {out_csv}')
-    return df
-
-
-# =============================================================================
-# Entry point
-# =============================================================================
-
-def main():
-    parser = argparse.ArgumentParser(description='Evaluate RL Fine-tuning Comparison')
-    parser.add_argument('--model', default='all',
-                        choices=['all', 'YOLOv5s', 'YOLOv8n', 'YOLOv8s',
-                                 'YOLOv11n', 'YOLOv11s', 'YOLO26n', 'DP-YOLO'])
-    parser.add_argument('--levels', type=int, nargs='+', default=[1, 2, 3],
-                        help='RL levels to compare (e.g. --levels 2 3)')
-    parser.add_argument('--split',  default='val', choices=['val', 'test'])
-    parser.add_argument('--data-root', default=str(REPO_ROOT / 'pre-data/data/v2i_cleanned'))
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--model', choices=SUPPORTED_MODELS, default='yolov8n')
+    parser.add_argument('--checkpoint', help='omit for supervised-only evaluation')
+    parser.add_argument('--split', choices=('valid', 'test'), default='valid')
     parser.add_argument('--device', default='cuda')
-    args = parser.parse_args()
-
-    run_comparison(args)
+    parser.add_argument('--batch-size', type=int, default=8)
+    parser.add_argument('--image-size', type=int, default=640)
+    parser.add_argument('--limit', type=int, default=0)
+    parser.add_argument('--output', required=True)
+    args = parser.parse_args(argv)
+    if args.limit < 0 or args.batch_size < 1:
+        parser.error('limit must be nonnegative and batch size positive')
+    return args
 
 
 if __name__ == '__main__':
-    main()
+    evaluate(parse_args())

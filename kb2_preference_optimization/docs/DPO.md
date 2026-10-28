@@ -1,177 +1,150 @@
-# DPO online cho chọn candidate của YOLO
+# Structured whole-output DPO cho YOLO — thiết kế 26/10/2026
 
-Nhánh `dpo` được thêm trên branch `DPO` ngày 2026-10-07 vào trainer
-`train_feedback.py` và runner `run_ablation.py`. Đây là một nhánh ablation riêng,
-bên cạnh baseline, sampling, hybrid và pairwise. Mã Level 2 trong `train_rl.py`
-là thử nghiệm cũ, có quy tắc chọn cặp khác và không được script này gọi.
+**Objective:** `structured_detection_dpo_v1`. Đây là implementation mới; các
+run candidate-DPO v1/v2 ngày 07/10 không chứng minh hiệu quả của phương pháp này.
 
-Phiên bản hiện tại là `candidate_selection_online_dpo_v2`, nguồn cặp
-`online_policy_gt_iou_v2`: GT và hộp của model **đang train** xác định ưu tiên.
-Phiên bản v1 chọn cặp bằng hộp reference; các số thực nghiệm v1 ở cuối tài liệu
-chỉ mô tả phương pháp cũ. Không resume checkpoint v1 thành v2 hoặc dùng số v1
-để kết luận về v2.
+## 1. Ánh xạ
 
-## Policy và objective
+| DPO LLM | KB2 |
+|---|---|
+| Prompt | Một ảnh train đã resize/pad xác định |
+| Response | Toàn bộ action indexed-grid: background/class và bin tọa độ |
+| Hai responses | Hai action khác nhau, render thành hai bộ detection A/B |
+| Preference annotator | Matching toàn bộ output với GT train |
+| SFT | Best checkpoint supervised chung từ KB1 |
+| Policy/reference | Hai bản S0; reference không update |
 
-Với ảnh train sau augmentation `x`, lớp GT `c` và chỉ số candidate `a`, gọi
-`q_theta(a,c|x)` là xác suất lớp do YOLO trả về. Định nghĩa policy categorical:
+Hai output dùng cùng ảnh, trọng số và quy tắc sampling. Reference không phải
+model chuyên sinh rejected. Không đưa GT vào sampler; không dùng hai ảnh
+augmentation khác nhau thay cho hai responses của cùng input.
 
-```text
-z_theta(a,c|x) = logit(clamp(q_theta(a,c|x), 1e-6, 1-1e-6))
-pi_theta(a|x,c) = softmax_a(z_theta(a,c|x))
-```
+## 2. Policy chuẩn hóa và full action likelihood
 
-Softmax chạy trên toàn bộ dense candidate của cùng lớp. Đây là phân phối
-chuẩn hóa cho hành động **chọn chỉ số candidate**, không phải likelihood của
-toàn bộ detection set hoặc likelihood của tọa độ hộp. Không lấy riêng sigmoid
-confidence rồi mặc định coi đó là xác suất sinh detection set.
-
-Reference `pi_ref` là bản sao đóng băng của checkpoint KB1 khởi đầu, được tạo
-trước khi load policy resume. Reference không nằm trong optimizer và forward
-trong `no_grad`/eval. Ảnh và GT sau augmentation được dùng giống hệt cho hai
-mô hình; grid candidate phải cùng shape. **Prediction hiện tại của policy**
-được detach để chọn cặp bằng GT:
-
-- Mỗi candidate thuộc GT có IoU cao nhất.
-- A là candidate có IoU cao nhất trong các candidate thuộc GT đó, với IoU >= 0.5.
-- B có điểm lớp GT cao nhất trong các candidate cùng GT với IoU >= 0.1 và
-  IoU thấp hơn A ít nhất sai số số học `1e-6`. B có thể có IoU >= 0.5;
-  ví dụ A=0.9 và B=0.6 vẫn là cặp được phép.
-- Không có A hoặc B hợp lệ thì bỏ GT đó. Candidate thuộc GT khác không làm B;
-  IoU hòa nhau không tạo preference. Confidence chỉ chọn hard negative giữa
-  các B có chất lượng thấp hơn; không được đảo chosen/rejected của GT.
-
-Các chỉ số A/B **đã chọn từ policy** được dùng nguyên vẹn cho cả policy và
-reference khi tính loss của bước đó. Reference chỉ cung cấp log-prob trên
-cùng action indices, không chọn lại cặp, không gán nhãn ưu tiên và không được
-cập nhật. Bước tiếp theo tạo cặp mới theo hộp policy mới so GT. Nhãn lỗi về
-geometry của reference không được dùng để tiếp tục ưu tiên một hộp policy đã
-trở nên kém hơn. Phần chọn cặp rời rạc không có gradient; class scores policy
-vẫn giữ gradient để tăng ưu tiên A và giảm ưu tiên B.
+Với mỗi vị trí grid i, class logits g_i của YOLO tạo categorical:
 
 ```text
-gap_policy = log pi_theta(A|x,c) - log pi_theta(B|x,c)
-gap_ref    = log pi_ref(A|x,c)   - log pi_ref(B|x,c)
-L_DPO      = mean(-log sigmoid(beta * (gap_policy - gap_ref)))
-L_total    = L_native_YOLO + alpha * L_DPO
+p_i = softmax([background_logit, g_i,1, ..., g_i,C] / T_class)
 ```
 
-Đây là objective reference-relative theo công thức trong
-[bài DPO gốc, Eq. 7](https://arxiv.org/html/2305.18290v3).
-Pipeline offline của bài gốc dùng preference dataset đã có nhãn; ở đây cặp
-được tạo lại online từ IoU policy/GT. Vì vậy dùng công thức DPO không tự động
-chứng minh mọi bảo đảm lý thuyết của pipeline offline cho bài detection này.
-Khi policy giống reference, `L_DPO = log(2)` trên batch có cặp hợp lệ, nhưng
-gradient policy vẫn khác 0. Không thêm margin của nhánh pairwise vào công thức.
-`beta` điều khiển thang log-ratio trong objective; không phải phép đo KL và
-không bảo đảm KL toàn mô hình luôn dưới một ngưỡng cố định.
+Category 0 là background. Cách chuẩn hóa này là lựa chọn riêng của KB2, không
+phải xác suất objectness native của YOLOv8. Background logit và temperature
+được khóa, lưu trong manifest và dùng y hệt khi sample/chấm likelihood.
 
-`alpha=0.1`, `beta=0.1` là cấu hình thử ban đầu, chưa được chứng minh tối ưu.
-Nhánh này dùng shuffle giống baseline và không cộng thêm sampling/hybrid/
-pairwise/object loss để giữ đối chứng dễ diễn giải. Cả pairwise và DPO v2
-đều chọn cặp từ policy hiện tại. Pairwise giữ quy tắc B có IoU < 0.5,
-còn DPO v2 cho phép mọi B có IoU thấp hơn A và >= 0.1. So hai nhánh này
-thay đổi cả objective lẫn miền chọn B; chưa cô lập riêng tác dụng reference.
+Với mỗi cạnh s thuộc l/t/r/b, raw DFL logits tạo:
 
-## Phạm vi và giới hạn
-
-Gradient DPO đi qua điểm lớp của A/B và các tham số mạng tạo điểm đó; không
-đi trực tiếp qua tọa độ hộp. Native loss vẫn học regression và classification.
-Nhánh này không trực tiếp xử lý GT không có A >= 0.5, false positive xa GT,
-số lượng detection hoặc ranking sau NMS. Chất lượng A/B được tính lại từ
-hộp policy so với GT ở từng bước. Cải thiện gap so reference chưa bảo đảm
-điểm A cao hơn B tuyệt đối; không suy ra mAP tăng chỉ vì loss DPO giảm.
-
-Checkpoint ghi `candidate_selection_dpo_native_loss`, hash checkpoint nền và
-reference, policy/pair schema, `dpo_objective_version`, alpha/beta, số cặp
-và số bước có cặp. Checkpoint v1 không được resume vào v2. Resume
-từ chối thay checkpoint nền, objective, feedback hoặc các cấu hình train
-chính; reference được tái tạo từ nền ban đầu. Resume hiện vẫn chưa phục hồi
-đầy đủ RNG/sampler/vị trí batch, nên không dùng resume để tuyên bố tái lập
-chính xác run liên tục. Các đối chứng thực nghiệm dùng run mới từ đầu.
-
-## Chạy
-
-Từ root repo, chạy riêng DPO cho YOLOv8n:
-
-```bash
-bash kb2_preference_optimization/run_all_kb2.sh --model yolov8n --variants dpo --steps 15000 --patience 5 --dpo-alpha 0.1 --dpo-beta 0.1
+```text
+r_i,s = softmax(raw_DFL_i,s / T_box)
 ```
 
-Chạy baseline/pairwise/DPO cùng protocol, dùng feedback hiện có trên Windows:
+Một action a gồm category ở mọi grid slot; bốn DFL bins nếu category khác
+background. Lưu foreground indices/classes/bins, background còn lại được suy
+ra **nhưng vẫn tính trong likelihood**:
 
-```powershell
-$env:NO_ALBUMENTATIONS_UPDATE='1'
-.venv/Scripts/python.exe kb2_preference_optimization/run_ablation.py --model yolov8n --variants baseline pairwise dpo --feedback kb2_preference_optimization/feedback_data_clean/yolov8n_train_20261007T075619Z_354.jsonl --steps 15000 --eval-interval 1000 --patience 5 --save-interval 2000 --seed 42 --dpo-alpha 0.1 --dpo-beta 0.1 --output-dir kb2_preference_optimization/checkpoint_preference_optimization/dpo_online_v2_comparison_s42
+```text
+log π(a|x) = sum_i log p_i(category_i)
+            + sum_foreground_i sum_s log r_i,s(bin_i,s)
 ```
 
-Chọn thư mục output mới cho mỗi lần thử. `--variants dpo` chỉ train DPO.
-Ngân sách mặc định hiện là tối đa **15.000 update**: với 2.411 ảnh train,
-batch 4 và shuffle, loader train bỏ batch cuối không đủ 4 ảnh nên có 602 batch,
-tương đương khoảng
-24,9 lượt nếu chạy đủ ngân sách. Validation mỗi 1.000 update; early stopping
-sau 5 lần liên tiếp không cải thiện best mAP50–95 quá `1e-4` (khoảng
-5.000 update), thay cho cấu hình cũ 3 lần mỗi 250 update. Checkpoint trung
-gian lưu mỗi 2.000 update. Đây là ngân sách để theo dõi plateau, không phải
-bằng chứng đã hội tụ. Giữ cùng ngân sách và quy tắc dừng cho các nhánh;
-cần xem cả số bước thực chạy vì early stopping có thể dừng chúng khác nhau.
-Các pilot và run v1 bên dưới vẫn giữ số bước lịch sử, không được đổi thành
-kết quả 15.000 bước. Learning rate và alpha/beta giữ nguyên.
+Không có tọa độ random ngoài phân phối được chấm; không dùng log(mean confidence),
+âm native loss hoặc score chất lượng làm log-probability. Không chia theo số
+detection từng output. Tổng xác suất các complete action bằng một trong policy
+factorized này. Các độc lập giữa slot/cạnh là giả thiết mô hình hóa.
 
-Native checkpoint đầu vào phải đúng model và hash của feedback. Pilot dùng
-2.411 ảnh train, 479 ảnh validation, ảnh 640, batch 4, AdamW lr `1e-6`,
-weight decay `5e-4`. AP dùng confidence `0.001`, NMS IoU `0.45`, max_det 100.
-Checkpoint tốt nhất được chọn theo validation mAP50-95, gồm cả step 0.
-Không dùng tập test để chọn alpha/beta.
+Native DFL decoder dùng kỳ vọng; bộ lấy mẫu dùng bins. Vì vậy gradient DPO
+đi vào raw regression logits khi chấm bins đã lưu, còn native loss tiếp tục
+học kỳ vọng tọa độ. Chưa có bảo đảm sampling tốt hơn đồng nghĩa deterministic
+inference tốt hơn; evaluation chính luôn đo inference YOLO thường.
 
-Mỗi nhánh ghi `*_last_metrics.jsonl` chứa loss, gradient norm, AP ở các mốc
-validation; nhánh DPO còn ghi số cặp, chênh gap so reference, tỷ lệ A>B của
-policy/reference và tỷ lệ gap policy cải thiện so reference. V2 ghi thêm
-gap policy tuyệt đối, IoU chosen/rejected và chênh lệch chất lượng theo GT.
-Các tỷ lệ này
-đo trên batch train đang xét trước optimizer update, không phải AP validation.
+## 3. Renderer cố định và giới hạn set likelihood
 
-## Kiểm chứng
+Giải mã bins theo anchor/grid/stride cố định, clip hộp vào ảnh, bỏ hộp suy biến,
+class-aware NMS/cap300. NMS ưu tiên score từ S0 đóng băng, không dùng score/box
+của policy đang thay đổi để vẽ lại action cũ. Ties dùng thứ tự grid xác định.
+Không confidence-filter lần hai: category đã quyết định xuất/không xuất hộp.
 
-```powershell
-$env:NO_ALBUMENTATIONS_UPDATE='1'
-.venv/Scripts/python.exe -m unittest discover -s kb2_preference_optimization/tests -p 'test_*.py'
-$env:KB2_RUN_REAL_DPO='1'
-.venv/Scripts/python.exe kb2_preference_optimization/tests/test_dpo_integration.py
+Chất lượng preference được chấm trên output sau renderer. Log-probability
+được tính trên **action đầy đủ trước renderer**, gồm cả quyết định bị NMS bỏ.
+Nhiều action có thể tạo cùng unordered set; không cộng biên tất cả preimages.
+Vì thế tên chính xác là **DPO trên structured detection actions với whole-output
+GT preferences**, không tuyên bố exact likelihood của unordered post-NMS set.
+
+## 4. Chấm GT và xây preference
+
+Matching cùng class, one-to-one; tối đa hóa số match trước rồi tổng IoU. Đây
+là matcher cho preference/geometry, khác matcher confidence-ordered của COCO.
+
+```text
+Q = 0.8 * mean(F1@IoU=0.50:0.05:0.95)
+    + 0.2 * sum(matched IoU@0.5)/number_of_GT
 ```
 
-Test loss kiểm tra policy chuẩn hóa, log(2) khi policy=reference, đúng dấu
-gradient A/B, reference không nhận gradient, đảo preference khi chất lượng
-hộp policy đảo, geometry/confidence reference không gán nhãn ưu tiên,
-cặp A/B cùng trên IoU 0.5, loại positive của GT khác, và batch không có cặp.
-Test checkpoint kiểm tra reference không chia sẻ storage với policy,
-hash/config resume và từ chối resume v1 thành v2.
+Ảnh không GT dùng Q=1/(1+number_of_predictions). Score confidence không trực
+tiếp tham gia Q. Class sai không match nên gây FP và GT có thể còn FN; duplicate
+không nhận thêm TP. Chọn best/worst trong 4 draws, bỏ nếu Q-gap<0.02 hoặc hai
+rendered sets giống nhau. Các hằng số là heuristic pilot, chưa được xác nhận.
 
-Lượt discover sau sửa v2 chạy 53 test: 52 qua, một test GPU được skip và
-được chạy riêng thành công.
+Preferences chỉ có train và deterministic transform. Mọi lần replay dùng đúng
+ảnh, index, class, bins đã lưu. Không augment ảnh ngẫu nhiên với action cũ.
+JSONL lưu cả rendered A/B, quality breakdown, cached reference log-probs.
 
-Test thật YOLOv8n trên batch train augmentation seed 42 có 24 cặp;
-loss ban đầu `0.693147`, gradient DPO sau nhân alpha bằng `3.5336%` gradient
-native, loss sau một update kết hợp là `0.692895`. Reference không thay đổi;
-chênh IoU A/B trung bình là `0.049637`. Thay geometry reference không đổi loss.
+## 5. Objective và training
 
-Pilot v2 chạy mới baseline/pairwise/DPO 100 bước, seed 42, ghi trong
-[report KB2, mục 10](../../docs/report_final/KB2.md) và artifact
-`checkpoint_preference_optimization/dpo_online_v2_20261007_s42_100`.
+```text
+Δ = (log πθ(a+|x) - log πθ(a-|x))
+    - (log πref(a+|x) - log πref(a-|x))
+L_DPO = mean(softplus(-β Δ))
+L_total = L_native + λ L_DPO
+```
 
-## Kết quả lịch sử v1
+Reference frozen/no_grad, forward trên **cùng tensor ảnh, cùng batch size** với
+policy mỗi update. Audit cũng chấm policy/reference cùng batch. Cached likelihood
+batch1 từ lúc sinh cặp chỉ dùng replay/truy vết, không đi vào DPO objective.
+Source/data/transform/code/runtime fingerprints vẫn phải khớp. Kiểm tra replay
+cache trước train và log chênh reference gap cùng batch so với cache để phát
+hiện sai lệch số học CUDA. Config ghi `reference_scoring=same_batch_reference_v1`.
+Native loss/BN và DPO đều dùng cùng policy head; backbone/neck và DFL integral
+cố định. Không lấy đạo hàm xuyên sampling/NMS/matching; gradient đi qua
+likelihood của action. Khi policy=reference, loss=log2 và gradient có thể khác0.
 
-Pilot v1 dùng reference chọn cặp, ghi tại
-`checkpoint_preference_optimization/dpo_pilot_20261007_s42_100`.
+λ=0.01, β=0.1 là mặc định thử, không kế thừa strength từ candidate-DPO cũ.
+Pilot input640 cho thấy λ=0.1 tạo weighted gradient norm khoảng 1.87 lần
+native ở một batch, nên giảm λ thử xuống0.01; cần đo lại nhiều batch/model.
+Log norm/cosine của native và λ*DPO để phát hiện quá yếu/xung đột. Chưa thêm
+projection, weighted sampling, image hybrid, PCGrad hoặc GRPO vào phương pháp.
 
-Run v1 YOLOv8n tiếp theo đủ 1.000 update, seed 42, alpha/beta đều 0.1, ghi tại
-`checkpoint_preference_optimization/ablation/20261007T075619Z_354/yolov8n`.
-Best mAP50–95 là `0.385223` tại step 1.000, thấp hơn historical baseline
-cùng protocol `0.385598` khoảng 0.0375 điểm phần trăm. DPO xử lý 17.306 cặp,
-active trên toàn bộ 1.000 bước. AP_small tăng nhẹ; chưa thấy lợi ích tổng thể
-ở mAP50–95 trên một model và một seed. Chi tiết ở mục 9 của report KB2.
+## 6. Đánh giá và acceptance gates
 
-Trong log run DPO, `pairwise=0 pairs=0` là hai trường của nhánh ranking
-pairwise riêng đang tắt; `dpo` và `dpo_pairs` mới là loss/count của DPO.
-`feedback=native` là diagnostic alias khi feedback-alpha=0, không cộng native
-hai lần. Tổng loss đúng là `native + dpo_alpha * dpo`.
+1. Probability mass=1 trên bài toán nhỏ; gradient đúng hướng, regression/class
+   nhận signal; background và tọa độ được tính; reference/BN immutable.
+2. Train sampler sinh bộ output khác nhau có chất lượng/coverage hữu ích, đủ
+   preference không gần hòa; kiểm tra trực quan các A/B trước run dài.
+3. Fixed train audit theo dõi ranking/quality; không chọn checkpoint bằng Q
+   hoặc win-rate train. Ground-truth preference đúng theo định nghĩa không
+   đồng nghĩa policy đã học.
+4. Canonical deterministic S0/DPO dùng cùng resize/pad, confidence .001, NMS .60,
+   cap300. Metric chính mAP50–95; thêm AP75/per-class/area-support/P/R/F1/
+   FP/FN/IoU+coverage. Area APs/m/l tính trong không gian ảnh đã transform.
+5. Step0 luôn là ứng viên best. Pilot/partial validation có cờ riêng, không
+   được báo như final test. Khóa method trước test; không train/test tự động.
+6. Chỉ sau full validation/multi-seed mới kết luận gain. So S0 đo tác dụng
+   quy trình native+DPO tổng thể, chưa cô lập DPO khỏi continued native learning.
+   Native-only ablation có thể bổ sung khi cần, không phải hướng KB2 riêng.
+
+## 7. Nguồn và trạng thái
+
+- [DPO gốc, Eq.7](https://arxiv.org/html/2305.18290v3): objective policy/reference;
+  không chứng minh chất lượng detector với cách ánh xạ mới của dự án.
+- [Ultralytics DFL decoder](https://github.com/ultralytics/ultralytics/blob/main/ultralytics/nn/modules/block.py):
+  cơ sở lấy raw bin distributions; implementation thực chạy cần khóa package.
+- [COCOeval](https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocotools/cocoeval.py):
+  định nghĩa metric; maxDet300 là contract dự án, khác default maxDet100.
+
+V1 hỗ trợ DFL YOLOv8/YOLO11; chưa hỗ trợ YOLO26 DFL-free. Run dài YOLOv8n
+seed 42 đã hoàn tất: best 9k có validation mAP50–95 tăng 0,4347 điểm so S0,
+recall giảm 2,8087 điểm. Bổ sung seed 43/44 cùng fixed preferences: gain mean
+0,4438 ± 0,0429 điểm qua ba continuation seed, recall đều giảm và gain tập
+trung ở một lớp chỉ có 14 GT validation. Chưa xác nhận gain riêng của DPO
+hoặc độ vững ngoài S0/preferences/split hiện tại. Xem
+[review đa seed](../../docs/report_final/KB2_MULTISEED_REVIEW_20261026.md).
+Xem [review run dài](../../docs/report_final/KB2_FULL_RUN_REVIEW_20261026.md).
+Source/artifact lịch sử ở [../legacy](../legacy).

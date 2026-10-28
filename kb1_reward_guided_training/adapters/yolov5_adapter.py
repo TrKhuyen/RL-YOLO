@@ -37,7 +37,9 @@ class YOLOv5Adapter:
 
     def _load(self, checkpoint: str):
         from models.common import DetectMultiBackend
-        model = DetectMultiBackend(checkpoint, device=self.device)
+        from checkpoint_io import windows_checkpoint_paths
+        with windows_checkpoint_paths():
+            model = DetectMultiBackend(checkpoint, device=self.device)
         # Detection heads return decoded predictions in eval mode. Eval mode
         # does not disable autograd, so RL gradients still flow through scores.
         model.model.eval()

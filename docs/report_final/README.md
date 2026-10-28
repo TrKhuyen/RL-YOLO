@@ -1,5 +1,9 @@
 # Review logic cuối cho KB1, KB2 và KB3
 
+> **KB2 cập nhật 26/10/2026:** pipeline chính đã được thiết kế lại thành
+> [structured whole-output DPO](../../kb2_preference_optimization/README.md).
+> Các nhận xét KB2 bên dưới ghi lịch sử review cũ, không phải trạng thái code mới.
+
 ## Phạm vi
 
 Báo cáo này chỉ kiểm tra **logic nghiên cứu và logic triển khai hiện có**. Dữ liệu đã được làm lại nhưng các thí nghiệm chưa chạy lại, nên tài liệu này **không dùng số liệu từ các lượt chạy cũ, không đánh giá mức cải thiện và không xếp hạng mô hình**. Các hyperparameter trong code là giá trị triển khai hiện tại, chưa phải cấu hình thực nghiệm cuối đã được chọn và kiểm chứng.

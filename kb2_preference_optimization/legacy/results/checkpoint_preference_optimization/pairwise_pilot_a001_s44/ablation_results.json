@@ -1,0 +1,32 @@
+{
+  "protocol": {
+    "steps": 100,
+    "batch_size": 4,
+    "img_size": 640,
+    "lr": 1e-06,
+    "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+    "seed": 44,
+    "eval_interval": 100,
+    "pairwise_alpha": 0.01,
+    "pairwise_margin": 0.1,
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.001,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "pairwise",
+      "step": 100,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\pairwise_pilot_a001_s44\\pairwise_last_best.pt",
+      "training_method": "pairwise_preference_native_loss",
+      "pairwise_pairs_seen": 1767,
+      "pairwise_active_steps": 100,
+      "mAP50-95": 0.3790387809276581,
+      "mAP50": 0.4956612288951874,
+      "AP_small": 0.04466003179550171,
+      "Recall": 0.5502736568450928,
+      "FPS": 82.681903518967,
+      "num_images": 479
+    }
+  ]
+}

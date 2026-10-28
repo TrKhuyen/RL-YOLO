@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.1",
+  "split": "train",
+  "model": "yolov11n",
+  "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov11n\\weights\\best.pt",
+  "checkpoint_sha256": "339ee672b168f6995b7b977ed7c8d40e90d84971d772fef0cb417852a7eb3673",
+  "feedback_sha256": "1d5ce6c0e578fd2f6da267f6dcfae890faa91daa853576b253003f1e3269a62a",
+  "matching_policy": "max_cardinality_gt_v2_1",
+  "data_root": "D:\\graduate\\RL-YOLO\\pre-data\\data\\v2i_cleanned",
+  "img_size": 640,
+  "conf_threshold": 0.25,
+  "nms_iou_threshold": 0.45,
+  "match_iou_threshold": 0.5,
+  "localization_iou_threshold": 0.1,
+  "num_images": 2411,
+  "feedback_counts": {
+    "matched": 9703,
+    "wrong_class": 126,
+    "bad_localization": 122,
+    "false_positive": 3470,
+    "duplicate": 7,
+    "missed": 382
+  },
+  "images_with_feedback": {
+    "matched": 2361,
+    "wrong_class": 82,
+    "bad_localization": 99,
+    "false_positive": 1065,
+    "duplicate": 7,
+    "missed": 228
+  },
+  "num_preferences": 1123
+}

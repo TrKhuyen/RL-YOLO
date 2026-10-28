@@ -1,0 +1,49 @@
+{
+  "protocol": {
+    "steps": 1000,
+    "batch_size": 4,
+    "img_size": 640,
+    "lr": 1e-06,
+    "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+    "seed": 42,
+    "eval_interval": 250,
+    "pairwise_alpha": 0.01,
+    "pairwise_margin": 0.1,
+    "dpo_alpha": 0.1,
+    "dpo_beta": 0.1,
+    "dpo_policy": "gt_class_anchor_softmax_v1",
+    "dpo_pair_source": "frozen_reference_same_gt_v1",
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.001,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "dpo",
+      "step": 1000,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\ablation\\20261007T075619Z_354\\yolov8n\\dpo_last_best.pt",
+      "training_method": "candidate_selection_dpo_native_loss",
+      "pairwise_pairs_seen": 0,
+      "pairwise_active_steps": 0,
+      "dpo_pairs_seen": 17306,
+      "dpo_active_steps": 1000,
+      "dpo_diagnostics": {
+        "pair_count": 7,
+        "relative_margin": 1.3382974863052368,
+        "policy_win_rate": 0.4285714626312256,
+        "reference_win_rate": 0.4285714626312256,
+        "relative_win_rate": 0.7142857313156128
+      },
+      "base_checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "reference_checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "dpo_policy": "gt_class_anchor_softmax_v1",
+      "dpo_pair_source": "frozen_reference_same_gt_v1",
+      "mAP50-95": 0.3852229416370392,
+      "mAP50": 0.5009101033210754,
+      "AP_small": 0.060873690992593765,
+      "Recall": 0.556927502155304,
+      "FPS": 71.80756230701289,
+      "num_images": 479
+    }
+  ]
+}

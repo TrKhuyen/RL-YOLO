@@ -1,4 +1,4 @@
-﻿"""Provenance guards for the KB1 two-stage workflow."""
+"""Provenance guards for the KB1 two-stage workflow."""
 import sys
 import tempfile
 import unittest
@@ -45,6 +45,29 @@ class ProvenanceChecks(unittest.TestCase):
         (self.data / 'train' / 'labels' / 'train.txt').write_text('0 0.4 0.5 0.2 0.2\n')
         with self.assertRaisesRegex(ValueError, 'Dataset changed'):
             provenance.verify_supervised('yolov8n', checkpoint)
+
+    def test_relocation_preserves_content_identity_and_rejects_tampering(self):
+        import shutil
+        dataset = provenance.dataset_manifest()
+        checkpoint = self.root / 'checkpoint_based' / 'yolov8n' / 'weights' / 'best.pt'
+        checkpoint.parent.mkdir(parents=True)
+        checkpoint.write_bytes(b'checkpoint')
+        provenance.record_supervised('yolov8n', 'yolov8n.pt', dataset,
+                                     {'w3f': False, 'psa': False})
+        moved = self.root.parent / 'moved'
+        shutil.copytree(self.root, moved / 'kb1')
+        shutil.copytree(self.data, moved / 'data')
+        with patch.object(provenance, 'ROOT', moved / 'kb1'), \
+             patch.object(provenance, 'DATA_ROOT', moved / 'data'), \
+             patch.object(provenance, 'DATA_CONFIG', moved / 'kb1' / 'pest.yaml'):
+            current = provenance.dataset_manifest()
+            self.assertEqual(dataset['sha256'], current['sha256'])
+            self.assertNotEqual(dataset['root'], current['root'])
+            target = moved / 'kb1' / 'checkpoint_based' / 'yolov8n' / 'weights' / 'best.pt'
+            provenance.verify_supervised('yolov8n', target, current)
+            (moved / 'data' / 'train' / 'labels' / 'train.txt').write_text('0 0.4 0.5 0.2 0.2')
+            with self.assertRaisesRegex(ValueError, 'Dataset changed'):
+                provenance.verify_supervised('yolov8n', target)
 
     def test_reject_augmented_validation_and_unpaired_files(self):
         image = self.data / 'valid' / 'images' / 'valid_aug1_rot90cw.jpg'

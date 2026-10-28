@@ -1,0 +1,57 @@
+{
+  "protocol": {
+    "steps": 15000,
+    "batch_size": 4,
+    "img_size": 640,
+    "lr": 1e-06,
+    "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8s\\weights\\best.pt",
+    "seed": 42,
+    "eval_interval": 1000,
+    "patience": 5,
+    "save_interval": 2000,
+    "pairwise_alpha": 0.01,
+    "pairwise_margin": 0.1,
+    "dpo_alpha": 0.1,
+    "dpo_beta": 0.1,
+    "dpo_policy": "gt_class_anchor_softmax_v1",
+    "dpo_pair_source": "online_policy_gt_iou_v2",
+    "dpo_objective_version": "candidate_selection_online_dpo_v2",
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.001,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "dpo",
+      "step": 6000,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\ablation\\20261007T173941Z_330\\yolov8s\\dpo_last_best.pt",
+      "training_method": "candidate_selection_dpo_native_loss",
+      "pairwise_pairs_seen": 0,
+      "pairwise_active_steps": 0,
+      "dpo_pairs_seen": 102690,
+      "dpo_active_steps": 6000,
+      "dpo_diagnostics": {
+        "pair_count": 4,
+        "relative_margin": -0.09224802255630493,
+        "policy_win_rate": 0.25,
+        "reference_win_rate": 0.25,
+        "relative_win_rate": 0.5,
+        "policy_margin": -10.241905212402344,
+        "chosen_iou": 0.9811334609985352,
+        "rejected_iou": 0.9716834425926208,
+        "quality_gap": 0.009449973702430725
+      },
+      "base_checkpoint_sha256": "7e5ea3f770508a54b59e7a15a8aa8f52e6b7134f25f69c267623044a825694c2",
+      "reference_checkpoint_sha256": "7e5ea3f770508a54b59e7a15a8aa8f52e6b7134f25f69c267623044a825694c2",
+      "dpo_policy": "gt_class_anchor_softmax_v1",
+      "dpo_pair_source": "online_policy_gt_iou_v2",
+      "dpo_objective_version": "candidate_selection_online_dpo_v2",
+      "mAP50-95": 0.4072052240371704,
+      "mAP50": 0.5126723647117615,
+      "AP_small": 0.04061140492558479,
+      "Recall": 0.5598220229148865,
+      "FPS": 64.32887050758985,
+      "num_images": 479
+    }
+  ]
+}

@@ -8,6 +8,7 @@ yolov5>=7.0.0            # YOLOv5
 
 # Metrics
 torchmetrics>=1.0.0
+scipy>=1.10.0            # KB2 exact class-aware preference matching
 
 # Logging
 tensorboard>=2.13.0

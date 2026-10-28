@@ -30,3 +30,12 @@ results/
 kb2_preferences_optimization/
 **/feedback_checkpoints/
 **/feedback_data/ 
+# Ubuntu KB1 runtime (Windows environment remains intact)
+.venv-ubuntu/
+.kb1-tools/
+
+# KB2 structured DPO: generated runs stay local, archived numeric evidence stays reviewable.
+kb2_preference_optimization/outputs/
+!kb2_preference_optimization/legacy/results/
+!kb2_preference_optimization/legacy/results/**
+!docs/report_final/assets/kb2_20261026/preference_example.png

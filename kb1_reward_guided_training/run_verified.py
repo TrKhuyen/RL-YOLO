@@ -18,8 +18,9 @@ from canonical_eval import evaluate_adapter
 from dataloader import PestDataset, get_train_transforms, get_pest_dataloader, pest_collate_fn
 from train_rl import (CHECKPOINTS, DATA_ROOT, PROJECT_ROOT, load_adapter,
                       EMABaseline, match_aware_objective, l2sp_loss)
+from experiment_modes import MODES, objective_weights
 from reward import detection_composite_reward
-from run_provenance import dataset_manifest, verify_supervised
+from run_provenance import dataset_manifest, verify_supervised, runtime_manifest
 
 PROTOCOL = {
     'id': 'kb1_canonical_v3_map5095', 'split': 'val',
@@ -122,6 +123,8 @@ def parity_check(adapter, images, path, model_name, source):
 
 
 def run(args):
+    if not torch.cuda.is_available():
+        raise RuntimeError('Verified KB1 training requires a working CUDA GPU')
     torch.set_num_threads(4)
     cv2.setNumThreads(0)
     torch.backends.cudnn.benchmark = False
@@ -135,6 +138,9 @@ def run(args):
                eval_interval=args.eval_interval, batch_size=args.batch_size)
     if args.steps < 2 or args.steps % 2 or args.eval_interval % 2:
         raise ValueError('Steps and eval interval must be positive multiples of accumulation=2')
+    if getattr(args, 'fixed_budget', False):
+        cfg['fixed_budget'] = True
+    weights = objective_weights(args.mode, cfg)
     source = CHECKPOINTS[args.model]
     source_manifest = verify_supervised(args.model, source, dataset_manifest())
     dp_flags = source_manifest['dp_flags']
@@ -149,8 +155,8 @@ def run(args):
                 'code_sha256': {str(p.relative_to(PROJECT_ROOT)): sha256(p) for p in
                     [Path(__file__), PROJECT_ROOT / 'canonical_eval.py',
                      PROJECT_ROOT / 'dataloader.py', PROJECT_ROOT / 'train_rl.py',
-                     PROJECT_ROOT / 'reward.py', *sorted((PROJECT_ROOT / 'adapters').glob('*.py'))]},
-                'protocol': protocol, 'source': str(source), 'source_sha256': sha256(source),
+                     PROJECT_ROOT / 'reward.py', PROJECT_ROOT / 'run_provenance.py', PROJECT_ROOT / 'checkpoint_io.py', PROJECT_ROOT / 'experiment_modes.py', *sorted((PROJECT_ROOT / 'adapters').glob('*.py'))]},
+                'effective_weights': weights, 'runtime': runtime_manifest(), 'protocol': protocol, 'source': str(source), 'source_sha256': sha256(source),
                 'source_manifest': source_manifest}
     manifest = out / 'manifest.json'
     if manifest.exists() and json.loads(manifest.read_text(encoding='utf-8')) != metadata:
@@ -200,7 +206,7 @@ def run(args):
                                      'metrics': initial, 'metadata': metadata})
     print('Step0 parity PASS; baseline', initial['mAP50'], initial['mAP50_95'], flush=True)
     dataset = SeededDataset(args.seed)
-    stop = start if stale >= cfg['early_stopping_patience'] else args.steps
+    stop = start if not cfg.get('fixed_budget', False) and stale >= cfg['early_stopping_patience'] else args.steps
     batches = StepBatches(len(dataset), args.batch_size, start, stop, args.seed)
     train = DataLoader(dataset, batch_sampler=batches, num_workers=args.workers,
                        collate_fn=pest_collate_fn, pin_memory=True,
@@ -219,23 +225,25 @@ def run(args):
         for group in optimizer.param_groups:
             group['lr'] = lr
         native, _ = adapter.native_detection_loss(images, targets)
-        loss = cfg['native_supervised_loss_weight'] * native
+        loss = weights['native'] * native
         reward_value, proxy_value = None, None
-        if args.mode == 'kb1b':
+        if weights['reward'] or weights['proxy']:
             preds = adapter.forward_with_grad(images, conf_thres=cfg['conf_thres'],
                                              iou_thres=cfg['iou_thres'])
-            rewards = detection_composite_reward(
-                preds, targets, iou_thresholds=cfg['reward_iou_thresholds'],
-                precision_weight=cfg['precision_weight'], recall_weight=cfg['recall_weight'],
-                iou_weight=cfg['iou_weight']).to('cuda')
-            advantage = baseline.normalized_advantage(rewards, cfg['advantage_clip'])
             log_prob, proxy = match_aware_objective(
                 preds, targets, cfg['iou_threshold'], cfg['tp_weight'],
                 cfg['fp_weight'], cfg['fn_weight'])
-            loss = loss + cfg['reward_loss_weight'] * -(log_prob * advantage.detach()).mean()
-            loss = loss + cfg['supervised_loss_weight'] * proxy
-            reward_value, proxy_value = rewards.mean().item(), proxy.item()
-        loss = loss + cfg['stability_loss_weight'] * l2sp_loss(named, reference)
+            if weights['reward']:
+                rewards = detection_composite_reward(
+                    preds, targets, iou_thresholds=cfg['reward_iou_thresholds'],
+                    precision_weight=cfg['precision_weight'], recall_weight=cfg['recall_weight'],
+                    iou_weight=cfg['iou_weight']).to('cuda')
+                advantage = baseline.normalized_advantage(rewards, cfg['advantage_clip'])
+                loss = loss + weights['reward'] * -(log_prob * advantage.detach()).mean()
+                reward_value = rewards.mean().item()
+            loss = loss + weights['proxy'] * proxy
+            proxy_value = proxy.item()
+        loss = loss + weights['stability'] * l2sp_loss(named, reference)
         if not torch.isfinite(loss):
             raise FloatingPointError(f'Nonfinite loss at step {step}')
         (loss / 2).backward()
@@ -279,14 +287,16 @@ def run(args):
             atomic_save(last_path, {'state_dict': adapter.state_dict(),
                 'optimizer': optimizer.state_dict(), 'step': step, 'best_score': best_score,
                 'patience_score': patience_score, 'stale': stale, 'best_step': best_step,
+                'metadata': metadata, 'metrics': m,
                 'ema': baseline.__dict__, 'torch_rng': torch.get_rng_state(),
                 'cuda_rng': torch.cuda.get_rng_state_all(),
                 'training_seconds_total': previous_train_seconds + time.perf_counter() - started})
             atomic_json(out / 'status.json', {'status': 'training', 'step': step,
                                               'best_step': best_step, 'score': current})
             print('Validation', step, m['mAP50'], m['mAP50_95'], 'best', best_step, flush=True)
-            if stale >= cfg['early_stopping_patience']:
+            if not cfg.get('fixed_budget', False) and stale >= cfg['early_stopping_patience']:
                 break
+    last_metrics = torch.load(last_path, map_location='cpu', weights_only=False)['metrics']
     best = torch.load(out / 'best.pt', map_location='cpu', weights_only=False)
     adapter.load_state_dict(best['state_dict'], strict=True)
     final = evaluate(adapter, val)
@@ -295,6 +305,9 @@ def run(args):
             raise RuntimeError(f'Best checkpoint reload mismatch: {key}')
     atomic_json(out / 'completed.json', {'status': 'complete', 'steps_run': step,
                 'best_step': best['step'], 'baseline': initial, 'best': final,
+                'best_sha256': sha256(out / 'best.pt'),
+                'last_sha256': sha256(last_path), 'last': last_metrics,
+                'manifest_sha256': sha256(out / 'manifest.json'),
                 'optimizer_updates': step // 2,
                 'wall_seconds_this_process': time.perf_counter() - started,
                 'training_seconds_total': previous_train_seconds + time.perf_counter() - started,
@@ -308,11 +321,12 @@ def run(args):
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
     p.add_argument('--model', required=True, choices=list(CHECKPOINTS))
-    p.add_argument('--mode', required=True, choices=['native_only', 'kb1b'])
+    p.add_argument('--mode', required=True, choices=MODES)
     p.add_argument('--output', required=True)
     p.add_argument('--steps', type=int, default=10000)
     p.add_argument('--eval-interval', type=int, default=500)
     p.add_argument('--batch-size', type=int, default=8)
     p.add_argument('--workers', type=int, default=2)
     p.add_argument('--seed', type=int, default=42)
+    p.add_argument('--fixed-budget', action='store_true', help='Disable early stopping; keep best and final checkpoints')
     run(p.parse_args())

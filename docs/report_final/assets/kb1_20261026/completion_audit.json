@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-26",
+  "timezone": "Asia/Bangkok",
+  "checks": {
+    "pipeline_complete": 1,
+    "pipeline_hash": 3,
+    "selected_checkpoint_hash": 58,
+    "dataset_identity": 1,
+    "supervised_provenance": 7,
+    "preflight_count": 1,
+    "continuation_count": 1,
+    "ablation_count": 1,
+    "evaluation_count": 1,
+    "training_complete": 58,
+    "training_hash": 174,
+    "training_source": 58,
+    "training_runtime": 58,
+    "ablation_full_budget": 30,
+    "evaluation_complete": 16,
+    "evaluation_hash": 48,
+    "checkpoint_selection": 16,
+    "evaluated_checkpoint_hash": 156,
+    "evaluated_images": 156,
+    "evaluated_final_step": 60
+  },
+  "issues": [],
+  "dataset_sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+  "inference_rerun": false
+}

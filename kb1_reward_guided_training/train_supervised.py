@@ -16,7 +16,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from run_provenance import dataset_manifest, record_supervised
+from run_provenance import dataset_manifest, record_supervised, runtime_data_config
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -197,6 +197,7 @@ def main():
 
     targets = MODELS if args.model == 'all' else {args.model: MODELS[args.model]}
     dataset_before = dataset_manifest()
+    COMMON['data'] = str(runtime_data_config())
     print('Clean dataset SHA256:', dataset_before['sha256'])
 
     results = {}

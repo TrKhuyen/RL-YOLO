@@ -1,0 +1,620 @@
+{
+  "checks": {
+    "pipeline_hash": 3,
+    "locked_checkpoint": 58,
+    "current_code_config": 31,
+    "dataset_identity": 1,
+    "supervised_identity": 7,
+    "training_hash": 174,
+    "training_complete": 58,
+    "training_runtime": 58,
+    "training_source": 58,
+    "ablation_matched_updates": 30,
+    "evaluation_complete": 16,
+    "evaluation_hash": 48,
+    "evaluation_selection": 16,
+    "evaluation_runtime": 16,
+    "evaluation_checkpoint": 156,
+    "evaluation_training_provenance": 116,
+    "evaluation_images": 156,
+    "supervised_seed": 156,
+    "evaluation_seed": 156,
+    "metric_finite": 156,
+    "evaluated_final_step": 60,
+    "aggregate_rows": 1,
+    "aggregate_matches_csv": 156,
+    "recomputed_delta": 116,
+    "recomputed_mean_sd": 48
+  },
+  "issues": [],
+  "training_runs": [
+    {
+      "group": "continuation",
+      "model": "yolov11s",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 1293.804504920001,
+      "updates": 4500,
+      "best_step": 8500,
+      "stop_step": 9000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov11s",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 1517.4281052059996,
+      "updates": 3750,
+      "best_step": 7500,
+      "stop_step": 7500
+    },
+    {
+      "group": "continuation",
+      "model": "yolov11n",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 247.869340276,
+      "updates": 1000,
+      "best_step": 1000,
+      "stop_step": 2000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov11n",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 451.1428074740006,
+      "updates": 1500,
+      "best_step": 1000,
+      "stop_step": 3000
+    },
+    {
+      "group": "continuation",
+      "model": "yolo26n",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 395.887280818999,
+      "updates": 1500,
+      "best_step": 1000,
+      "stop_step": 3000
+    },
+    {
+      "group": "continuation",
+      "model": "yolo26n",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 641.6585649429999,
+      "updates": 2000,
+      "best_step": 3000,
+      "stop_step": 4000
+    },
+    {
+      "group": "continuation",
+      "model": "dp_yolo",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 1569.3003458340008,
+      "updates": 4500,
+      "best_step": 7500,
+      "stop_step": 9000
+    },
+    {
+      "group": "continuation",
+      "model": "dp_yolo",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 2317.165243130001,
+      "updates": 4500,
+      "best_step": 8000,
+      "stop_step": 9000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8s",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 884.4258241130001,
+      "updates": 3000,
+      "best_step": 6000,
+      "stop_step": 6000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8s",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 1912.091878057,
+      "updates": 4750,
+      "best_step": 9500,
+      "stop_step": 9500
+    },
+    {
+      "group": "continuation",
+      "model": "yolov5s",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 1118.960933316,
+      "updates": 4500,
+      "best_step": 9000,
+      "stop_step": 9000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov5s",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 1639.1318760069998,
+      "updates": 5000,
+      "best_step": 8500,
+      "stop_step": 10000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8n",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 410.94674786099995,
+      "updates": 1750,
+      "best_step": 1500,
+      "stop_step": 3500
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8n",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 506.8784509020006,
+      "updates": 1750,
+      "best_step": 2500,
+      "stop_step": 3500
+    },
+    {
+      "group": "continuation",
+      "model": "yolov11s",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 1026.9290400360005,
+      "updates": 3500,
+      "best_step": 7000,
+      "stop_step": 7000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov11s",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 923.3877447800005,
+      "updates": 2250,
+      "best_step": 3500,
+      "stop_step": 4500
+    },
+    {
+      "group": "continuation",
+      "model": "yolov11n",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 245.1907526429968,
+      "updates": 1000,
+      "best_step": 500,
+      "stop_step": 2000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov11n",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 451.96935128399855,
+      "updates": 1500,
+      "best_step": 1000,
+      "stop_step": 3000
+    },
+    {
+      "group": "continuation",
+      "model": "yolo26n",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 594.4771392689981,
+      "updates": 2250,
+      "best_step": 2500,
+      "stop_step": 4500
+    },
+    {
+      "group": "continuation",
+      "model": "yolo26n",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 790.1594061830001,
+      "updates": 2500,
+      "best_step": 3000,
+      "stop_step": 5000
+    },
+    {
+      "group": "continuation",
+      "model": "dp_yolo",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 1134.8899316019997,
+      "updates": 3250,
+      "best_step": 6500,
+      "stop_step": 6500
+    },
+    {
+      "group": "continuation",
+      "model": "dp_yolo",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 1748.1796095619975,
+      "updates": 3750,
+      "best_step": 7500,
+      "stop_step": 7500
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8s",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 1163.4195819220004,
+      "updates": 4000,
+      "best_step": 6000,
+      "stop_step": 8000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8s",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 2049.480009427003,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov5s",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 933.2772072080006,
+      "updates": 3750,
+      "best_step": 7500,
+      "stop_step": 7500
+    },
+    {
+      "group": "continuation",
+      "model": "yolov5s",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 1644.321876883998,
+      "updates": 5000,
+      "best_step": 9500,
+      "stop_step": 10000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8n",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 475.84956486600277,
+      "updates": 2000,
+      "best_step": 2500,
+      "stop_step": 4000
+    },
+    {
+      "group": "continuation",
+      "model": "yolov8n",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 1016.9934962040024,
+      "updates": 3500,
+      "best_step": 6000,
+      "stop_step": 7000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 1217.1504992080008,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "reward_only",
+      "seed": 43,
+      "seconds": 1490.8623627259985,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 1516.885121145002,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "proxy_only",
+      "seed": 43,
+      "seconds": 1451.3332857820023,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "kb1b_no_sp",
+      "seed": 43,
+      "seconds": 1489.1222068720017,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "native_only",
+      "seed": 43,
+      "seconds": 1498.2628411900005,
+      "updates": 5000,
+      "best_step": 8500,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "reward_only",
+      "seed": 43,
+      "seconds": 2720.5856071570015,
+      "updates": 5000,
+      "best_step": 7000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "kb1b",
+      "seed": 43,
+      "seconds": 2975.4620768099994,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "proxy_only",
+      "seed": 43,
+      "seconds": 1995.219493908,
+      "updates": 5000,
+      "best_step": 9500,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "kb1b_no_sp",
+      "seed": 43,
+      "seconds": 2940.7804833499977,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 1275.8643217849967,
+      "updates": 5000,
+      "best_step": 500,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "reward_only",
+      "seed": 44,
+      "seconds": 1686.0755050269945,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 1631.715210784998,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "proxy_only",
+      "seed": 44,
+      "seconds": 1636.7664520629987,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "kb1b_no_sp",
+      "seed": 44,
+      "seconds": 1609.0756381259998,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "native_only",
+      "seed": 44,
+      "seconds": 1553.423542165001,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "reward_only",
+      "seed": 44,
+      "seconds": 3063.7682479270006,
+      "updates": 5000,
+      "best_step": 6500,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "kb1b",
+      "seed": 44,
+      "seconds": 2985.1298776010008,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "proxy_only",
+      "seed": 44,
+      "seconds": 2447.3822332790005,
+      "updates": 5000,
+      "best_step": 7000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "kb1b_no_sp",
+      "seed": 44,
+      "seconds": 2512.608173376997,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "native_only",
+      "seed": 42,
+      "seconds": 930.9364514330009,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "reward_only",
+      "seed": 42,
+      "seconds": 1815.8142968020002,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "kb1b",
+      "seed": 42,
+      "seconds": 1823.6202762730004,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "proxy_only",
+      "seed": 42,
+      "seconds": 1561.5973552679984,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov11n",
+      "mode": "kb1b_no_sp",
+      "seed": 42,
+      "seconds": 1798.8821518680006,
+      "updates": 5000,
+      "best_step": 1000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "native_only",
+      "seed": 42,
+      "seconds": 1758.3971750599994,
+      "updates": 5000,
+      "best_step": 7500,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "reward_only",
+      "seed": 42,
+      "seconds": 2541.6918639429987,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "kb1b",
+      "seed": 42,
+      "seconds": 2061.010898714001,
+      "updates": 5000,
+      "best_step": 9000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "proxy_only",
+      "seed": 42,
+      "seconds": 2547.2748896449993,
+      "updates": 5000,
+      "best_step": 10000,
+      "stop_step": 10000
+    },
+    {
+      "group": "ablation",
+      "model": "yolov8s",
+      "mode": "kb1b_no_sp",
+      "seed": 42,
+      "seconds": 2082.1030421319992,
+      "updates": 5000,
+      "best_step": 9000,
+      "stop_step": 10000
+    }
+  ],
+  "evaluation_rows": 156,
+  "historical_reference": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/results/canonical_clean/screening/ubuntu_all_models_seed42_20261022_v1",
+  "review_date": "2026-10-25",
+  "timezone": "Asia/Bangkok",
+  "inference_rerun": false,
+  "prior_ubuntu_hashes_verified": true,
+  "prior_windows_vs_ubuntu_max_map_delta_pp": 0.004497170448303223,
+  "source_test_baselines_match_prior_ubuntu": true
+}

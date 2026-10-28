@@ -266,18 +266,19 @@ def _legacy_evaluate_model(
 # Canonical adapter loading. The legacy loader above is retained only for
 # backward compatibility with existing imports.
 def _load_canonical_adapter(model_name, checkpoint, device, base_checkpoint=None):
+    import os
     from train_rl import load_adapter
-    is_rl = base_checkpoint is not None
-    data = (torch.load(checkpoint, map_location='cpu', weights_only=False)
-            if is_rl else {})
-    source = base_checkpoint if is_rl else checkpoint
-    if is_rl and not source:
-        raise ValueError('RL checkpoint requires base_checkpoint')
-    adapter = load_adapter(model_name, str(source), device)
-    if is_rl:
+    from evaluation_provenance import inspect_checkpoint
+    record, data = inspect_checkpoint(model_name, checkpoint, base_checkpoint)
+    flags = record['source_manifest']['dp_flags']
+    os.environ['DP_YOLO_USE_W3F'] = '1' if flags['w3f'] else '0'
+    os.environ['DP_YOLO_USE_PSA'] = '1' if flags['psa'] else '0'
+    adapter = load_adapter(model_name, record['source'], device)
+    if base_checkpoint is not None:
         adapter.load_state_dict(data['state_dict'], strict=True)
     adapter.eval_mode()
-    return adapter, data if is_rl else {}
+    data = dict(data, supervised_seed=record['supervised_seed'])
+    return adapter, data
 
 
 def canonical_evaluate_model(
@@ -295,7 +296,9 @@ def canonical_evaluate_model(
         max_det=max_det, class_metrics=True, measure_latency=True,
     )
     metrics['checkpoint_step'] = metadata.get('step', 0)
-    metrics['seed'] = metadata.get('seed')
+    metrics['supervised_seed'] = metadata.get('supervised_seed')
+    metrics['continuation_seed'] = metadata.get('metadata', {}).get('seed')
+    metrics['seed'] = metrics['continuation_seed'] if supervised_ckpt is not None else metrics['supervised_seed']
     return metrics
 
 
@@ -360,110 +363,119 @@ def evaluate_per_class(
 # Full comparison
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run_comparison(
-    model_filter: str  = 'all',
-    split:        str  = 'val',
-    device:       str  = 'cuda',
-    seed:         int  = 42,
-    checkpoint_source: str = 'screening',
-) -> pd.DataFrame:
-    """
-    Chay evaluation toan bo, tinh delta RL vs supervised, luu CSV.
-    """
-    loader = get_pest_dataloader(
-        DATA_ROOT, split=split, batch_size=16, num_workers=4,
-    )
-
-    targets_to_eval = (
-        EXPERIMENTS if model_filter == 'all'
-        else {model_filter: EXPERIMENTS[model_filter]}
-    )
-
-    rows = []
-    for model_name, paths in targets_to_eval.items():
-        adapter_name = model_name.lower().replace('-', '_')
-        if checkpoint_source == 'screening':
-            screening = PROJECT_ROOT / 'checkpoint_reward_guide_trainning' / f'screening_seed{seed}_v1' / adapter_name
-            stage_paths = {
-                'supervised': paths['supervised'],
-                'native_only': str(screening / 'native_only' / 'best.pt'),
-                'kb1b': str(screening / 'kb1b' / 'best.pt'),
-            }
-        elif checkpoint_source == 'train_rl':
-            stage_paths = {
-                'supervised': paths['supervised'],
-                'native_only': str(PROJECT_ROOT / 'checkpoint_reward_guide_trainning'
-                                   / f'{adapter_name}_seed{seed}_native_only_best.pt'),
-                'kb1b': str(PROJECT_ROOT / 'checkpoint_reward_guide_trainning'
-                            / f'{adapter_name}_seed{seed}_rl_best.pt'),
-            }
-        else:
-            raise ValueError(f'Unknown checkpoint source: {checkpoint_source}')
-        for stage, ckpt in stage_paths.items():
-            if not ckpt or not Path(ckpt).exists():
-                print(f"  SKIP {model_name} [{stage}]: {ckpt}")
-                continue
-
-            print(f"  Evaluating {model_name} [{stage}]...")
-            try:
-                metrics = canonical_evaluate_model(
-                    adapter_name, ckpt, loader,
-                    device=device,
-                    supervised_ckpt=(
-                        paths['supervised'] if stage != 'supervised' else None
-                    ),
-                )
-                rows.append({
-                    'Model': model_name,
-                    'Stage': stage,
-                    **metrics,
-                })
-                print(f"    mAP50={metrics['mAP50']:.4f}  "
-                      f"APs={metrics['APs']:.4f}  "
-                      f"recall={metrics['recall']:.4f}  "
-                      f"fps={metrics['fps']:.1f}")
-            except Exception as e:
-                print(f"    ERROR: {e}")
-
-    if not rows:
-        print("Không có kết quả nào. Kiểm tra checkpoints.")
-        return pd.DataFrame()
-
-    df = pd.DataFrame(rows)
-
-    # ── Tính delta RL vs supervised ─────────────────────────────────────
-    metrics_cols = ['mAP50', 'mAP50_95', 'APs', 'APm', 'recall']
-    df_sup = df[df['Stage'] == 'supervised'].set_index('Model')[metrics_cols]
-    df_native = df[df['Stage'] == 'native_only'].set_index('Model')[metrics_cols]
-    df_kb1b = df[df['Stage'] == 'kb1b'].set_index('Model')[metrics_cols]
-    delta_sup = (df_kb1b - df_sup).add_suffix('_kb1b_minus_supervised')
-    delta_native = (
-        df_kb1b - df_native
-    ).add_suffix('_kb1b_minus_native_only')
-    df_delta = delta_sup.join(delta_native, how='outer').reset_index()
-
-    # ── Lưu kết quả ─────────────────────────────────────────────────────
-    out_dir = PROJECT_ROOT / 'results' / 'canonical_clean' / checkpoint_source / split
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    df.to_csv(out_dir / 'results_full.csv', index=False)
-    df_delta.to_csv(out_dir / 'results_delta.csv', index=False)
-
-    # ── In bảng markdown ────────────────────────────────────────────────
-    print(f"\n{'='*80}")
-    print('  KẾT QUẢ SO SÁNH SUPERVISED vs. RL FINE-TUNED')
-    print(f"{'='*80}")
-    print(df.to_markdown(index=False, floatfmt='.4f'))
-
-    print(f"\n{'='*80}")
-    print('  DELTA GHÉP CẶP (dương = KB1-B tốt hơn)')
-    print(f"{'='*80}")
-    print(df_delta.to_markdown(index=False, floatfmt='+.4f'))
-
-    print(f"\n  → Đã lưu: {out_dir}/results_full.csv")
-    print(f"  → Đã lưu: {out_dir}/results_delta.csv")
-
-    return df
+def run_comparison(model_filter='all', split='val', device='cuda', seed=42,
+                   checkpoint_source='screening', output=None, screening_root=None,
+                   workers=0, batch_size=16, stages=None, selection='best'):
+    """Evaluate the entire requested cohort or fail; never overwrite a table."""
+    import importlib.metadata
+    import json
+    import platform
+    from datetime import datetime, timezone
+    from evaluation_provenance import inspect_checkpoint
+    from run_provenance import dataset_manifest, sha256, verify_supervised
+    from run_verified import atomic_json
+    if checkpoint_source != 'screening':
+        raise ValueError('Legacy train_rl artifacts lack verified completed provenance; use screening')
+    targets = EXPERIMENTS if model_filter == 'all' else {model_filter: EXPERIMENTS[model_filter]}
+    root = Path(screening_root or PROJECT_ROOT / 'checkpoint_reward_guide_trainning'
+                / f'screening_seed{seed}_v1').resolve()
+    # Check every input before creating output or doing inference.
+    stages = tuple(stages or ('supervised', 'native_only', 'kb1b'))
+    if 'supervised' not in stages or 'kb1b' not in stages or len(set(stages)) != len(stages):
+        raise ValueError('Stages must include supervised and kb1b without duplicates')
+    if selection not in ('best', 'last'):
+        raise ValueError('Unknown checkpoint selection')
+    inputs = []
+    for name, paths in targets.items():
+        model = name.lower().replace('-', '_')
+        source = paths['supervised']
+        for stage in stages:
+            checkpoint = source if stage == 'supervised' else root / model / stage / f'{selection}.pt'
+            record, _ = inspect_checkpoint(model, checkpoint,
+                None if stage == 'supervised' else source,
+                None if stage == 'supervised' else seed,
+                None if stage == 'supervised' else stage)
+            inputs.append((name, model, stage, checkpoint, source, record))
+    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+    out = Path(output or PROJECT_ROOT / 'results' / 'canonical_clean'
+               / checkpoint_source / f'{split}_{stamp}').resolve()
+    out.mkdir(parents=True, exist_ok=False)
+    dataset = dataset_manifest()
+    code = [p for p in PROJECT_ROOT.rglob('*.py')
+            if p.parent == PROJECT_ROOT or p.parent == PROJECT_ROOT / 'adapters'
+            or PROJECT_ROOT / 'models' / 'dp_yolo' in p.parents]
+    versions = {}
+    for package in ('torch', 'torchvision', 'ultralytics', 'torchmetrics',
+                    'faster-coco-eval', 'albumentations', 'numpy', 'opencv-python', 'PyYAML'):
+        versions[package] = importlib.metadata.version(package)
+    import ultralytics
+    dependency_files = {}
+    for relative in ('utils/loss.py', 'nn/tasks.py', 'nn/modules/head.py'):
+        file = Path(ultralytics.__file__).parent / relative
+        dependency_files[relative] = sha256(file)
+    manifest = {'created_utc': stamp, 'split': split, 'continuation_seed': seed,
+        'screening_root': str(root), 'stages': stages, 'selection': selection, 'expected_rows': len(inputs), 'dataset': dataset,
+        'device': device, 'batch_size': batch_size, 'workers': workers,
+        'python': platform.python_version(), 'platform': platform.platform(),
+        'versions': versions, 'cuda': torch.version.cuda,
+        'cudnn': torch.backends.cudnn.version(),
+        'gpu': torch.cuda.get_device_name(torch.device(device)) if str(device).startswith('cuda') else None,
+        'code_sha256': {str(p.relative_to(PROJECT_ROOT)): sha256(p) for p in code},
+        'ultralytics_code_sha256': dependency_files,
+        'protocol': {'imgsz': 640, 'conf': .001, 'nms_iou': .60, 'max_det': 300,
+                     'operating_conf': .25, 'operating_iou': .5, 'dtype': 'FP32'},
+        'inputs': [item[-1] for item in inputs]}
+    atomic_json(out / 'manifest.json', manifest)
+    atomic_json(out / 'status.json', {'status': 'running'})
+    try:
+        loader = get_pest_dataloader(DATA_ROOT, split=split, batch_size=batch_size,
+                                    num_workers=workers, seed=seed)
+        rows = []
+        for name, model, stage, checkpoint, source, record in inputs:
+            print(f'Evaluating {name}/{stage}', flush=True)
+            metrics = canonical_evaluate_model(model, str(checkpoint), loader, device=device,
+                supervised_ckpt=None if stage == 'supervised' else source)
+            if metrics['n_images'] != len(loader.dataset):
+                raise RuntimeError('Incomplete dataset evaluation')
+            if sha256(checkpoint) != record['checkpoint_sha256'] or sha256(source) != record['source_sha256']:
+                raise RuntimeError('Checkpoint changed during evaluation')
+            rows.append({'Model': name, 'Stage': stage, **metrics})
+            print(f"DONE {name}/{stage}: mAP50_95={metrics['mAP50_95']:.8f}", flush=True)
+        if dataset_manifest() != dataset:
+            raise RuntimeError('Dataset changed during evaluation')
+        for item in inputs:
+            record = item[-1]
+            seed_config = record.get('supervised_seed_config')
+            if seed_config and sha256(seed_config['path']) != seed_config['sha256']:
+                raise RuntimeError('Supervised seed config changed during evaluation')
+            if verify_supervised(item[1], item[4], dataset) != record['source_manifest']:
+                raise RuntimeError('Supervised provenance changed during evaluation')
+            if sha256(item[3]) != record['checkpoint_sha256'] or sha256(item[4]) != record['source_sha256']:
+                raise RuntimeError('Evaluation inputs changed')
+            if item[2] != 'supervised':
+                folder = Path(item[3]).parent
+                if sha256(folder / 'manifest.json') != record['run_manifest_sha256'] or sha256(folder / 'completed.json') != record['completed_sha256']:
+                    raise RuntimeError('Training provenance changed during evaluation')
+        df = pd.DataFrame(rows)
+        metrics_cols = ['mAP50', 'mAP50_95', 'APs', 'APm', 'APl', 'AR300',
+                        'precision', 'operating_recall', 'f1', 'macro_f1']
+        tables = {stage: df[df.Stage == stage].set_index('Model')[metrics_cols] for stage in stages}
+        delta = pd.concat([(tables['kb1b'] - tables[stage]).add_suffix('_kb1b_minus_' + stage)
+                           for stage in stages if stage != 'kb1b'], axis=1).reset_index()
+        for name, table in [('results_full.csv', df), ('results_delta.csv', delta)]:
+            tmp = out / (name + '.tmp')
+            table.to_csv(tmp, index=False)
+            tmp.replace(out / name)
+        atomic_json(out / 'completed.json', {'status': 'complete', 'rows': len(rows),
+            'manifest_sha256': sha256(out / 'manifest.json'),
+            'results_sha256': sha256(out / 'results_full.csv'),
+            'delta_sha256': sha256(out / 'results_delta.csv')})
+        atomic_json(out / 'status.json', {'status': 'complete'})
+        print('Evaluation complete:', out, flush=True)
+        return df
+    except Exception as exc:
+        atomic_json(out / 'status.json', {'status': 'failed', 'error': str(exc)})
+        raise
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -481,7 +493,16 @@ def main():
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--checkpoint-source', choices=['screening', 'train_rl'],
                         default='screening')
+    parser.add_argument('--output', type=Path, help='New output directory; existing paths are rejected')
+    parser.add_argument('--screening-root', type=Path)
+    parser.add_argument('--workers', type=int, default=0)
+    parser.add_argument('--batch-size', type=int, default=16)
+    from experiment_modes import MODES
+    parser.add_argument('--stages', nargs='+', choices=('supervised', *MODES))
+    parser.add_argument('--selection', choices=('best', 'last'), default='best')
     args = parser.parse_args()
+    if args.workers < 0 or args.batch_size <= 0:
+        parser.error('workers must be nonnegative; batch-size must be positive')
 
     run_comparison(
         model_filter=args.model,
@@ -489,6 +510,8 @@ def main():
         device=args.device,
         seed=args.seed,
         checkpoint_source=args.checkpoint_source,
+        output=args.output, screening_root=args.screening_root,
+        workers=args.workers, batch_size=args.batch_size, stages=args.stages, selection=args.selection,
     )
 
 

@@ -3,8 +3,10 @@ set -Eeuo pipefail
 
 KB1_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd -- "$KB1_DIR/.." && pwd)"
-if [[ -x "$REPO_DIR/.venv/Scripts/python.exe" ]]; then
+if [[ "$OSTYPE" != linux* && -x "$REPO_DIR/.venv/Scripts/python.exe" ]]; then
   PYTHON="$REPO_DIR/.venv/Scripts/python.exe"
+elif [[ -x "$REPO_DIR/.venv-ubuntu/bin/python" ]]; then
+  PYTHON="$REPO_DIR/.venv-ubuntu/bin/python"
 elif [[ -x "$REPO_DIR/.venv/bin/python" ]]; then
   PYTHON="$REPO_DIR/.venv/bin/python"
 else
@@ -85,7 +87,8 @@ PY
 
 printf '\n[KB1 4/4] Locked-checkpoint test evaluation\n'
 export KB1_EVAL_STARTED_NS="$("$PYTHON" -c 'import time; print(time.time_ns())')"
-"$PYTHON" -u evaluate.py --checkpoint-source screening --split test
+export KB1_EVAL_OUTPUT="results/canonical_clean/screening/test_${KB1_EVAL_STARTED_NS}"
+"$PYTHON" -u evaluate.py --checkpoint-source screening --split test --output "$KB1_EVAL_OUTPUT"
 "$PYTHON" - <<'PY'
 import csv
 import json
@@ -94,7 +97,7 @@ import os
 from pathlib import Path
 from run_screening import MODELS, OUTPUT
 
-root = Path('results/canonical_clean/screening/test')
+root = Path(os.environ['KB1_EVAL_OUTPUT'])
 full = root / 'results_full.csv'
 deltas = root / 'results_delta.csv'
 started = int(os.environ['KB1_EVAL_STARTED_NS'])
@@ -139,7 +142,7 @@ test_leader = max(MODELS, key=lambda model: float(by_key[labels[model], 'kb1b'][
 lines += ['', f'Highest guided test score: {labels[test_leader]}. This is descriptive; test did not select checkpoints or hyperparameters.',
           'The guided - native-only difference includes the reward and proxy terms together.', '',
           f'Full metrics: `{full.as_posix()}`; paired deltas: `{deltas.as_posix()}`.', '']
-report = Path('docs/KB1_FINAL_CLEAN_REPORT.md')
+report = root / 'KB1_FINAL_CLEAN_REPORT.md'
 report.write_text('\n'.join(lines), encoding='utf-8')
 print(f'PASS: all {len(expected)} model-stage test rows verified', flush=True)
 print('Final report:', report.resolve(), flush=True)

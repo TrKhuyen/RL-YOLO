@@ -1,0 +1,57 @@
+{
+  "protocol": {
+    "steps": 15000,
+    "batch_size": 4,
+    "img_size": 640,
+    "lr": 1e-06,
+    "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+    "seed": 42,
+    "eval_interval": 1000,
+    "patience": 5,
+    "save_interval": 2000,
+    "pairwise_alpha": 0.01,
+    "pairwise_margin": 0.1,
+    "dpo_alpha": 0.1,
+    "dpo_beta": 0.1,
+    "dpo_policy": "gt_class_anchor_softmax_v1",
+    "dpo_pair_source": "online_policy_gt_iou_v2",
+    "dpo_objective_version": "candidate_selection_online_dpo_v2",
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.001,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "dpo",
+      "step": 5000,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\ablation\\20261007T173941Z_330\\yolov8n\\dpo_last_best.pt",
+      "training_method": "candidate_selection_dpo_native_loss",
+      "pairwise_pairs_seen": 0,
+      "pairwise_active_steps": 0,
+      "dpo_pairs_seen": 85733,
+      "dpo_active_steps": 5000,
+      "dpo_diagnostics": {
+        "pair_count": 14,
+        "relative_margin": -0.376413494348526,
+        "policy_win_rate": 0.0,
+        "reference_win_rate": 0.2142857313156128,
+        "relative_win_rate": 0.2857142984867096,
+        "policy_margin": -5.852419853210449,
+        "chosen_iou": 0.9138588905334473,
+        "rejected_iou": 0.7641998529434204,
+        "quality_gap": 0.14965906739234924
+      },
+      "base_checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "reference_checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "dpo_policy": "gt_class_anchor_softmax_v1",
+      "dpo_pair_source": "online_policy_gt_iou_v2",
+      "dpo_objective_version": "candidate_selection_online_dpo_v2",
+      "mAP50-95": 0.3936287462711334,
+      "mAP50": 0.5110918283462524,
+      "AP_small": 0.060978151857852936,
+      "Recall": 0.5641443729400635,
+      "FPS": 92.80276323426934,
+      "num_images": 479
+    }
+  ]
+}

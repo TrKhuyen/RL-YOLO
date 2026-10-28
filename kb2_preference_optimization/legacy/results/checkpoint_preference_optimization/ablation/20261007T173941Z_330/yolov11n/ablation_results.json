@@ -1,0 +1,57 @@
+{
+  "protocol": {
+    "steps": 15000,
+    "batch_size": 4,
+    "img_size": 640,
+    "lr": 1e-06,
+    "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov11n\\weights\\best.pt",
+    "seed": 42,
+    "eval_interval": 1000,
+    "patience": 5,
+    "save_interval": 2000,
+    "pairwise_alpha": 0.01,
+    "pairwise_margin": 0.1,
+    "dpo_alpha": 0.1,
+    "dpo_beta": 0.1,
+    "dpo_policy": "gt_class_anchor_softmax_v1",
+    "dpo_pair_source": "online_policy_gt_iou_v2",
+    "dpo_objective_version": "candidate_selection_online_dpo_v2",
+    "selection_metric": "mAP50-95",
+    "val_conf": 0.001,
+    "val_iou": 0.45
+  },
+  "results": [
+    {
+      "variant": "dpo",
+      "step": 12000,
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb2_preference_optimization\\checkpoint_preference_optimization\\ablation\\20261007T173941Z_330\\yolov11n\\dpo_last_best.pt",
+      "training_method": "candidate_selection_dpo_native_loss",
+      "pairwise_pairs_seen": 0,
+      "pairwise_active_steps": 0,
+      "dpo_pairs_seen": 205499,
+      "dpo_active_steps": 12000,
+      "dpo_diagnostics": {
+        "pair_count": 19,
+        "relative_margin": 0.26140040159225464,
+        "policy_win_rate": 0.0,
+        "reference_win_rate": 0.0,
+        "relative_win_rate": 0.6315789222717285,
+        "policy_margin": -6.6471662521362305,
+        "chosen_iou": 0.925490140914917,
+        "rejected_iou": 0.9038541913032532,
+        "quality_gap": 0.02163594402372837
+      },
+      "base_checkpoint_sha256": "339ee672b168f6995b7b977ed7c8d40e90d84971d772fef0cb417852a7eb3673",
+      "reference_checkpoint_sha256": "339ee672b168f6995b7b977ed7c8d40e90d84971d772fef0cb417852a7eb3673",
+      "dpo_policy": "gt_class_anchor_softmax_v1",
+      "dpo_pair_source": "online_policy_gt_iou_v2",
+      "dpo_objective_version": "candidate_selection_online_dpo_v2",
+      "mAP50-95": 0.43107181787490845,
+      "mAP50": 0.5493619441986084,
+      "AP_small": 0.060870081186294556,
+      "Recall": 0.5834804773330688,
+      "FPS": 36.164127227812635,
+      "num_images": 479
+    }
+  ]
+}

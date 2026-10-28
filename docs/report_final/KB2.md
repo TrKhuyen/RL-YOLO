@@ -1,5 +1,12 @@
 # KB2 — Review feedback-guided, pairwise và candidate-selection DPO
 
+> **Lưu trữ lịch sử — cập nhật 26/10/2026:** KB2 đã chuyển sang DPO trên action
+> detection hoàn chỉnh, nhận preference ở cấp toàn bộ bộ dự đoán A/B. Thiết kế
+> hiện hành: [KB2 structured DPO](../../kb2_preference_optimization/README.md).
+> Source cũ ở `kb2_preference_optimization/legacy/`; checkpoint/feedback cũ đã
+> xóa theo yêu cầu người dùng, có [inventory/hash và số liệu nhỏ](../../kb2_preference_optimization/legacy/cleanup_manifest.json).
+> Các mô tả “hiện tại” và lệnh dưới đây thuộc phiên bản trước khi thiết kế lại.
+
 ## 1. Phạm vi và tên phương pháp
 
 KB2 dùng prediction của checkpoint nền trên **tập train** cùng ground truth để tạo tín hiệu chọn mẫu và loss phụ cho YOLO. Native detection loss vẫn là objective chính. Nhánh **pairwise preference optimization** chọn hai candidate của mô hình hiện tại cho cùng GT và tối ưu điểm chosen cao hơn rejected. Baseline là native continuation; sampling và hybrid dùng feedback. Từ ngày 2026-10-07, nhánh **candidate-selection DPO** dùng reference đóng băng, policy categorical trên chỉ số candidate và objective policy/reference log-ratio. Phiên bản hiện tại **v2 chọn A/B bằng IoU prediction của policy đang train so với GT**; reference chỉ tính log-prob trên cùng chỉ số A/B. Các mục 8–9 ghi kết quả v1 lịch sử, mục 10 ghi sửa đổi và pilot v2. Đây là DPO online cho chọn candidate, chưa phải policy sinh toàn bộ detection set; định nghĩa và giới hạn ở [DPO.md](../../kb2_preference_optimization/docs/DPO.md).

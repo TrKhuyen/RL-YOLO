@@ -1,8 +1,10 @@
-﻿"""Dataset and supervised checkpoint provenance for KB1."""
+"""Dataset and supervised checkpoint provenance for KB1."""
 import hashlib
 import json
 import os
 import re
+
+import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -22,9 +24,23 @@ def sha256(path):
 def dataset_manifest():
     if not DATA_CONFIG.is_file():
         raise FileNotFoundError(DATA_CONFIG)
-    config = DATA_CONFIG.read_text(encoding='utf-8')
-    if str(DATA_ROOT).replace('\\', '/') not in config.replace('\\', '/'):
-        raise ValueError('KB1 data config does not point to the clean dataset')
+    config = yaml.safe_load(DATA_CONFIG.read_text(encoding='utf-8'))
+    configured = str(config.get('path', '')).replace('\\', '/').rstrip('/')
+    local = str(DATA_ROOT.resolve()).replace('\\', '/')
+    if configured != local:
+        # Relocation is allowed only for the unchanged configuration recorded
+        # by a historical supervised manifest. Image/label hashes are checked
+        # independently below and by verify_supervised.
+        anchors = ROOT.glob('checkpoint_based/*/supervised_manifest.json')
+        trusted = False
+        for anchor in anchors:
+            saved = json.loads(anchor.read_text(encoding='utf-8'))
+            old_root = saved['dataset']['root'].replace('\\', '/').rstrip('/')
+            if configured == old_root and sha256(DATA_CONFIG) == saved['data_config_sha256']:
+                trusted = True
+                break
+        if not trusted:
+            raise ValueError('KB1 data config does not point to the clean dataset')
     digest = hashlib.sha256()
     counts = {}
     source_sets = {}
@@ -33,8 +49,9 @@ def dataset_manifest():
         labels = DATA_ROOT / split / 'labels'
         if not images.is_dir() or not labels.is_dir():
             raise FileNotFoundError(f'Missing {split} images or labels')
-        image_files = sorted(images.glob('*.jpg'))
-        label_files = sorted(labels.glob('*.txt'))
+        # WindowsPath sorts case-insensitively; preserve the historical digest.
+        image_files = sorted(images.glob('*.jpg'), key=lambda p: p.name.lower())
+        label_files = sorted(labels.glob('*.txt'), key=lambda p: p.name.lower())
         if not image_files or {p.stem for p in image_files} != {p.stem for p in label_files}:
             raise ValueError(f'Unpaired or missing images/labels in {split}')
         augmented = sum(bool(AUGMENTED.search(p.stem)) for p in image_files)
@@ -87,10 +104,47 @@ def verify_supervised(model, checkpoint, current_dataset=None):
         raise FileNotFoundError(f'Supervised provenance missing: {path}; retrain stage 1')
     metadata = json.loads(path.read_text(encoding='utf-8'))
     source = Path(checkpoint).resolve()
-    if metadata['model'] != model or metadata['checkpoint'] != str(source):
+    expected = (ROOT / 'checkpoint_based' / model / 'weights' / 'best.pt').resolve()
+    if metadata['model'] != model or source != expected:
         raise ValueError(f'Wrong supervised checkpoint for {model}')
     if sha256(source) != metadata['checkpoint_sha256']:
         raise ValueError(f'Supervised checkpoint hash mismatch for {model}')
-    if metadata['dataset'] != (current_dataset or dataset_manifest()):
-        raise ValueError(f'Dataset changed since supervised training of {model}')
+    assert_dataset_identity(metadata['dataset'], current_dataset or dataset_manifest())
+    if metadata['data_config_sha256'] != sha256(DATA_CONFIG):
+        raise ValueError(f'Dataset config changed since supervised training of {model}')
     return metadata
+
+
+def assert_dataset_identity(recorded, current):
+    """Compare content identity; absolute locations may change across hosts."""
+    keys = ('sha256', 'counts', 'source_id_policy')
+    if any(recorded.get(key) != current.get(key) for key in keys):
+        raise ValueError('Dataset changed since supervised training')
+
+
+def runtime_data_config():
+    """Materialize a local native-trainer YAML without modifying historical bytes."""
+    dataset_manifest()
+    config = yaml.safe_load(DATA_CONFIG.read_text(encoding='utf-8'))
+    config['path'] = str(DATA_ROOT.resolve())
+    output = ROOT.parent / '.kb1-tools' / 'runtime' / 'pest.yaml'
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(yaml.safe_dump(config, allow_unicode=True, sort_keys=False), encoding='utf-8')
+    return output
+
+
+def runtime_manifest():
+    """Record versions and loss/head implementation used by a new run."""
+    import importlib.metadata
+    import platform
+    import torch
+    import ultralytics
+    versions = {name: importlib.metadata.version(name) for name in
+                ('torch', 'torchvision', 'ultralytics', 'torchmetrics',
+                 'faster-coco-eval', 'albumentations', 'numpy', 'opencv-python', 'PyYAML')}
+    package = Path(ultralytics.__file__).parent
+    return {'python': platform.python_version(), 'platform': platform.platform(),
+            'versions': versions, 'cuda': torch.version.cuda,
+            'cudnn': torch.backends.cudnn.version(),
+            'ultralytics_code_sha256': {name: sha256(package / name) for name in
+                ('utils/loss.py', 'nn/tasks.py', 'nn/modules/head.py')}}
