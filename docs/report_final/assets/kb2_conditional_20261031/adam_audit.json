@@ -1,0 +1,108 @@
+{
+  "objective_version": "conditional_detection_dpo_v0",
+  "run": "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_conditional_smoke_20261031_v2",
+  "full_bank_replay": {
+    "pairs": 784,
+    "max_logit_error": 0.0
+  },
+  "scope": "Actual matched AdamW updates; fixed sampled train decisions; not generalization evidence",
+  "steps": 2,
+  "input_streams_equal": true,
+  "raw_box_max_abs_delta": 0.0,
+  "parameter_update_L2": {
+    "native": 0.0009600947289293493,
+    "dpo": 0.0009599273325079526,
+    "dpo_minus_native": 4.39932455957289e-05
+  },
+  "sampled_decisions": [
+    {
+      "sampled_at_step": 1,
+      "evaluated_after_steps": 2,
+      "pair_id": 590,
+      "image_id": 1807,
+      "group": "background",
+      "target_gt": null,
+      "class_id": 27,
+      "slot": 6797,
+      "logits": {
+        "S0": -0.4885110855102539,
+        "native": -0.4906291961669922,
+        "dpo": -0.4908180236816406
+      },
+      "scores": {
+        "S0": 0.3802444040775299,
+        "native": 0.37974533438682556,
+        "dpo": 0.3797008693218231
+      },
+      "signed_logit_delta_DPO_vs_native": 0.0001888275146484375,
+      "signed_score_delta_DPO_vs_native": 4.4465065002441406e-05
+    },
+    {
+      "sampled_at_step": 1,
+      "evaluated_after_steps": 2,
+      "pair_id": 625,
+      "image_id": 1933,
+      "group": "recovery",
+      "target_gt": 0,
+      "class_id": 25,
+      "slot": 7174,
+      "logits": {
+        "S0": -2.319892406463623,
+        "native": -2.3109169006347656,
+        "dpo": -2.310873031616211
+      },
+      "scores": {
+        "S0": 0.08948882669210434,
+        "native": 0.09022285789251328,
+        "dpo": 0.09022645652294159
+      },
+      "signed_logit_delta_DPO_vs_native": 4.38690185546875e-05,
+      "signed_score_delta_DPO_vs_native": 3.598630428314209e-06
+    },
+    {
+      "sampled_at_step": 2,
+      "evaluated_after_steps": 2,
+      "pair_id": 414,
+      "image_id": 1278,
+      "group": "background",
+      "target_gt": null,
+      "class_id": 10,
+      "slot": 7238,
+      "logits": {
+        "S0": -0.8934011459350586,
+        "native": -0.8950901031494141,
+        "dpo": -0.8951034545898438
+      },
+      "scores": {
+        "S0": 0.2904084622859955,
+        "native": 0.29006052017211914,
+        "dpo": 0.2900577783584595
+      },
+      "signed_logit_delta_DPO_vs_native": 1.33514404296875e-05,
+      "signed_score_delta_DPO_vs_native": 2.7418136596679688e-06
+    },
+    {
+      "sampled_at_step": 2,
+      "evaluated_after_steps": 2,
+      "pair_id": 287,
+      "image_id": 704,
+      "group": "preservation",
+      "target_gt": 3,
+      "class_id": 8,
+      "slot": 7197,
+      "logits": {
+        "S0": -1.0951032638549805,
+        "native": -1.0968999862670898,
+        "dpo": -1.0968751907348633
+      },
+      "scores": {
+        "S0": 0.2506585121154785,
+        "native": 0.2503211796283722,
+        "dpo": 0.25032585859298706
+      },
+      "signed_logit_delta_DPO_vs_native": 2.47955322265625e-05,
+      "signed_score_delta_DPO_vs_native": 4.678964614868164e-06
+    }
+  ],
+  "mean_signed_score_delta_DPO_vs_native": 1.3871118426322937e-05
+}

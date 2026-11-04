@@ -111,6 +111,31 @@ class ProbabilityTests(unittest.TestCase):
 
 
 class QualityTests(unittest.TestCase):
+    def test_f2_prefers_recovered_gt_with_moderate_extra_false_positives(self):
+        # Ten GT with exact geometry at all ten IoU thresholds. A finds nine
+        # with three FP; B finds eight with zero FP. F1 and F2 disagree.
+        boxes = [[20*i, 0, 20*i+10, 10] for i in range(10)]
+        gt = prediction(boxes)
+        a = prediction(boxes[:9] + [[300+20*i, 0, 310+20*i, 10] for i in range(3)])
+        b = prediction(boxes[:8])
+        f1_a, f1_b = [quality_score(p, gt, QualityConfig(f_beta=1.)) for p in (a, b)]
+        f2_a, f2_b = [quality_score(p, gt) for p in (a, b)]
+        self.assertLess(f1_a['score'], f1_b['score'])
+        self.assertGreater(f2_a['score'], f2_b['score'])
+        self.assertAlmostEqual(f2_a['mean_f2'], 45 / 52)
+        self.assertAlmostEqual(f2_b['mean_f2'], 40 / 48)
+        self.assertEqual((f2_a['tp'], f2_a['fp'], f2_a['fn']), (9, 3, 1))
+        self.assertAlmostEqual(f1_a['score'], .8 * 18 / 22 + .2 * .9)
+        self.assertEqual(QualityConfig().to_dict()['f_beta'], 2.)
+
+    def test_f2_still_penalizes_false_positives_and_invalid_beta(self):
+        gt = prediction([[0, 0, 10, 10]])
+        spam = prediction([[0, 0, 10, 10]] + [[20+i*20, 0, 30+i*20, 10] for i in range(20)])
+        self.assertLess(quality_score(spam, gt)['score'], quality_score(gt, gt)['score'])
+        for beta in (0, -1, float('nan'), float('inf')):
+            with self.assertRaises(ValueError):
+                QualityConfig(f_beta=beta)
+
     def test_perfect_output_beats_missing_wrong_class_duplicate_and_loose_boxes(self):
         gt = prediction([[0, 0, 10, 10], [20, 20, 30, 30]], [0, 1])
         perfect = quality_score(gt, gt)['score']

@@ -1,0 +1,586 @@
+{
+  "mAP50_95": 0.3806333839893341,
+  "mAP50": 0.4945683479309082,
+  "mAP75": 0.43199610710144043,
+  "AR300": 0.560469925403595,
+  "APs": 0.040550004690885544,
+  "APm": 0.18213282525539398,
+  "APl": 0.42871418595314026,
+  "precision": 0.5298468040147913,
+  "operating_recall": 0.5315315315315315,
+  "f1": 0.5306878306878307,
+  "macro_f1": 0.5245666120734882,
+  "tp": 1003,
+  "fp": 890,
+  "fn": 884,
+  "fp_per_image": 1.8580375782881002,
+  "fn_rate": 0.46846846846846846,
+  "matched_mean_iou": 0.8719348921138768,
+  "geometry_gt_coverage": 0.5315315315315315,
+  "gt_normalized_iou": 0.4634608886010696,
+  "geometry_matcher": "class_aware_max_cardinality_then_iou",
+  "operating_matcher": "confidence_ordered_greedy_same_as_kb1",
+  "area_gt_support": {
+    "small": 94,
+    "medium": 577,
+    "large": 1216
+  },
+  "per_class": {
+    "0": {
+      "AP50_95": 0.40531986951828003,
+      "AR300": 0.484375,
+      "tp": 16,
+      "fp": 4,
+      "fn": 16,
+      "gt_support": 32
+    },
+    "1": {
+      "AP50_95": 0.671822190284729,
+      "AR300": 0.810869574546814,
+      "tp": 41,
+      "fp": 39,
+      "fn": 5,
+      "gt_support": 46
+    },
+    "2": {
+      "AP50_95": 0.42824721336364746,
+      "AR300": 0.6195651888847351,
+      "tp": 30,
+      "fp": 13,
+      "fn": 16,
+      "gt_support": 46
+    },
+    "3": {
+      "AP50_95": 0.3900301158428192,
+      "AR300": 0.6620689630508423,
+      "tp": 19,
+      "fp": 46,
+      "fn": 10,
+      "gt_support": 29
+    },
+    "4": {
+      "AP50_95": 0.28717806935310364,
+      "AR300": 0.563265323638916,
+      "tp": 21,
+      "fp": 24,
+      "fn": 28,
+      "gt_support": 49
+    },
+    "5": {
+      "AP50_95": 0.4533718228340149,
+      "AR300": 0.6348101496696472,
+      "tp": 110,
+      "fp": 69,
+      "fn": 48,
+      "gt_support": 158
+    },
+    "6": {
+      "AP50_95": 0.3299019932746887,
+      "AR300": 0.4985714256763458,
+      "tp": 33,
+      "fp": 19,
+      "fn": 37,
+      "gt_support": 70
+    },
+    "7": {
+      "AP50_95": 0.3966091573238373,
+      "AR300": 0.8214285969734192,
+      "tp": 11,
+      "fp": 17,
+      "fn": 3,
+      "gt_support": 14
+    },
+    "8": {
+      "AP50_95": 0.5019667744636536,
+      "AR300": 0.6625000238418579,
+      "tp": 42,
+      "fp": 27,
+      "fn": 14,
+      "gt_support": 56
+    },
+    "9": {
+      "AP50_95": 0.6578036546707153,
+      "AR300": 0.6871795058250427,
+      "tp": 28,
+      "fp": 2,
+      "fn": 11,
+      "gt_support": 39
+    },
+    "10": {
+      "AP50_95": 0.45506009459495544,
+      "AR300": 0.6414285898208618,
+      "tp": 45,
+      "fp": 21,
+      "fn": 25,
+      "gt_support": 70
+    },
+    "11": {
+      "AP50_95": 0.05464034527540207,
+      "AR300": 0.2341463416814804,
+      "tp": 3,
+      "fp": 20,
+      "fn": 38,
+      "gt_support": 41
+    },
+    "12": {
+      "AP50_95": 0.19957664608955383,
+      "AR300": 0.37674418091773987,
+      "tp": 52,
+      "fp": 55,
+      "fn": 120,
+      "gt_support": 172
+    },
+    "13": {
+      "AP50_95": 0.19192151725292206,
+      "AR300": 0.4564516246318817,
+      "tp": 21,
+      "fp": 33,
+      "fn": 41,
+      "gt_support": 62
+    },
+    "14": {
+      "AP50_95": 0.6439990997314453,
+      "AR300": 0.7476922869682312,
+      "tp": 106,
+      "fp": 34,
+      "fn": 24,
+      "gt_support": 130
+    },
+    "15": {
+      "AP50_95": 0.4950738251209259,
+      "AR300": 0.592424213886261,
+      "tp": 37,
+      "fp": 29,
+      "fn": 29,
+      "gt_support": 66
+    },
+    "16": {
+      "AP50_95": 0.4784587323665619,
+      "AR300": 0.6314814686775208,
+      "tp": 35,
+      "fp": 34,
+      "fn": 19,
+      "gt_support": 54
+    },
+    "17": {
+      "AP50_95": 0.6648193001747131,
+      "AR300": 0.7462365627288818,
+      "tp": 69,
+      "fp": 27,
+      "fn": 24,
+      "gt_support": 93
+    },
+    "18": {
+      "AP50_95": 0.166968435049057,
+      "AR300": 0.3425000011920929,
+      "tp": 11,
+      "fp": 29,
+      "fn": 29,
+      "gt_support": 40
+    },
+    "19": {
+      "AP50_95": 0.278207391500473,
+      "AR300": 0.476666659116745,
+      "tp": 29,
+      "fp": 39,
+      "fn": 31,
+      "gt_support": 60
+    },
+    "20": {
+      "AP50_95": 0.203205406665802,
+      "AR300": 0.42160001397132874,
+      "tp": 58,
+      "fp": 82,
+      "fn": 67,
+      "gt_support": 125
+    },
+    "21": {
+      "AP50_95": 0.048774782568216324,
+      "AR300": 0.2616666555404663,
+      "tp": 11,
+      "fp": 65,
+      "fn": 49,
+      "gt_support": 60
+    },
+    "22": {
+      "AP50_95": 0.4249962270259857,
+      "AR300": 0.5693877339363098,
+      "tp": 27,
+      "fp": 22,
+      "fn": 22,
+      "gt_support": 49
+    },
+    "23": {
+      "AP50_95": 0.30670157074928284,
+      "AR300": 0.4585365951061249,
+      "tp": 18,
+      "fp": 19,
+      "fn": 23,
+      "gt_support": 41
+    },
+    "24": {
+      "AP50_95": 0.1679471731185913,
+      "AR300": 0.4201219379901886,
+      "tp": 58,
+      "fp": 59,
+      "fn": 106,
+      "gt_support": 164
+    },
+    "25": {
+      "AP50_95": 0.16055183112621307,
+      "AR300": 0.4959999918937683,
+      "tp": 21,
+      "fp": 41,
+      "fn": 29,
+      "gt_support": 50
+    },
+    "26": {
+      "AP50_95": 0.6617440581321716,
+      "AR300": 0.7754386067390442,
+      "tp": 42,
+      "fp": 19,
+      "fn": 15,
+      "gt_support": 57
+    },
+    "27": {
+      "AP50_95": 0.5328372716903687,
+      "AR300": 0.6000000238418579,
+      "tp": 9,
+      "fp": 2,
+      "fn": 5,
+      "gt_support": 14
+    }
+  },
+  "num_images": 479,
+  "num_gt": 1887,
+  "evaluation_wall_seconds": 3.86126712100031,
+  "protocol": {
+    "version": "kb2_canonical_v1_ar300",
+    "conf": 0.001,
+    "nms_iou": 0.6,
+    "max_det": 300,
+    "operating_conf": 0.25,
+    "operating_iou": 0.5,
+    "selection": "mAP50_95",
+    "area_coordinates": "transformed_image",
+    "inference": "ordinary_deterministic_yolo"
+  },
+  "partial_evaluation": false,
+  "macro_recall": 0.543597246469275,
+  "checkpoint_selection": "macro_recall_subject_to_S0_micro_recall_FP_AP_gates",
+  "source_gt_transitions": {
+    "retained": 971,
+    "gt": 1887,
+    "persistent_miss": 834,
+    "lost": 50,
+    "recovered": 32,
+    "net_recovery": -18,
+    "per_class": {
+      "12": {
+        "retained": 45,
+        "gt": 172,
+        "persistent_miss": 113,
+        "recovered": 7,
+        "lost": 7
+      },
+      "26": {
+        "retained": 41,
+        "gt": 57,
+        "persistent_miss": 13,
+        "lost": 2,
+        "recovered": 1
+      },
+      "3": {
+        "retained": 19,
+        "gt": 29,
+        "persistent_miss": 10
+      },
+      "10": {
+        "persistent_miss": 22,
+        "gt": 70,
+        "recovered": 2,
+        "retained": 43,
+        "lost": 3
+      },
+      "6": {
+        "retained": 33,
+        "gt": 70,
+        "persistent_miss": 36,
+        "lost": 1
+      },
+      "8": {
+        "retained": 42,
+        "gt": 56,
+        "lost": 2,
+        "persistent_miss": 12
+      },
+      "4": {
+        "persistent_miss": 27,
+        "gt": 49,
+        "retained": 19,
+        "recovered": 2,
+        "lost": 1
+      },
+      "0": {
+        "retained": 16,
+        "gt": 32,
+        "persistent_miss": 16
+      },
+      "7": {
+        "retained": 8,
+        "gt": 14,
+        "persistent_miss": 3,
+        "recovered": 3
+      },
+      "9": {
+        "retained": 28,
+        "gt": 39,
+        "persistent_miss": 10,
+        "lost": 1
+      },
+      "19": {
+        "persistent_miss": 30,
+        "gt": 60,
+        "retained": 29,
+        "lost": 1
+      },
+      "2": {
+        "retained": 30,
+        "gt": 46,
+        "persistent_miss": 14,
+        "lost": 2
+      },
+      "16": {
+        "retained": 34,
+        "gt": 54,
+        "persistent_miss": 19,
+        "recovered": 1
+      },
+      "14": {
+        "retained": 105,
+        "gt": 130,
+        "persistent_miss": 21,
+        "lost": 3,
+        "recovered": 1
+      },
+      "22": {
+        "retained": 27,
+        "gt": 49,
+        "persistent_miss": 20,
+        "lost": 2
+      },
+      "18": {
+        "persistent_miss": 28,
+        "gt": 40,
+        "retained": 11,
+        "lost": 1
+      },
+      "20": {
+        "retained": 58,
+        "gt": 125,
+        "lost": 10,
+        "persistent_miss": 57
+      },
+      "11": {
+        "persistent_miss": 38,
+        "gt": 41,
+        "retained": 3
+      },
+      "25": {
+        "persistent_miss": 29,
+        "gt": 50,
+        "recovered": 3,
+        "retained": 18
+      },
+      "5": {
+        "retained": 105,
+        "gt": 158,
+        "persistent_miss": 47,
+        "recovered": 5,
+        "lost": 1
+      },
+      "13": {
+        "retained": 21,
+        "gt": 62,
+        "persistent_miss": 36,
+        "lost": 5
+      },
+      "24": {
+        "persistent_miss": 103,
+        "gt": 164,
+        "retained": 56,
+        "lost": 3,
+        "recovered": 2
+      },
+      "27": {
+        "persistent_miss": 5,
+        "gt": 14,
+        "retained": 9
+      },
+      "23": {
+        "persistent_miss": 23,
+        "gt": 41,
+        "retained": 17,
+        "recovered": 1
+      },
+      "17": {
+        "retained": 69,
+        "gt": 93,
+        "persistent_miss": 20,
+        "lost": 4
+      },
+      "21": {
+        "persistent_miss": 49,
+        "gt": 60,
+        "recovered": 3,
+        "retained": 8
+      },
+      "15": {
+        "persistent_miss": 29,
+        "gt": 66,
+        "retained": 36,
+        "recovered": 1
+      },
+      "1": {
+        "retained": 41,
+        "gt": 46,
+        "persistent_miss": 4,
+        "lost": 1
+      }
+    },
+    "density": {
+      "1-2": {
+        "retained": 206,
+        "gt": 313,
+        "persistent_miss": 90,
+        "lost": 10,
+        "recovered": 7
+      },
+      "3-5": {
+        "retained": 279,
+        "gt": 473,
+        "persistent_miss": 182,
+        "lost": 8,
+        "recovered": 4
+      },
+      "6+": {
+        "retained": 486,
+        "gt": 1101,
+        "persistent_miss": 562,
+        "recovered": 21,
+        "lost": 32
+      }
+    },
+    "size": {
+      "large": {
+        "retained": 731,
+        "gt": 1216,
+        "persistent_miss": 438,
+        "lost": 22,
+        "recovered": 25
+      },
+      "medium": {
+        "persistent_miss": 312,
+        "gt": 577,
+        "retained": 234,
+        "lost": 24,
+        "recovered": 7
+      },
+      "small": {
+        "persistent_miss": 84,
+        "gt": 94,
+        "retained": 6,
+        "lost": 4
+      }
+    },
+    "gt_overlap": {
+      "iou<.3": {
+        "retained": 944,
+        "gt": 1843,
+        "persistent_miss": 817,
+        "lost": 50,
+        "recovered": 32
+      },
+      "iou>=.3": {
+        "persistent_miss": 17,
+        "gt": 44,
+        "retained": 27
+      }
+    },
+    "common_detected_mean_iou_S0": 0.8728945607628317,
+    "common_detected_mean_iou_policy": 0.8724226728158434,
+    "common_detected_support": 971
+  },
+  "threshold_control": {
+    "scope": "validation diagnostic on a fixed coarse threshold grid; not calibration or test tuning",
+    "S0_FP_budget_at_conf25": 984,
+    "max_recall_at_S0_FP_budget_on_grid": 0.5315315315315315,
+    "curve": [
+      {
+        "confidence": 0.05,
+        "recall": 0.620561738208797,
+        "fp": 2114
+      },
+      {
+        "confidence": 0.1,
+        "recall": 0.5882352941176471,
+        "fp": 1542
+      },
+      {
+        "confidence": 0.15,
+        "recall": 0.5675675675675675,
+        "fp": 1241
+      },
+      {
+        "confidence": 0.2,
+        "recall": 0.5516693163751988,
+        "fp": 1029
+      },
+      {
+        "confidence": 0.25,
+        "recall": 0.5315315315315315,
+        "fp": 890
+      },
+      {
+        "confidence": 0.3,
+        "recall": 0.5135135135135135,
+        "fp": 763
+      },
+      {
+        "confidence": 0.35,
+        "recall": 0.4970853206147324,
+        "fp": 660
+      },
+      {
+        "confidence": 0.4,
+        "recall": 0.474827768945416,
+        "fp": 565
+      },
+      {
+        "confidence": 0.5,
+        "recall": 0.43773184949655536,
+        "fp": 439
+      },
+      {
+        "confidence": 0.6,
+        "recall": 0.39109697933227344,
+        "fp": 313
+      },
+      {
+        "confidence": 0.7,
+        "recall": 0.34022257551669316,
+        "fp": 203
+      },
+      {
+        "confidence": 0.8,
+        "recall": 0.26285108638049814,
+        "fp": 110
+      },
+      {
+        "confidence": 0.9,
+        "recall": 0.1293057763645999,
+        "fp": 25
+      }
+    ]
+  }
+}

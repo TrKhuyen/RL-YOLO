@@ -1,0 +1,6 @@
+﻿model,confidence,tp,fp,fn,recall,precision,FP_budget,scope
+s0,0.25028350949287415,1021,984,866,0.5410704822469529,0.5092269326683292,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+original_native,0.18774272501468658,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+original_dpo,0.1876225471496582,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+reduced_native,0.23695272207260132,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+reduced_dpo,0.23680326342582703,1025,984,862,0.543190249072602,0.5102040816326531,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning

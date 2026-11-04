@@ -1,0 +1,18 @@
+{
+  "old_native_pilot": "kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/reduced_native",
+  "new_native_pilot": "kb2_preference_optimization/outputs/yolov8n_strength_s42_20261101_094532_307953/native",
+  "old_native_long": "kb2_preference_optimization/outputs/yolov8n_native_background_long_s42_20261031_020350_005551/native",
+  "new_DPO_long": "kb2_preference_optimization/outputs/yolov8n_strength_long_lambda010_s42_20261101_180757_848916",
+  "native_update_loop_AST_identical": true,
+  "native_2000_all_state_tensors_bitwise_equal": true,
+  "state_tensor_count": 355,
+  "native_2000_optimizer_state_equal": true,
+  "native_2000_train_logs_identical_across_old_pilot_new_pilot_old_long": true,
+  "full_15000_input_stream_equal_native_DPO": true,
+  "saved_training_code_fingerprints_match_current": true,
+  "scope": "Native new trainer rerun directly verified through2000 steps; no new-trainer native15000 rerun claimed",
+  "checkpoint_sha256": {
+    "kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/reduced_native/last.pt": "3eef88b37eaa135de9c6afa4c74d2733e0c1f413ae6b32b150d3ab36b033f007",
+    "kb2_preference_optimization/outputs/yolov8n_strength_s42_20261101_094532_307953/native/last.pt": "e17476cb7be896509eee10ceccdb99db65fda5384be6877210f65bb039907a5e"
+  }
+}

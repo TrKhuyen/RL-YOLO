@@ -1,0 +1,57 @@
+test_checkpoint_gate_protects_recall_FP_and_AP (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_common_context_can_contain_errors_and_is_immutable (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_duplicate_drop_requires_real_FP_reduction_without_GT_loss (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_initial_reference_margin_is_zero (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_keep_rejected_if_common_candidate_already_covers_target (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_loss_equals_normalized_bernoulli_dpo_and_gradient_sign (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_low_confidence_keep_recovers_true_FN_without_fabricating_box_or_score (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_matching_counts_agree_with_canonical_in_crowded_multiclass_image (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_real_Adam_step_preserves_geometry_and_all_frozen_state (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_sampler_limits_image_exposure_even_with_many_pairs_same_GT (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_small_probe_budget_covers_all_decision_groups (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_validation_distinguishes_rescued_GT_from_lost_neighbor_at_equal_TP (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_whole_image_gate_rejects_NMS_loss_of_neighbor (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_wrong_class_and_localization_errors_are_not_background_negatives (test_conditional_dpo.ConditionalDPOTests) ... ok
+test_invalid_label_fails_without_silent_fallback (test_metrics_and_data.DatasetTests) ... ok
+test_replay_is_deterministic_and_missing_labels_fail (test_metrics_and_data.DatasetTests) ... ok
+test_false_positives_false_negatives_and_undefined_iou (test_metrics_and_data.MetricTests) ... ok
+test_partial_evaluation_is_explicit (test_metrics_and_data.MetricTests) ... ok
+test_perfect_metrics_and_same_ap_contract_as_kb1 (test_metrics_and_data.MetricTests) ... ok
+test_identity_and_empty_foreground (test_native_background.BackgroundLossTests) ... ok
+test_optional_class_weight_diagnostics_and_all_foreground (test_native_background.BackgroundLossTests) ... ok
+test_real_s0_loss_identity_assignment_and_output_gradients (test_native_background.BackgroundLossTests) ... ok
+test_reject_invalid_weight_and_missing_assignment (test_native_background.BackgroundLossTests) ... ok
+test_slot_weighting_preserves_foreground_zero_class_and_normalization (test_native_background.BackgroundLossTests) ... ok
+test_action_distance_is_not_inferred_from_matched_gt (test_recovery_selection.RecoveryTests) ... ok
+test_all_six_pairs_are_checked_instead_of_only_extreme_scores (test_recovery_selection.RecoveryTests) ... ok
+test_canonical_identity_matching_agrees_with_counts_in_crowded_scene (test_recovery_selection.RecoveryTests) ... ok
+test_class_balancing_handles_multi_class_pairs_without_duplicate_rows (test_recovery_selection.RecoveryTests) ... ok
+test_equal_tp_but_replacing_a_gt_is_not_recovery_or_maintenance (test_recovery_selection.RecoveryTests) ... ok
+test_matching_uses_gt_identity_despite_different_prediction_coordinates (test_recovery_selection.RecoveryTests) ... ok
+test_recovery_requires_no_gt_loss_and_no_extra_fp (test_recovery_selection.RecoveryTests) ... ok
+test_repeat_cap_changes_infeasible_group_fraction (test_recovery_selection.RecoveryTests) ... ok
+test_initial_policy_matches_reference_at_actual_training_batch_size (test_reference_scoring.GPUReferenceScoringTests) ... ok
+test_incomplete_batch_is_rejected (test_reference_scoring.SameBatchScoringTests) ... ok
+test_live_reference_controls_loss_after_policy_changes (test_reference_scoring.SameBatchScoringTests) ... ok
+test_stale_cache_cannot_bias_initial_loss_or_margin (test_reference_scoring.SameBatchScoringTests) ... ok
+test_background_and_coordinate_likelihood_are_included (test_structured_dpo.ProbabilityTests) ... ok
+test_cached_double_reference_does_not_lose_precision (test_structured_dpo.ProbabilityTests) ... ok
+test_complete_action_probability_sums_to_one (test_structured_dpo.ProbabilityTests) ... ok
+test_dpo_initial_loss_and_class_regression_gradient_direction (test_structured_dpo.ProbabilityTests) ... ok
+test_invalid_actions_and_config_are_rejected (test_structured_dpo.ProbabilityTests) ... ok
+test_reference_is_detached (test_structured_dpo.ProbabilityTests) ... ok
+test_renderer_replays_fixed_coordinates_independent_of_policy_logits (test_structured_dpo.ProbabilityTests) ... ok
+test_sampling_is_reproducible_but_produces_distinct_actions (test_structured_dpo.ProbabilityTests) ... ok
+test_empty_cases_and_preference_ties (test_structured_dpo.QualityTests) ... ok
+test_f2_prefers_recovered_gt_with_moderate_extra_false_positives (test_structured_dpo.QualityTests) ... ok
+test_f2_still_penalizes_false_positives_and_invalid_beta (test_structured_dpo.QualityTests) ... ok
+test_matching_maximizes_cardinality_before_iou (test_structured_dpo.QualityTests) ... ok
+test_perfect_output_beats_missing_wrong_class_duplicate_and_loose_boxes (test_structured_dpo.QualityTests) ... ok
+test_quality_does_not_depend_on_confidence (test_structured_dpo.QualityTests) ... ok
+test_dfl_policy_native_loss_and_reference_immutability (test_structured_dpo.RealYOLOTests) ... Overriding model.yaml nc=80 with nc=3
+ok
+
+----------------------------------------------------------------------
+Ran 51 tests in 2.835s
+
+OK

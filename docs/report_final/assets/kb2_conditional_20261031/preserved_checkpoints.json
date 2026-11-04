@@ -1,0 +1,17 @@
+{
+  "S0": {
+    "path": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt",
+    "sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+    "matches_previous_audit": true
+  },
+  "recovery_best": {
+    "path": "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_recovery_long_20261029_023113_387762/pilot_balanced/best.pt",
+    "sha256": "edf9db2376c9e25bede50a04abca0209b37d5b7844acf8ac01e49b272e4fc7a6",
+    "matches_previous_audit": true
+  },
+  "recovery_last": {
+    "path": "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_recovery_long_20261029_023113_387762/pilot_balanced/last.pt",
+    "sha256": "2c7375ee186145e65b64e848efb93fe83a2e8ea76a4ea084bdf7a1ecde7fa4ca",
+    "matches_previous_audit": true
+  }
+}

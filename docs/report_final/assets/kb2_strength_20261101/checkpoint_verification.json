@@ -1,0 +1,22 @@
+{
+  "native": {
+    "step0_state_equals_S0": true,
+    "best_step": 1000,
+    "best_differs_from_S0": true
+  },
+  "lambda001": {
+    "step0_state_equals_S0": true,
+    "best_step": 1000,
+    "best_differs_from_S0": true
+  },
+  "lambda003": {
+    "step0_state_equals_S0": true,
+    "best_step": 1000,
+    "best_differs_from_S0": true
+  },
+  "lambda010": {
+    "step0_state_equals_S0": true,
+    "best_step": 1000,
+    "best_differs_from_S0": true
+  }
+}

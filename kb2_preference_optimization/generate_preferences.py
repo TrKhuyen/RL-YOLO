@@ -24,7 +24,7 @@ def generate(args):
     seed_everything(args.seed)
     policy = PolicyConfig(args.class_temperature, args.box_temperature,
                           args.background_logit)
-    quality = QualityConfig(args.detection_weight, args.min_gap)
+    quality = QualityConfig(args.detection_weight, args.min_gap, args.f_beta)
     provenance = source_provenance(args.model)
     adapter = DFLAdapter(source_checkpoint(args.model), args.device)
     adapter.model.requires_grad_(False)
@@ -105,6 +105,7 @@ def parse_args(argv=None):
     parser.add_argument('--background-logit', type=float, default=0.)
     parser.add_argument('--detection-weight', type=float, default=.8)
     parser.add_argument('--min-gap', type=float, default=.02)
+    parser.add_argument('--f-beta', type=float, default=2., help='F-beta in quality; 2 emphasizes recall, 1 replays F1')
     return parser.parse_args(argv)
 
 

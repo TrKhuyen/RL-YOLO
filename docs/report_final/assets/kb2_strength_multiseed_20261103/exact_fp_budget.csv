@@ -1,0 +1,14 @@
+﻿seed,arm,step,mode,confidence,tp,fp,fn,recall,precision,FP_budget,scope
+S0,S0,0,source,0.25028350949287415,1021,984,866,0.5410704822469529,0.5092269326683292,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+42,native,1000,best,0.24197272956371307,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+42,native,15000,last,0.21276497840881348,1027,984,860,0.5442501324854266,0.5106911984087519,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+42,dpo,12000,best,0.21377907693386078,1028,984,859,0.5447800741918389,0.510934393638171,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+42,dpo,15000,last,0.21446911990642548,1028,984,859,0.5447800741918389,0.510934393638171,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+43,native,12000,best,0.2138306200504303,1028,984,859,0.5447800741918389,0.510934393638171,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+43,native,15000,last,0.21045111119747162,1031,984,856,0.5463698993110758,0.5116625310173697,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+43,dpo,15000,best,0.21253171563148499,1032,984,855,0.5468998410174881,0.5119047619047619,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+43,dpo,15000,last,0.21253171563148499,1032,984,855,0.5468998410174881,0.5119047619047619,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+44,native,13000,best,0.21377243101596832,1027,984,860,0.5442501324854266,0.5106911984087519,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+44,native,15000,last,0.2127470225095749,1025,984,862,0.543190249072602,0.5102040816326531,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+44,dpo,15000,best,0.21349774301052094,1029,984,858,0.5453100158982512,0.511177347242921,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+44,dpo,15000,last,0.21349774301052094,1029,984,858,0.5453100158982512,0.511177347242921,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning

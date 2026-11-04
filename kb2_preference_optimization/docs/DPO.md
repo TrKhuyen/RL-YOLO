@@ -1,3 +1,8 @@
+> Từ31/10, runner chính dùng **conditional_detection_dpo_v0**: Bernoulli keep/drop,
+> likelihood tại một quyết định, freeze regression, native+DPO có đối chứng.
+> Xem [README hiện tại](../README.md) và [thiết kế đầy đủ](../../docs/KB2_DPO_DESIGN_BRAINSTORM_20261031.md).
+> Phần dưới mô tả objective whole-action lịch sử, không phải likelihood của V0.
+
 # Structured whole-output DPO cho YOLO — thiết kế 26/10/2026
 
 **Objective:** `structured_detection_dpo_v1`. Đây là implementation mới; các
@@ -74,9 +79,19 @@ Matching cùng class, one-to-one; tối đa hóa số match trước rồi tổn
 là matcher cho preference/geometry, khác matcher confidence-ordered của COCO.
 
 ```text
-Q = 0.8 * mean(F1@IoU=0.50:0.05:0.95)
+Q = 0.8 * mean(F2@IoU=0.50:0.05:0.95)
     + 0.2 * sum(matched IoU@0.5)/number_of_GT
 ```
+
+Từ 28/10/2026 dùng `F2 = 5TP/(5TP + 4FN + FP)` thay F1 để thử ưu tiên recall.
+Trọng số quality 0.8/0.2, matching, renderer và ngưỡng gap giữ nguyên. Manifest
+ghi `quality.f_beta=2` và `quality.version=whole_set_fbeta_iou_v2`; `--f-beta 1`
+cho phép chấm F1 trong một run đối chứng mới. Diagnostic lưu cả mean F1/F2.
+Scorer beta=2 độc lập với DPO beta=0.1. Không suy từ lựa chọn F2 rằng recall
+inference chắc chắn tăng; kết quả cần so trên cùng validation/protocol.
+Thử nghiệm ba seed đã hoàn tất: giảm trung bình 0,67 FN/run so F1,
+macro recall không tăng; chưa đạt mục tiêu cải thiện bỏ sót. Xem
+[báo cáo F2](../../docs/report_final/KB2_F2_EXPERIMENT_20261028.md).
 
 Ảnh không GT dùng Q=1/(1+number_of_predictions). Score confidence không trực
 tiếp tham gia Q. Class sai không match nên gây FP và GT có thể còn FN; duplicate

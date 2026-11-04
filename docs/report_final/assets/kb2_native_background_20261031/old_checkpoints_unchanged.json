@@ -1,0 +1,11 @@
+{
+  "kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_s42_20261030_180851_313339/native/best.pt": "97f719491928c93674f917835b91d208a6096680d503bd70fbd91318cee0eb6f",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_s42_20261030_180851_313339/native/last.pt": "e1bd2be7232c6fd2b84565df8d256d8891953b3e8e03fd545bb8be74252f3d80",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_s42_20261030_180851_313339/dpo/best.pt": "b8b7955ac21c349920b645c92a4005354d81a09058f3a8fe93028d286609eb6f",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_s42_20261030_180851_313339/dpo/last.pt": "6684852d58ce360b502109a6743d0a69e252c78e691820a193017295ea035f9f",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_long_s42_20261030_200209_427399/native/best.pt": "7b8e63427fd82095f426531ca46b369bc8eef1224ff61298962b262aa486f268",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_long_s42_20261030_200209_427399/native/last.pt": "da9ebbab4634dd04a0ceda95036105280931ff7d10146fe7d36d463ec1902836",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_long_s42_20261030_200209_427399/dpo/best.pt": "5f38761f6a0fd8e97c19341a20ffc7efbf0ea2810f4b66af9086529165f123b9",
+  "kb2_preference_optimization/outputs/yolov8n_conditional_long_s42_20261030_200209_427399/dpo/last.pt": "ba2249a171d9c16968d09a066e28791e64d324f45b21b41fce58af0dac84abf9"
+}

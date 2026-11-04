@@ -1,0 +1,21 @@
+﻿arm,step,confidence,tp,fp,fn,recall,precision,FP_budget,scope
+S0,0,0.25028350949287415,1021,984,866,0.5410704822469529,0.5092269326683292,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,0,0.25028350949287415,1021,984,866,0.5410704822469529,0.5092269326683292,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,1000,0.24269846081733704,1022,984,865,0.5416004239533652,0.5094715852442672,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,2000,0.23946848511695862,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,3000,0.23164017498493195,1026,984,861,0.5437201907790143,0.5104477611940299,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,4000,0.22598294913768768,1027,984,860,0.5442501324854266,0.5106911984087519,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,5000,0.22520236670970917,1029,984,858,0.5453100158982512,0.511177347242921,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,6000,0.22708839178085327,1024,984,863,0.5426603073661898,0.5099601593625498,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,7000,0.22227296233177185,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,8000,0.2215135395526886,1024,984,863,0.5426603073661898,0.5099601593625498,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,9000,0.21867670118808746,1026,984,861,0.5437201907790143,0.5104477611940299,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,10000,0.2194027602672577,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,11000,0.21691054105758667,1024,984,863,0.5426603073661898,0.5099601593625498,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,12000,0.21377907693386078,1028,984,859,0.5447800741918389,0.510934393638171,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,13000,0.2140776813030243,1026,984,861,0.5437201907790143,0.5104477611940299,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,14000,0.2131166309118271,1026,984,861,0.5437201907790143,0.5104477611940299,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda010,15000,0.21446911990642548,1028,984,859,0.5447800741918389,0.510934393638171,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+native,1000,0.24197272956371307,1023,984,864,0.5421303656597775,0.5097159940209267,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+native,15000,0.21276497840881348,1027,984,860,0.5442501324854266,0.5106911984087519,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning
+lambda001,15000,0.21184732019901276,1028,984,859,0.5447800741918389,0.510934393638171,984,Exploratory validation threshold; inclusive score ties; no interpolation or test tuning

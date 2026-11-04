@@ -1,0 +1,43 @@
+{
+  "baseline_pairs": 20,
+  "baseline_train_pairs": 15,
+  "all_alternatives": {
+    "attempts": 307,
+    "rejected": 279,
+    "valid": 28,
+    "train_pairs": 22,
+    "probe_pairs": 6
+  },
+  "images_replayed": 129,
+  "pair_images": 26,
+  "train_images": 20,
+  "train_classes": [
+    0,
+    2,
+    5,
+    8,
+    10,
+    11,
+    13,
+    14,
+    17,
+    21,
+    22,
+    24,
+    25,
+    27
+  ],
+  "config": {
+    "confidence": 0.25,
+    "nms_iou": 0.6,
+    "match_iou": 0.5,
+    "max_det": 300,
+    "max_source_iou": 0.85,
+    "min_iou_gain": 0.1,
+    "min_total_iou_gain": 0.05,
+    "attempts_per_gt": 1000000,
+    "max_pairs_per_image": 1000000
+  },
+  "script_sha256": "15e5faf841111cf10cbaee6fcc6a2f800e14f60aa131f64a62d6a6af18a47746",
+  "scope": "Proposal-cap sensitivity only; all quality gates unchanged, no training"
+}

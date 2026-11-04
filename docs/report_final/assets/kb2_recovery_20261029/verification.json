@@ -1,0 +1,12 @@
+{
+  "selected_pairs_rechecked_against_saved_full_pool": 2321,
+  "control_pairs_identical_to_archived_F2": 2358,
+  "old_F2_pairs_sha256": "e8cec641f7b4b1b280013b6a6c418fd44222a54fb4841e23727e9b02b46fa471",
+  "control_pairs_sha256": "72df951d0b4bc065a4b24731b74a2d8d1592c1f5e53e6d7ce214f58dfc5c6f19",
+  "cpu_tests": {
+    "discovered": 32,
+    "passed": 31,
+    "gpu_opt_in_skipped": 1
+  },
+  "actual_gpu_pilots_check_initial_margin_reference_immutability": true
+}

@@ -23,6 +23,7 @@ def main(argv=None):
     parser.add_argument('--pilot-images', type=int, default=0)
     parser.add_argument('--draws', type=int, default=4)
     parser.add_argument('--min-gap', type=float, default=.02)
+    parser.add_argument('--f-beta', type=float, default=2.)
     parser.add_argument('--class-temperature', type=float, default=1.)
     parser.add_argument('--box-temperature', type=float, default=1.)
     parser.add_argument('--background-logit', type=float, default=0.)
@@ -48,6 +49,7 @@ def main(argv=None):
     generate(preference_args(shared + [
         '--output', str(root / 'preferences'), '--image-size', str(args.image_size),
         '--draws', str(args.draws), '--limit', str(args.pilot_images), '--min-gap', str(args.min_gap),
+        '--f-beta', str(args.f_beta),
         '--class-temperature', str(args.class_temperature), '--box-temperature', str(args.box_temperature),
         '--background-logit', str(args.background_logit)]))
     train(training_args(shared + [

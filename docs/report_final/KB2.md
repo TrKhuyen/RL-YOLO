@@ -1,5 +1,7 @@
 # KB2 — Review feedback-guided, pairwise và candidate-selection DPO
 
+> **Báo cáo tổng hợp hiện hành, 03/11/2026:** xem [Báo cáo KB2 DPO](Report_KB2_DPO_20261103.md), từ quyết định chọn DPO làm hướng chính đến conditional keep/drop và kết quả YOLOv8n ba seed. Tài liệu bên dưới là lịch sử trước/đầu giai đoạn thiết kế lại.
+
 > **Lưu trữ lịch sử — cập nhật 26/10/2026:** KB2 đã chuyển sang DPO trên action
 > detection hoàn chỉnh, nhận preference ở cấp toàn bộ bộ dự đoán A/B. Thiết kế
 > hiện hành: [KB2 structured DPO](../../kb2_preference_optimization/README.md).

@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "results": {
+    "control_best": {
+      "step": 1000,
+      "mAP50_95": 0.38002046942710876,
+      "fn": 901,
+      "fp": 822,
+      "all_per_class_metrics_exact": true
+    },
+    "control_last": {
+      "step": 2000,
+      "mAP50_95": 0.379698246717453,
+      "fn": 916,
+      "fp": 785,
+      "all_per_class_metrics_exact": true
+    },
+    "selector_best": {
+      "step": 1000,
+      "mAP50_95": 0.37999945878982544,
+      "fn": 901,
+      "fp": 822,
+      "all_per_class_metrics_exact": true
+    },
+    "selector_last": {
+      "step": 2000,
+      "mAP50_95": 0.3795832097530365,
+      "fn": 916,
+      "fp": 785,
+      "all_per_class_metrics_exact": true
+    },
+    "balanced_best": {
+      "step": 1000,
+      "mAP50_95": 0.38000163435935974,
+      "fn": 901,
+      "fp": 822,
+      "all_per_class_metrics_exact": true
+    },
+    "balanced_last": {
+      "step": 2000,
+      "mAP50_95": 0.3796902894973755,
+      "fn": 916,
+      "fp": 785,
+      "all_per_class_metrics_exact": true
+    }
+  }
+}

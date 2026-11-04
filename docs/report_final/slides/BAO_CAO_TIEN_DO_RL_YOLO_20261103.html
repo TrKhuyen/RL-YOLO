@@ -1,0 +1,1245 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>RL-YOLO — Báo cáo tiến độ</title><style>@page{size:1600px 900px;margin:0}*{box-sizing:border-box}body{margin:0;background:#d9e0dc;font-family:"DejaVu Sans",sans-serif}.slide{width:1600px;height:900px;position:relative;overflow:hidden;break-after:page;margin:0 auto}.el{position:absolute;white-space:pre;line-height:1.33}@media screen{.slide{margin:24px auto;box-shadow:0 8px 35px #0002}}</style><body>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">BÁO CÁO TIẾN ĐỘ / ĐỀ TÀI</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Tối ưu mô hình YOLO phát hiện lá sâu bệnh</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">01</div>
+<div class="el" style="left:64px;top:207px;width:1472px;height:554px;background:#17332F;border-radius:20px;"></div>
+<div class="el" style="left:105px;top:255px;width:1360px;height:154px;font-size:43px;color:#FFFFFF;font-weight:700;text-align:left;">BẰNG HỌC TĂNG CƯỜNG
+VÀ XÂY DỰNG WEBSITE NHẬN DIỆN</div>
+<div class="el" style="left:105px;top:468px;width:1330px;height:86px;font-size:29px;color:#ABDCCB;font-weight:400;text-align:left;">PlantDOC → Ba kịch bản tối ưu → Ứng dụng website</div>
+<div class="el" style="left:105px;top:618px;width:1330px;height:103px;font-size:25px;color:#FFFFFF;font-weight:400;text-align:left;">[Tên nhóm] · [Thành viên]
+GVHD: [Điền tên] | Ngày báo cáo: [Điền ngày]</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">DỮ LIỆU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Chuẩn bị dữ liệu: lựa chọn PlantDOC</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">02</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#17836B;font-weight:700;text-align:left;">Dữ liệu được chọn</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">PlantDOC — bản đã làm sạch trong dự án.
+
+Bài toán detection: tìm vị trí lá và class tương ứng.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#17836B;font-weight:700;text-align:left;">Biểu diễn nhãn</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">28 class: loại cây và tình trạng lá khỏe/bệnh.
+
+Nhãn YOLO: class, cx, cy, width, height.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Các thống kê mô tả bản dữ liệu của dự án, không phải quy mô PlantDOC nguyên bản.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">DỮ LIỆU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Bộ dữ liệu thực nghiệm: 3.129 ảnh, 28 class</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">03</div>
+<div class="el" style="left:64px;top:238px;width:263.44262295081967px;height:71px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:250px;width:237.44262295081967px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Split</div>
+<div class="el" style="left:329.44262295081967px;top:238px;width:191.0491803278689px;height:71px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:343.44262295081967px;top:250px;width:165.0491803278689px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Ảnh</div>
+<div class="el" style="left:522.4918032786886px;top:238px;width:287.57377049180326px;height:71px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:536.4918032786886px;top:250px;width:261.57377049180326px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Bounding box</div>
+<div class="el" style="left:812.0655737704919px;top:238px;width:721.9344262295083px;height:71px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:826.0655737704919px;top:250px;width:695.9344262295083px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Vai trò</div>
+<div class="el" style="left:64px;top:311px;width:263.44262295081967px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:323px;width:237.44262295081967px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Train</div>
+<div class="el" style="left:329.44262295081967px;top:311px;width:191.0491803278689px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:343.44262295081967px;top:323px;width:165.0491803278689px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">2.411</div>
+<div class="el" style="left:522.4918032786886px;top:311px;width:287.57377049180326px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:536.4918032786886px;top:323px;width:261.57377049180326px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">10.333</div>
+<div class="el" style="left:812.0655737704919px;top:311px;width:721.9344262295083px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:826.0655737704919px;top:323px;width:695.9344262295083px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Học trọng số; tạo preference</div>
+<div class="el" style="left:64px;top:384px;width:263.44262295081967px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:396px;width:237.44262295081967px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Validation</div>
+<div class="el" style="left:329.44262295081967px;top:384px;width:191.0491803278689px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:343.44262295081967px;top:396px;width:165.0491803278689px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">479</div>
+<div class="el" style="left:522.4918032786886px;top:384px;width:287.57377049180326px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:536.4918032786886px;top:396px;width:261.57377049180326px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">1.887</div>
+<div class="el" style="left:812.0655737704919px;top:384px;width:721.9344262295083px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:826.0655737704919px;top:396px;width:695.9344262295083px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Chọn cấu hình / checkpoint</div>
+<div class="el" style="left:64px;top:457px;width:263.44262295081967px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:469px;width:237.44262295081967px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Test</div>
+<div class="el" style="left:329.44262295081967px;top:457px;width:191.0491803278689px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:343.44262295081967px;top:469px;width:165.0491803278689px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">239</div>
+<div class="el" style="left:522.4918032786886px;top:457px;width:287.57377049180326px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:536.4918032786886px;top:469px;width:261.57377049180326px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">1.063</div>
+<div class="el" style="left:812.0655737704919px;top:457px;width:721.9344262295083px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:826.0655737704919px;top:469px;width:695.9344262295083px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Đánh giá lựa chọn đã khóa</div>
+<div class="el" style="left:64px;top:530px;width:263.44262295081967px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:542px;width:237.44262295081967px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Tổng</div>
+<div class="el" style="left:329.44262295081967px;top:530px;width:191.0491803278689px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:343.44262295081967px;top:542px;width:165.0491803278689px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">3.129</div>
+<div class="el" style="left:522.4918032786886px;top:530px;width:287.57377049180326px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:536.4918032786886px;top:542px;width:261.57377049180326px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">13.283</div>
+<div class="el" style="left:812.0655737704919px;top:530px;width:721.9344262295083px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:826.0655737704919px;top:542px;width:695.9344262295083px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">28 class</div>
+<div class="el" style="left:64px;top:638px;width:1472px;height:100px;font-size:23px;color:#5E726E;font-weight:400;text-align:left;">Audit source ID: chưa thấy nguồn chung giữa split theo quy tắc bỏ hậu tố augment.
+Giới hạn: chưa loại trừ mọi near-duplicate khác ID.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Train có 667 ảnh mang hậu tố augmentation đã nhận diện; số ảnh không bằng số nguồn độc lập.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">DỮ LIỆU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Trực quan hóa dữ liệu trước augmentation</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">04</div>
+<div class="el" style="left:64px;top:240px;width:724px;height:370px;background:#FFFFFF;border-radius:15px;border:1px solid #A9C5B8;"></div>
+<div class="el" style="left:90px;top:340px;width:672px;height:55px;font-size:29px;color:#17836B;font-weight:700;text-align:center;">NHÓM TỰ BỔ SUNG</div>
+<div class="el" style="left:90px;top:411px;width:672px;height:75px;font-size:23px;color:#5E726E;font-weight:400;text-align:center;">BIỂU ĐỒ PHÂN BỐ CLASS</div>
+<div class="el" style="left:812px;top:240px;width:724px;height:370px;background:#FFFFFF;border-radius:15px;border:1px solid #A9C5B8;"></div>
+<div class="el" style="left:838px;top:340px;width:672px;height:55px;font-size:29px;color:#17836B;font-weight:700;text-align:center;">NHÓM TỰ BỔ SUNG</div>
+<div class="el" style="left:838px;top:411px;width:672px;height:75px;font-size:23px;color:#5E726E;font-weight:400;text-align:center;">ẢNH DỮ LIỆU CÓ BOUNDING BOX</div>
+<div class="el" style="left:64px;top:650px;width:1472px;height:80px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Nhận xét của nhóm: [class ít mẫu / ảnh nhiều lá / nền / kích thước đối tượng]</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Biểu đồ cần ghi rõ đếm ảnh hay box và thuộc split nào.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">DỮ LIỆU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Augmentation: mục tiêu và hai hình thức</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">05</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#17836B;font-weight:700;text-align:left;">Offline — biến thể được lưu</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">667 ảnh train có hậu tố flip/rotation được nhận diện.
+
+1.744 file train còn lại không mang các hậu tố đã
+biết.
+
+Ảnh và nhãn augment phải cùng split train.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#17836B;font-weight:700;text-align:left;">Online — khi đọc ảnh</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Tạo biến thiên input qua các lượt huấn luyện.
+
+Kết hợp hình học và quang học.
+
+Recipe phụ thuộc từng kịch bản.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Tăng biến thiên input; chưa có ablation để quy gain AP cho riêng từng phép augment.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">DỮ LIỆU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Phương pháp augmentation: ảnh đi cùng nhãn</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">06</div>
+<div class="el" style="left:64px;top:238px;width:325.1111111111111px;height:60px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:250px;width:299.1111111111111px;height:45px;font-size:22px;color:#FFFFFF;font-weight:700;text-align:left;">Nhóm</div>
+<div class="el" style="left:391.1111111111111px;top:238px;width:488.6666666666667px;height:60px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:405.1111111111111px;top:250px;width:462.6666666666667px;height:45px;font-size:22px;color:#FFFFFF;font-weight:700;text-align:left;">Phép biến đổi</div>
+<div class="el" style="left:881.7777777777778px;top:238px;width:652.2222222222222px;height:60px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:895.7777777777778px;top:250px;width:626.2222222222222px;height:45px;font-size:22px;color:#FFFFFF;font-weight:700;text-align:left;">Xác suất / phạm vi</div>
+<div class="el" style="left:64px;top:300px;width:325.1111111111111px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:312px;width:299.1111111111111px;height:45px;font-size:22px;color:#17332F;font-weight:700;text-align:left;">Kích thước</div>
+<div class="el" style="left:391.1111111111111px;top:300px;width:488.6666666666667px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:405.1111111111111px;top:312px;width:462.6666666666667px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">Resize cạnh dài; pad 114</div>
+<div class="el" style="left:881.7777777777778px;top:300px;width:652.2222222222222px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:895.7777777777778px;top:312px;width:626.2222222222222px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">640 × 640; luôn áp dụng</div>
+<div class="el" style="left:64px;top:362px;width:325.1111111111111px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:374px;width:299.1111111111111px;height:45px;font-size:22px;color:#17332F;font-weight:700;text-align:left;">Ánh sáng</div>
+<div class="el" style="left:391.1111111111111px;top:362px;width:488.6666666666667px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:405.1111111111111px;top:374px;width:462.6666666666667px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">Brightness / contrast</div>
+<div class="el" style="left:881.7777777777778px;top:362px;width:652.2222222222222px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:895.7777777777778px;top:374px;width:626.2222222222222px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">p=0.5; ±0.3</div>
+<div class="el" style="left:64px;top:424px;width:325.1111111111111px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:436px;width:299.1111111111111px;height:45px;font-size:22px;color:#17332F;font-weight:700;text-align:left;">Màu sắc</div>
+<div class="el" style="left:391.1111111111111px;top:424px;width:488.6666666666667px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:405.1111111111111px;top:436px;width:462.6666666666667px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">Hue / saturation / value</div>
+<div class="el" style="left:881.7777777777778px;top:424px;width:652.2222222222222px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:895.7777777777778px;top:436px;width:626.2222222222222px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">p=0.4; ±15 / ±30 / ±20</div>
+<div class="el" style="left:64px;top:486px;width:325.1111111111111px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:498px;width:299.1111111111111px;height:45px;font-size:22px;color:#17332F;font-weight:700;text-align:left;">Nhiễu / mờ</div>
+<div class="el" style="left:391.1111111111111px;top:486px;width:488.6666666666667px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:405.1111111111111px;top:498px;width:462.6666666666667px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">Gaussian / motion blur</div>
+<div class="el" style="left:881.7777777777778px;top:486px;width:652.2222222222222px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:895.7777777777778px;top:498px;width:626.2222222222222px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">p=0.3 / 0.2</div>
+<div class="el" style="left:64px;top:548px;width:325.1111111111111px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:560px;width:299.1111111111111px;height:45px;font-size:22px;color:#17332F;font-weight:700;text-align:left;">Hình học</div>
+<div class="el" style="left:391.1111111111111px;top:548px;width:488.6666666666667px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:405.1111111111111px;top:560px;width:462.6666666666667px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">Lật ngang / dọc; xoay</div>
+<div class="el" style="left:881.7777777777778px;top:548px;width:652.2222222222222px;height:60px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:895.7777777777778px;top:560px;width:626.2222222222222px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">p=0.5 / 0.3; xoay p=0.4, ±15°</div>
+<div class="el" style="left:64px;top:610px;width:325.1111111111111px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:622px;width:299.1111111111111px;height:45px;font-size:22px;color:#17332F;font-weight:700;text-align:left;">Cục bộ</div>
+<div class="el" style="left:391.1111111111111px;top:610px;width:488.6666666666667px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:405.1111111111111px;top:622px;width:462.6666666666667px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">CLAHE</div>
+<div class="el" style="left:881.7777777777778px;top:610px;width:652.2222222222222px;height:60px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:895.7777777777778px;top:622px;width:626.2222222222222px;height:45px;font-size:22px;color:#17332F;font-weight:400;text-align:left;">p=0.2; clip limit 1–2</div>
+<div class="el" style="left:64px;top:685px;width:1472px;height:78px;font-size:21px;color:#5E726E;font-weight:400;text-align:left;">Recipe online stage hai KB1. BBox biến đổi đồng bộ; clipping; min_visibility=0.3.
+KB2: resize/pad xác định để giữ slot/box preference. Val/test: không random augment.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Một ảnh có thể nhận nhiều phép; normalize [0,1] rồi chuyển tensor.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">DỮ LIỆU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Trực quan hóa ảnh sau augmentation</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">07</div>
+<div class="el" style="left:64px;top:250px;width:350px;height:365px;background:#FFFFFF;border-radius:14px;border:1px solid #A9C5B8;"></div>
+<div class="el" style="left:88px;top:350px;width:302px;height:115px;font-size:31px;color:#17836B;font-weight:700;text-align:center;">TỰ THÊM
+ẢNH</div>
+<div class="el" style="left:74px;top:635px;width:330px;height:72px;font-size:20px;color:#17332F;font-weight:700;text-align:center;">ẢNH GỐC + BOX</div>
+<div class="el" style="left:438px;top:250px;width:350px;height:365px;background:#FFFFFF;border-radius:14px;border:1px solid #A9C5B8;"></div>
+<div class="el" style="left:462px;top:350px;width:302px;height:115px;font-size:31px;color:#17836B;font-weight:700;text-align:center;">TỰ THÊM
+ẢNH</div>
+<div class="el" style="left:448px;top:635px;width:330px;height:72px;font-size:20px;color:#17332F;font-weight:700;text-align:center;">HÌNH HỌC + BOX</div>
+<div class="el" style="left:812px;top:250px;width:350px;height:365px;background:#FFFFFF;border-radius:14px;border:1px solid #A9C5B8;"></div>
+<div class="el" style="left:836px;top:350px;width:302px;height:115px;font-size:31px;color:#17836B;font-weight:700;text-align:center;">TỰ THÊM
+ẢNH</div>
+<div class="el" style="left:822px;top:635px;width:330px;height:72px;font-size:20px;color:#17332F;font-weight:700;text-align:center;">QUANG HỌC + BOX</div>
+<div class="el" style="left:1186px;top:250px;width:350px;height:365px;background:#FFFFFF;border-radius:14px;border:1px solid #A9C5B8;"></div>
+<div class="el" style="left:1210px;top:350px;width:302px;height:115px;font-size:31px;color:#17836B;font-weight:700;text-align:center;">TỰ THÊM
+ẢNH</div>
+<div class="el" style="left:1196px;top:635px;width:330px;height:72px;font-size:20px;color:#17332F;font-weight:700;text-align:center;">KẾT HỢP + BOX</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Dùng cùng một ảnh train để so; ghi tên phép và tham số biến đổi thực tế.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">TỔNG QUAN</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Ba hướng tối ưu được nghiên cứu độc lập</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">08</div>
+<div class="el" style="left:64px;top:235px;width:474px;height:475px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:475px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:426px;height:75px;font-size:27px;color:#286BC0;font-weight:700;text-align:left;">KB1 · REWARD</div>
+<div class="el" style="left:88px;top:338px;width:426px;height:357px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Fine-tune Detect head bằng native
+loss, proxy và task reward.
+
+RL-inspired; có kết quả test.</div>
+<div class="el" style="left:563px;top:235px;width:474px;height:475px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:563px;top:235px;width:5px;height:475px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:587px;top:256px;width:426px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">KB2 · DPO</div>
+<div class="el" style="left:587px;top:338px;width:426px;height:357px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Học ưu tiên giữ/bỏ candidate từ GT
+và reference cố định.
+
+Hiện có validation.</div>
+<div class="el" style="left:1062px;top:235px;width:474px;height:475px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:1062px;top:235px;width:5px;height:475px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:1086px;top:256px;width:426px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">KB3 · HP</div>
+<div class="el" style="left:1086px;top:338px;width:426px;height:357px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">A: cấu hình bằng TPE.
+B: controller PPO trong train.
+
+A là HPO; B là RL.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">KB1 → KB2 → KB3 là thứ tự trình bày; không phải chuỗi fine-tune nối tiếp.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">KB1 / MỤC TIÊU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB1 — Mục tiêu và câu hỏi nghiên cứu</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">09</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#286BC0;font-weight:700;text-align:left;">Mục tiêu</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Kiểm chứng quy trình hai giai đoạn để cải thiện
+detector so với checkpoint supervised tương ứng.
+
+Metric chính: canonical mAP50–95.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#286BC0;font-weight:700;text-align:left;">Câu hỏi nghiên cứu</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">RQ1: thêm reward-guided cải thiện bao nhiêu so S0?
+
+RQ2: kiến trúc guided nào tốt nhất theo validation?</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Câu hỏi bổ sung: gain đến từ continuation, proxy hay reward?</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">KB1 / PHƯƠNG PHÁP</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB1 — Ý tưởng và objective</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">10</div>
+<div class="el" style="left:64.0px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:282.205px;width:317.75px;height:113px;font-size:23px;color:#286BC0;font-weight:700;text-align:center;">Prediction train</div>
+<div class="el" style="left:409.75px;top:275.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:440.75px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:452.75px;top:282.205px;width:317.75px;height:113px;font-size:23px;color:#286BC0;font-weight:700;text-align:center;">Matching với GT</div>
+<div class="el" style="left:786.5px;top:275.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:282.205px;width:317.75px;height:113px;font-size:23px;color:#286BC0;font-weight:700;text-align:center;">Reward P / R / IoU</div>
+<div class="el" style="left:1163.25px;top:275.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1194.25px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1206.25px;top:282.205px;width:317.75px;height:113px;font-size:23px;color:#286BC0;font-weight:700;text-align:center;">Advantage → loss</div>
+<div class="el" style="left:64px;top:397px;width:1472px;height:77px;font-size:26px;color:#17332F;font-weight:400;text-align:left;">Reward tại IoU 0.5 / 0.6 / 0.7 / 0.8; trọng số P / R / IoU = 0.25 / 0.45 / 0.30.</div>
+<div class="el" style="left:64px;top:505px;width:1472px;height:135px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:90px;top:542px;width:1420px;height:65px;font-size:31px;color:#286BC0;font-weight:700;text-align:center;">L = 0.25 Lnative + 0.10 Lreward + 0.25 Lproxy + 0.001 LSP</div>
+<div class="el" style="left:64px;top:677px;width:1472px;height:65px;font-size:23px;color:#5E726E;font-weight:400;text-align:left;">Proxy: confidence TP/FP/FN. LSP: hạn chế drift khỏi S0. Advantage: EMA reward baseline.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Reward-guided / RL-inspired; implementation chưa phải REINFORCE chuẩn.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">KB1 / KIẾN TRÚC</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB1 — Kiến trúc tổng thể</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">11</div>
+<div class="el" style="left:64.0px;top:245px;width:216.16666666666666px;height:135px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:297.87px;width:192.16666666666666px;height:123px;font-size:22px;color:#286BC0;font-weight:700;text-align:center;">Pretrained</div>
+<div class="el" style="left:284.16666666666663px;top:290.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:315.16666666666663px;top:245px;width:216.16666666666666px;height:135px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:327.16666666666663px;top:297.87px;width:192.16666666666666px;height:123px;font-size:22px;color:#286BC0;font-weight:700;text-align:center;">Supervised</div>
+<div class="el" style="left:535.3333333333333px;top:290.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:566.3333333333333px;top:245px;width:216.16666666666666px;height:135px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:578.3333333333333px;top:297.87px;width:192.16666666666666px;height:123px;font-size:22px;color:#286BC0;font-weight:700;text-align:center;">S0 của model</div>
+<div class="el" style="left:786.4999999999999px;top:290.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:245px;width:216.16666666666666px;height:135px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:297.87px;width:192.16666666666666px;height:123px;font-size:22px;color:#286BC0;font-weight:700;text-align:center;">Fine-tune head</div>
+<div class="el" style="left:1037.6666666666667px;top:290.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1068.6666666666665px;top:245px;width:216.16666666666666px;height:135px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1080.6666666666665px;top:297.87px;width:192.16666666666666px;height:123px;font-size:22px;color:#286BC0;font-weight:700;text-align:center;">Best validation</div>
+<div class="el" style="left:1288.8333333333333px;top:290.5px;width:30px;height:55px;font-size:31px;color:#286BC0;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1319.8333333333333px;top:245px;width:216.16666666666666px;height:135px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1331.8333333333333px;top:297.87px;width:192.16666666666666px;height:123px;font-size:22px;color:#286BC0;font-weight:700;text-align:center;">Test đã khóa</div>
+<div class="el" style="left:64px;top:416px;width:1472px;height:50px;font-size:28px;color:#286BC0;font-weight:700;text-align:center;">Backbone / neck và BN statistics đóng băng trong stage hai</div>
+<div class="el" style="left:64px;top:516px;width:474px;height:164px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:84px;top:532px;width:434px;height:45px;font-size:29px;color:#286BC0;font-weight:700;text-align:left;">S0</div>
+<div class="el" style="left:84px;top:590px;width:434px;height:77px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Không train thêm</div>
+<div class="el" style="left:563px;top:516px;width:474px;height:164px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:583px;top:532px;width:434px;height:45px;font-size:29px;color:#286BC0;font-weight:700;text-align:left;">S1</div>
+<div class="el" style="left:583px;top:590px;width:434px;height:77px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Native + L2-SP</div>
+<div class="el" style="left:1062px;top:516px;width:474px;height:164px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:1082px;top:532px;width:434px;height:45px;font-size:29px;color:#286BC0;font-weight:700;text-align:left;">G</div>
+<div class="el" style="left:1082px;top:590px;width:434px;height:77px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Native + proxy + reward + L2-SP</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Bảy model; mỗi model dùng S0 riêng, các nhánh có cùng điểm khởi đầu.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">KB1 / THỰC NGHIỆM</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB1 — Thiết kế thực nghiệm đã hoàn tất</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">12</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#286BC0;font-weight:700;text-align:left;">Cohort chính</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">7 model: YOLOv5s, YOLOv8n/s, YOLOv11n/s,
+YOLO26n, DP-YOLO.
+
+Continuation seed 42/43/44.
+
+Bảng chính dùng seed Ubuntu 43/44.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#286BC0;font-weight:700;text-align:left;">Ablation kiểm soát</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">YOLOv11n và YOLOv8s; 3 seed.
+
+S1, proxy-only, reward-only, G, G bỏ L2-SP.
+
+10.000 micro-step = 5.000 optimizer update; so last.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Đã hoàn tất 58 lượt train dài bổ sung; continuation và ablation tổng hợp riêng.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">KB1 / KẾT QUẢ TEST</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB1 — Guided cải thiện so S0 ở cả bảy model</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">13</div>
+<div class="el" style="left:64px;top:238px;width:320.6506024096385px;height:59px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:250px;width:294.6506024096385px;height:44px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Model</div>
+<div class="el" style="left:386.6506024096385px;top:238px;width:246.19277108433732px;height:59px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:250px;width:220.19277108433732px;height:44px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">S0 mAP (%)</div>
+<div class="el" style="left:634.8433734939758px;top:238px;width:246.19277108433732px;height:59px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:250px;width:220.19277108433732px;height:44px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">G mAP (%)</div>
+<div class="el" style="left:883.0361445783132px;top:238px;width:208.96385542168673px;height:59px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:250px;width:182.96385542168673px;height:44px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Δ (đpt)</div>
+<div class="el" style="left:64px;top:299px;width:320.6506024096385px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:311px;width:294.6506024096385px;height:44px;font-size:23px;color:#17332F;font-weight:700;text-align:left;">YOLOv5s</div>
+<div class="el" style="left:386.6506024096385px;top:299px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:311px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">30.398</div>
+<div class="el" style="left:634.8433734939758px;top:299px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:311px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">31.261</div>
+<div class="el" style="left:883.0361445783132px;top:299px;width:208.96385542168673px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:311px;width:182.96385542168673px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">+0.863</div>
+<div class="el" style="left:64px;top:360px;width:320.6506024096385px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:372px;width:294.6506024096385px;height:44px;font-size:23px;color:#17332F;font-weight:700;text-align:left;">YOLOv8n</div>
+<div class="el" style="left:386.6506024096385px;top:360px;width:246.19277108433732px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:372px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">33.201</div>
+<div class="el" style="left:634.8433734939758px;top:360px;width:246.19277108433732px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:372px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">33.561</div>
+<div class="el" style="left:883.0361445783132px;top:360px;width:208.96385542168673px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:372px;width:182.96385542168673px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">+0.359</div>
+<div class="el" style="left:64px;top:421px;width:320.6506024096385px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:433px;width:294.6506024096385px;height:44px;font-size:23px;color:#17332F;font-weight:700;text-align:left;">YOLOv8s</div>
+<div class="el" style="left:386.6506024096385px;top:421px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:433px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">33.976</div>
+<div class="el" style="left:634.8433734939758px;top:421px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:433px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">35.387</div>
+<div class="el" style="left:883.0361445783132px;top:421px;width:208.96385542168673px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:433px;width:182.96385542168673px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">+1.412</div>
+<div class="el" style="left:64px;top:482px;width:320.6506024096385px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:494px;width:294.6506024096385px;height:44px;font-size:23px;color:#17332F;font-weight:700;text-align:left;">YOLOv11n</div>
+<div class="el" style="left:386.6506024096385px;top:482px;width:246.19277108433732px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:494px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">37.534</div>
+<div class="el" style="left:634.8433734939758px;top:482px;width:246.19277108433732px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:494px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">37.768</div>
+<div class="el" style="left:883.0361445783132px;top:482px;width:208.96385542168673px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:494px;width:182.96385542168673px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">+0.234</div>
+<div class="el" style="left:64px;top:543px;width:320.6506024096385px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:555px;width:294.6506024096385px;height:44px;font-size:23px;color:#17332F;font-weight:700;text-align:left;">YOLOv11s</div>
+<div class="el" style="left:386.6506024096385px;top:543px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:555px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">36.271</div>
+<div class="el" style="left:634.8433734939758px;top:543px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:555px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">36.442</div>
+<div class="el" style="left:883.0361445783132px;top:543px;width:208.96385542168673px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:555px;width:182.96385542168673px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">+0.172</div>
+<div class="el" style="left:64px;top:604px;width:320.6506024096385px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:616px;width:294.6506024096385px;height:44px;font-size:23px;color:#17332F;font-weight:700;text-align:left;">YOLO26n</div>
+<div class="el" style="left:386.6506024096385px;top:604px;width:246.19277108433732px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:616px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">33.357</div>
+<div class="el" style="left:634.8433734939758px;top:604px;width:246.19277108433732px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:616px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">33.831</div>
+<div class="el" style="left:883.0361445783132px;top:604px;width:208.96385542168673px;height:59px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:616px;width:182.96385542168673px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">+0.474</div>
+<div class="el" style="left:64px;top:665px;width:320.6506024096385px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:677px;width:294.6506024096385px;height:44px;font-size:23px;color:#17332F;font-weight:700;text-align:left;">DP-YOLO</div>
+<div class="el" style="left:386.6506024096385px;top:665px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:400.6506024096385px;top:677px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">28.913</div>
+<div class="el" style="left:634.8433734939758px;top:665px;width:246.19277108433732px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:648.8433734939758px;top:677px;width:220.19277108433732px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">29.366</div>
+<div class="el" style="left:883.0361445783132px;top:665px;width:208.96385542168673px;height:59px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:897.0361445783132px;top:677px;width:182.96385542168673px;height:44px;font-size:23px;color:#17332F;font-weight:400;text-align:left;">+0.453</div>
+<div class="el" style="left:1140px;top:253px;width:395px;height:450px;font-size:29px;color:#286BC0;font-weight:700;text-align:left;">YOLOv11n
+Guided dẫn đầu
+Val: 40.648%
+Test: 37.768%
+
+YOLOv8s
+Gain lớn nhất
++1.412 đpt</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Mean test seed 43/44. G &gt; S0 ở 21/21 cặp model–seed quan sát, gồm 42/43/44.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">KB1 / PHÂN TÍCH</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB1 — Đóng góp riêng của reward</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">14</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#286BC0;font-weight:700;text-align:left;">Đọc đúng các phép so</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">G − S0: toàn bộ stage hai.
+
+G − S1: proxy + reward.
+
+G − proxy-only: phần thêm của reward khi đã có
+proxy.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#286BC0;font-weight:700;text-align:left;">Ablation cùng 10.000 micro-step</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">G − proxy-only, mean test 3 seed:
+
+YOLOv11n: +0.070727 đpt
+
+YOLOv8s: −0.049986 đpt
+
+G hơn S1 ở 16/21 cặp continuation.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Lợi ích riêng của reward phụ thuộc kiến trúc và protocol; không quy toàn bộ gain cho reward.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">KB1 / TIẾP THEO</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB1 — Định hướng tương lai</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">15</div>
+<div class="el" style="left:64px;top:235px;width:1472px;height:147px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:90px;top:268px;width:90px;height:70px;font-size:37px;color:#286BC0;font-weight:700;text-align:left;">01</div>
+<div class="el" style="left:210px;top:255px;width:1290px;height:45px;font-size:29px;color:#286BC0;font-weight:700;text-align:left;">Tăng bằng chứng</div>
+<div class="el" style="left:210px;top:313px;width:1270px;height:60px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Nhiều S0 supervised độc lập; nguồn ảnh hoặc tập đánh giá khác.</div>
+<div class="el" style="left:64px;top:407px;width:1472px;height:147px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:90px;top:440px;width:90px;height:70px;font-size:37px;color:#286BC0;font-weight:700;text-align:left;">02</div>
+<div class="el" style="left:210px;top:427px;width:1290px;height:45px;font-size:29px;color:#286BC0;font-weight:700;text-align:left;">Đo độ bất định</div>
+<div class="el" style="left:210px;top:485px;width:1270px;height:60px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Phân tích lỗi theo ảnh/source; paired bootstrap AP phù hợp.</div>
+<div class="el" style="left:64px;top:579px;width:1472px;height:147px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:90px;top:612px;width:90px;height:70px;font-size:37px;color:#286BC0;font-weight:700;text-align:left;">03</div>
+<div class="el" style="left:210px;top:599px;width:1290px;height:45px;font-size:29px;color:#286BC0;font-weight:700;text-align:left;">Cải thiện objective</div>
+<div class="el" style="left:210px;top:657px;width:1270px;height:60px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Chẩn đoán gradient/advantage; FN surrogate gắn với đúng GT bị bỏ sót.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">KB1 đã hoàn tất phạm vi hiện tại; các mục này là nghiên cứu mở rộng.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">KB2 / MỤC TIÊU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB2 — Mục tiêu và câu hỏi nghiên cứu</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">16</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">Mục tiêu</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Học quyết định giữ/bỏ candidate bằng preference tự
+động do GT chấm.
+
+Model xác nhận: YOLOv8n.
+
+Khởi tạo: S0 supervised KB1.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">Câu hỏi nghiên cứu</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">RQ1: Native + DPO cải thiện gì so S0?
+
+RQ2: DPO có hơn native-only cùng ngân sách?
+
+RQ3: đánh đổi AP, recall, FP/FN và class?</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Preference có giám sát bởi GT; không phải nhãn sở thích của con người.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">KB2 / Ý TƯỞNG</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB2 — Hai phương án chỉ khác một quyết định</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">17</div>
+<div class="el" style="left:64.0px;top:239px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:286.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">Ảnh + context S0</div>
+<div class="el" style="left:409.75px;top:279.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:440.75px;top:239px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:452.75px;top:286.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">A: giữ candidate j</div>
+<div class="el" style="left:786.5px;top:279.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:239px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:286.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">NMS toàn ảnh</div>
+<div class="el" style="left:1163.25px;top:279.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1194.25px;top:239px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1206.25px;top:286.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">GT → chosen / rejected</div>
+<div class="el" style="left:64.0px;top:410px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:457.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">Cùng box/class/score</div>
+<div class="el" style="left:409.75px;top:450.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:440.75px;top:410px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:452.75px;top:457.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">B: bỏ candidate j</div>
+<div class="el" style="left:786.5px;top:450.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:410px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:457.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">NMS toàn ảnh</div>
+<div class="el" style="left:1163.25px;top:450.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1194.25px;top:410px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1206.25px;top:457.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">So hậu quả với A</div>
+<div class="el" style="left:64px;top:588px;width:25px;height:40px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">•</div>
+<div class="el" style="left:94px;top:588px;width:1442px;height:38.910000000000004px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">Keep phải cứu/giữ GT mục tiêu; drop phải thực sự giảm FP.</div>
+<div class="el" style="left:64px;top:638.91px;width:25px;height:40px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">•</div>
+<div class="el" style="left:94px;top:638.91px;width:1442px;height:38.910000000000004px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">Gate toàn ảnh bảo vệ GT đang phát hiện và không cho tăng FP.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Học quyết định cục bộ, kiểm hậu quả toàn ảnh; inference thực tế không cần GT.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">KB2 / KIẾN TRÚC</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB2 — Kiến trúc policy và reference</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">18</div>
+<div class="el" style="left:64.0px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:281.54px;width:317.75px;height:113px;font-size:24px;color:#7954B4;font-weight:700;text-align:center;">S0 supervised</div>
+<div class="el" style="left:409.75px;top:275.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:440.75px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:452.75px;top:281.54px;width:317.75px;height:113px;font-size:24px;color:#7954B4;font-weight:700;text-align:center;">Policy: học cv3</div>
+<div class="el" style="left:786.5px;top:275.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:265.58px;width:317.75px;height:113px;font-size:24px;color:#7954B4;font-weight:700;text-align:center;">Native loss
+background 0.5</div>
+<div class="el" style="left:1163.25px;top:275.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1194.25px;top:235px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1206.25px;top:281.54px;width:317.75px;height:113px;font-size:24px;color:#7954B4;font-weight:700;text-align:center;">AdamW → cv3</div>
+<div class="el" style="left:64.0px;top:416px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:463.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">GT → A/B → bank</div>
+<div class="el" style="left:409.75px;top:456.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:440.75px;top:416px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:452.75px;top:447.90999999999997px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">2 preference +
+2 uniform ảnh</div>
+<div class="el" style="left:786.5px;top:456.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:416px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:447.90999999999997px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">DPO logit
+policy / reference</div>
+<div class="el" style="left:1163.25px;top:456.5px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1194.25px;top:416px;width:341.75px;height:125px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1206.25px;top:463.205px;width:317.75px;height:113px;font-size:23px;color:#7954B4;font-weight:700;text-align:center;">Lnative + 0.1 LDPO</div>
+<div class="el" style="left:64px;top:595px;width:1472px;height:128px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:89px;top:620px;width:1422px;height:92px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Reference = S0 cố định. Backbone/neck, regression và BN statistics đóng băng.
+Validation dùng ordinary YOLO inference; hiện chưa trực tiếp học sửa tọa độ box.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Native học GT trên 4 ảnh; DPO bổ sung 2 quyết định/update.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">KB2 / THỰC NGHIỆM</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB2 — Policy và thiết kế đối chứng</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">19</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">Policy Bernoulli</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">q(keep) = sigmoid(z)
+q(drop) = 1 − sigmoid(z)
+
+m = s(zpolicy − zreference)
+LDPO = softplus(−βm)
+
+s = +1 keep; −1 drop. β=0.1; λ=0.1.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">Đối chứng ghép seed</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">S0: không train thêm.
+Native-only: λDPO=0; background 0.5.
+Native+DPO: λDPO=0.1.
+
+3 seed × 2 nhánh × 15.000 update.
+Cùng stream ảnh/pair trong mỗi seed.
+So best và so cùng last 15k.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Probability chuẩn hóa cho keep/drop, chưa phải likelihood toàn detection set sau NMS.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">KB2 / KẾT QUẢ</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB2 — AP tăng lặp lại trên validation</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">20</div>
+<div class="el" style="left:64px;top:213px;width:1472px;height:40px;font-size:23px;color:#5E726E;font-weight:400;text-align:left;">YOLOv8n · Validation · Seed 42/43/44 · Mean ± SD</div>
+<div class="el" style="left:64px;top:283px;width:303.50943396226415px;height:86px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:295px;width:277.50943396226415px;height:71px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">So sánh</div>
+<div class="el" style="left:369.50943396226415px;top:283px;width:386.8301886792452px;height:86px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:383.50943396226415px;top:295px;width:360.8301886792452px;height:71px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Native (%)</div>
+<div class="el" style="left:758.3396226415093px;top:283px;width:386.8301886792452px;height:86px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:772.3396226415093px;top:295px;width:360.8301886792452px;height:71px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">DPO (%)</div>
+<div class="el" style="left:1147.1698113207544px;top:283px;width:386.8301886792452px;height:86px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:1161.1698113207544px;top:295px;width:360.8301886792452px;height:71px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Δ (đpt)</div>
+<div class="el" style="left:64px;top:371px;width:303.50943396226415px;height:86px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:383px;width:277.50943396226415px;height:71px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Best từng run</div>
+<div class="el" style="left:369.50943396226415px;top:371px;width:386.8301886792452px;height:86px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:383.50943396226415px;top:383px;width:360.8301886792452px;height:71px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">38.1196 ± 0.0608</div>
+<div class="el" style="left:758.3396226415093px;top:371px;width:386.8301886792452px;height:86px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:772.3396226415093px;top:383px;width:360.8301886792452px;height:71px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">38.1707 ± 0.0429</div>
+<div class="el" style="left:1147.1698113207544px;top:371px;width:386.8301886792452px;height:86px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1161.1698113207544px;top:383px;width:360.8301886792452px;height:71px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">+0.0511 ± 0.0202</div>
+<div class="el" style="left:64px;top:459px;width:303.50943396226415px;height:86px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:471px;width:277.50943396226415px;height:71px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Cùng last 15k</div>
+<div class="el" style="left:369.50943396226415px;top:459px;width:386.8301886792452px;height:86px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:383.50943396226415px;top:471px;width:360.8301886792452px;height:71px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">38.0595 ± 0.0430</div>
+<div class="el" style="left:758.3396226415093px;top:459px;width:386.8301886792452px;height:86px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:772.3396226415093px;top:471px;width:360.8301886792452px;height:71px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">38.1670 ± 0.0475</div>
+<div class="el" style="left:1147.1698113207544px;top:459px;width:386.8301886792452px;height:86px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:1161.1698113207544px;top:471px;width:360.8301886792452px;height:71px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">+0.1075 ± 0.0337</div>
+<div class="el" style="left:64px;top:594px;width:1472px;height:62px;font-size:32px;color:#7954B4;font-weight:700;text-align:left;">S0: 37.8218% → Best DPO: +0.3489 đpt so S0</div>
+<div class="el" style="left:64px;top:685px;width:1472px;height:60px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">DPO hơn native về mAP / AP50 / AP75 ở cả ba seed; mức tăng thêm còn nhỏ.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Đây là kết quả validation; chuỗi thí nghiệm KB2 hiện chưa đánh giá hiệu năng test.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">KB2 / ĐÁNH ĐỔI</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB2 — AP tăng, recall tại ngưỡng cố định giảm</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">21</div>
+<div class="el" style="left:64px;top:238px;width:287.09090909090907px;height:71px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:250px;width:261.09090909090907px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Metric</div>
+<div class="el" style="left:353.09090909090907px;top:238px;width:238.90909090909088px;height:71px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:367.09090909090907px;top:250px;width:212.90909090909088px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">S0</div>
+<div class="el" style="left:594.0px;top:238px;width:238.90909090909088px;height:71px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:608.0px;top:250px;width:212.90909090909088px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">DPO mean</div>
+<div class="el" style="left:834.9090909090909px;top:238px;width:287.09090909090907px;height:71px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:848.9090909090909px;top:250px;width:261.09090909090907px;height:56px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Thay đổi</div>
+<div class="el" style="left:64px;top:311px;width:287.09090909090907px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:323px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Precision (%)</div>
+<div class="el" style="left:353.09090909090907px;top:311px;width:238.90909090909088px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:367.09090909090907px;top:323px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">50.9227</div>
+<div class="el" style="left:594.0px;top:311px;width:238.90909090909088px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:608.0px;top:323px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">53.1581</div>
+<div class="el" style="left:834.9090909090909px;top:311px;width:287.09090909090907px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:848.9090909090909px;top:323px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">+2.2354 đpt</div>
+<div class="el" style="left:64px;top:384px;width:287.09090909090907px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:396px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Recall (%)</div>
+<div class="el" style="left:353.09090909090907px;top:384px;width:238.90909090909088px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:367.09090909090907px;top:396px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">54.1070</div>
+<div class="el" style="left:594.0px;top:384px;width:238.90909090909088px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:608.0px;top:396px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">53.0825</div>
+<div class="el" style="left:834.9090909090909px;top:384px;width:287.09090909090907px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:848.9090909090909px;top:396px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">−1.0246 đpt</div>
+<div class="el" style="left:64px;top:457px;width:287.09090909090907px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:469px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">F1 (%)</div>
+<div class="el" style="left:353.09090909090907px;top:457px;width:238.90909090909088px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:367.09090909090907px;top:469px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">52.4666</div>
+<div class="el" style="left:594.0px;top:457px;width:238.90909090909088px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:608.0px;top:469px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">53.1200</div>
+<div class="el" style="left:834.9090909090909px;top:457px;width:287.09090909090907px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:848.9090909090909px;top:469px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">+0.6534 đpt</div>
+<div class="el" style="left:64px;top:530px;width:287.09090909090907px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:542px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">FP</div>
+<div class="el" style="left:353.09090909090907px;top:530px;width:238.90909090909088px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:367.09090909090907px;top:542px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">984</div>
+<div class="el" style="left:594.0px;top:530px;width:238.90909090909088px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:608.0px;top:542px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">882.67</div>
+<div class="el" style="left:834.9090909090909px;top:530px;width:287.09090909090907px;height:71px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:848.9090909090909px;top:542px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">−101.33</div>
+<div class="el" style="left:64px;top:603px;width:287.09090909090907px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:615px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">FN</div>
+<div class="el" style="left:353.09090909090907px;top:603px;width:238.90909090909088px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:367.09090909090907px;top:615px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">866</div>
+<div class="el" style="left:594.0px;top:603px;width:238.90909090909088px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:608.0px;top:615px;width:212.90909090909088px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">885.33</div>
+<div class="el" style="left:834.9090909090909px;top:603px;width:287.09090909090907px;height:71px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:848.9090909090909px;top:615px;width:261.09090909090907px;height:56px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">+19.33</div>
+<div class="el" style="left:1170px;top:252px;width:365px;height:465px;font-size:26px;color:#7954B4;font-weight:700;text-align:left;">Confidence 0.25
+Matching IoU 0.5
+
+Mean class AP:
+12 tăng / 16 giảm
+
+AP small:
+4.3965 → 4.0525%</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Ranking tốt hơn chưa đồng nghĩa ít bỏ sót hơn ở mọi threshold; geometry vẫn đóng băng.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">KB2 / TIẾP THEO</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB2 — Ưu tiên kiểm chứng trước khi mở rộng</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">22</div>
+<div class="el" style="left:64px;top:235px;width:474px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:426px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">01 · XÁC NHẬN</div>
+<div class="el" style="left:88px;top:338px;width:426px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Khóa recipe/selector.
+
+Holdout/test cùng S0 và native.
+
+Thêm S0 độc lập khi cần.</div>
+<div class="el" style="left:563px;top:235px;width:474px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:563px;top:235px;width:5px;height:490px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:587px;top:256px;width:426px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">02 · ĐỐI CHỨNG</div>
+<div class="el" style="left:587px;top:338px;width:426px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">DPO so BCE có/không reference.
+
+Gradient-strength matching.
+
+Sweep β / λ / background.</div>
+<div class="el" style="left:1062px;top:235px;width:474px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:1062px;top:235px;width:5px;height:490px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:1086px;top:256px;width:426px;height:75px;font-size:27px;color:#7954B4;font-weight:700;text-align:left;">03 · MỞ RỘNG</div>
+<div class="el" style="left:1086px;top:338px;width:426px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Bank/class coverage.
+
+Adapter model khác.
+
+Geometry policy; augment ánh
+xạ đúng candidate.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Mục tiêu: gain AP bền vững hơn, giảm đánh đổi recall và cải thiện độ phủ.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">KB3 / MỤC TIÊU</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB3 — Mục tiêu và câu hỏi nghiên cứu</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">23</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">Mục tiêu</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Tìm cấu hình hoặc chính sách điều chỉnh
+hyperparameter để cải thiện chất lượng detector.
+
+Đối chứng cùng init, recipe, evaluator, seed và ngân
+sách.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">Hai câu hỏi</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">RQ-A: local HPO có hơn anchor và supervised KB1?
+
+RQ-B: controller RL có hơn cấu hình/lịch cố định?</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">A tạo mốc HPO; B nghiên cứu điều khiển thích nghi bằng RL.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">KB3 / Ý TƯỞNG</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB3 — Chọn trước run hay điều chỉnh trong run?</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">24</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">A — TPE / HPO</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">History → đề xuất LR/WD → train detector mới →
+validation → cập nhật history.
+
+Base parameters chọn trước trial; warmup/decay
+theo lịch đã định.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">B — PPO / RL</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Quan sát training → action đổi HP → train segment
+tiếp → reward → cập nhật controller.
+
+Một episode là một trainer liên tục.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">TPE là HPO truyền thống; PPO là hướng RL cần kiểm chứng chất lượng policy.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">KB3 / KIẾN TRÚC</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB3 — Tách recipe, pretrained và baseline</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">25</div>
+<div class="el" style="left:64.0px;top:235px;width:467.3333333333333px;height:130px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:268.08px;width:443.3333333333333px;height:118px;font-size:24px;color:#B87324;font-weight:700;text-align:center;">YAML KB1
+Recipe</div>
+<div class="el" style="left:535.3333333333333px;top:278.0px;width:30px;height:55px;font-size:31px;color:#B87324;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:566.3333333333333px;top:235px;width:467.3333333333333px;height:130px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:578.3333333333333px;top:268.08px;width:443.3333333333333px;height:118px;font-size:24px;color:#B87324;font-weight:700;text-align:center;">COCO pretrained gốc
+Khởi tạo trial</div>
+<div class="el" style="left:1037.6666666666665px;top:278.0px;width:30px;height:55px;font-size:31px;color:#B87324;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1068.6666666666665px;top:235px;width:467.3333333333333px;height:130px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1080.6666666666665px;top:268.08px;width:443.3333333333333px;height:118px;font-size:24px;color:#B87324;font-weight:700;text-align:center;">Best supervised KB1
+Đối chứng chỉ đọc</div>
+<div class="el" style="left:64.0px;top:425px;width:341.75px;height:130px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:474.705px;width:317.75px;height:118px;font-size:23px;color:#B87324;font-weight:700;text-align:center;">TPE → cấu hình</div>
+<div class="el" style="left:409.75px;top:468.0px;width:30px;height:55px;font-size:31px;color:#B87324;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:440.75px;top:425px;width:341.75px;height:130px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:452.75px;top:474.705px;width:317.75px;height:118px;font-size:23px;color:#B87324;font-weight:700;text-align:center;">Detector train mới</div>
+<div class="el" style="left:786.5px;top:468.0px;width:30px;height:55px;font-size:31px;color:#B87324;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:425px;width:341.75px;height:130px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:474.705px;width:317.75px;height:118px;font-size:23px;color:#B87324;font-weight:700;text-align:center;">Native chọn checkpoint</div>
+<div class="el" style="left:1163.25px;top:468.0px;width:30px;height:55px;font-size:31px;color:#B87324;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1194.25px;top:425px;width:341.75px;height:130px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1206.25px;top:474.705px;width:317.75px;height:118px;font-size:23px;color:#B87324;font-weight:700;text-align:center;">Canonical chấm trial</div>
+<div class="el" style="left:64px;top:623px;width:1472px;height:70px;font-size:29px;color:#B87324;font-weight:700;text-align:center;">B (nghiên cứu tiếp): controller ↔ live trainer ↔ metrics/reward</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Trial A không tiếp tục từ best KB1 và không nối trọng số từ trial trước.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">KB3 / THIẾT KẾ A</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB3-A — Local HPO hai chiều quanh KB1</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">26</div>
+<div class="el" style="left:64px;top:238px;width:374.9230769230769px;height:74px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:250px;width:348.9230769230769px;height:59px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Tham số</div>
+<div class="el" style="left:440.9230769230769px;top:238px;width:186.46153846153845px;height:74px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:454.9230769230769px;top:250px;width:160.46153846153845px;height:59px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Anchor</div>
+<div class="el" style="left:629.3846153846154px;top:238px;width:482.61538461538464px;height:74px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:643.3846153846154px;top:250px;width:456.61538461538464px;height:59px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Search space</div>
+<div class="el" style="left:64px;top:314px;width:374.9230769230769px;height:74px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:326px;width:348.9230769230769px;height:59px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">lr0</div>
+<div class="el" style="left:440.9230769230769px;top:314px;width:186.46153846153845px;height:74px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:454.9230769230769px;top:326px;width:160.46153846153845px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">0.01</div>
+<div class="el" style="left:629.3846153846154px;top:314px;width:482.61538461538464px;height:74px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:643.3846153846154px;top:326px;width:456.61538461538464px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">0.005–0.015; log scale</div>
+<div class="el" style="left:64px;top:390px;width:374.9230769230769px;height:74px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:402px;width:348.9230769230769px;height:59px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Weight decay</div>
+<div class="el" style="left:440.9230769230769px;top:390px;width:186.46153846153845px;height:74px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:454.9230769230769px;top:402px;width:160.46153846153845px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">0.0005</div>
+<div class="el" style="left:629.3846153846154px;top:390px;width:482.61538461538464px;height:74px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:643.3846153846154px;top:402px;width:456.61538461538464px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">0.00025–0.001; log scale</div>
+<div class="el" style="left:64px;top:466px;width:374.9230769230769px;height:74px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:478px;width:348.9230769230769px;height:59px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Momentum</div>
+<div class="el" style="left:440.9230769230769px;top:466px;width:186.46153846153845px;height:74px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:454.9230769230769px;top:478px;width:160.46153846153845px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">0.937</div>
+<div class="el" style="left:629.3846153846154px;top:466px;width:482.61538461538464px;height:74px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:643.3846153846154px;top:478px;width:456.61538461538464px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Giữ nguyên</div>
+<div class="el" style="left:64px;top:542px;width:374.9230769230769px;height:74px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:554px;width:348.9230769230769px;height:59px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Augmentation strength</div>
+<div class="el" style="left:440.9230769230769px;top:542px;width:186.46153846153845px;height:74px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:454.9230769230769px;top:554px;width:160.46153846153845px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">0.5</div>
+<div class="el" style="left:629.3846153846154px;top:542px;width:482.61538461538464px;height:74px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:643.3846153846154px;top:554px;width:456.61538461538464px;height:59px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Giữ nguyên</div>
+<div class="el" style="left:1160px;top:253px;width:375px;height:440px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">8 trial mục tiêu
+
+0: anchor
+1: startup random
+2–7: TPE
+
+Detector seed 0</div>
+<div class="el" style="left:64px;top:679px;width:1472px;height:62px;font-size:26px;color:#17332F;font-weight:400;text-align:left;">Objective: canonical validation mAP50–95 của checkpoint do native chọn.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Tám trial cùng detector seed không phải tám seed xác nhận độc lập.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">KB3 / KẾT QUẢ SNAPSHOT</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB3-A — Pretrained pilot chưa vượt baseline</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">27</div>
+<div class="el" style="left:64px;top:214px;width:1472px;height:43px;font-size:24px;color:#B87324;font-weight:700;text-align:left;">Snapshot: 15/10/2026, 02:31 +07:00 · Validation · 2/8 trial hoàn tất</div>
+<div class="el" style="left:64px;top:282px;width:488.66666666666663px;height:82px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:294px;width:462.66666666666663px;height:67px;font-size:25px;color:#FFFFFF;font-weight:700;text-align:left;">Mốc</div>
+<div class="el" style="left:554.6666666666666px;top:282px;width:335.3333333333333px;height:82px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:568.6666666666666px;top:294px;width:309.3333333333333px;height:67px;font-size:25px;color:#FFFFFF;font-weight:700;text-align:left;">mAP50–95 (%)</div>
+<div class="el" style="left:892.0px;top:282px;width:335.3333333333333px;height:82px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:906.0px;top:294px;width:309.3333333333333px;height:67px;font-size:25px;color:#FFFFFF;font-weight:700;text-align:left;">Δ anchor (đpt)</div>
+<div class="el" style="left:1229.3333333333333px;top:282px;width:304.66666666666663px;height:82px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:1243.3333333333333px;top:294px;width:278.66666666666663px;height:67px;font-size:25px;color:#FFFFFF;font-weight:700;text-align:left;">Δ KB1 (đpt)</div>
+<div class="el" style="left:64px;top:366px;width:488.66666666666663px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:378px;width:462.66666666666663px;height:67px;font-size:25px;color:#17332F;font-weight:700;text-align:left;">Supervised KB1</div>
+<div class="el" style="left:554.6666666666666px;top:366px;width:335.3333333333333px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:568.6666666666666px;top:378px;width:309.3333333333333px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">37.8207</div>
+<div class="el" style="left:892.0px;top:366px;width:335.3333333333333px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:906.0px;top:378px;width:309.3333333333333px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">+1.7530</div>
+<div class="el" style="left:1229.3333333333333px;top:366px;width:304.66666666666663px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1243.3333333333333px;top:378px;width:278.66666666666663px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">0</div>
+<div class="el" style="left:64px;top:450px;width:488.66666666666663px;height:82px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:462px;width:462.66666666666663px;height:67px;font-size:25px;color:#17332F;font-weight:700;text-align:left;">Trial 0 — anchor</div>
+<div class="el" style="left:554.6666666666666px;top:450px;width:335.3333333333333px;height:82px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:568.6666666666666px;top:462px;width:309.3333333333333px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">36.0677</div>
+<div class="el" style="left:892.0px;top:450px;width:335.3333333333333px;height:82px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:906.0px;top:462px;width:309.3333333333333px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">0</div>
+<div class="el" style="left:1229.3333333333333px;top:450px;width:304.66666666666663px;height:82px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:1243.3333333333333px;top:462px;width:278.66666666666663px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">−1.7530</div>
+<div class="el" style="left:64px;top:534px;width:488.66666666666663px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:546px;width:462.66666666666663px;height:67px;font-size:25px;color:#17332F;font-weight:700;text-align:left;">Trial 1 — random</div>
+<div class="el" style="left:554.6666666666666px;top:534px;width:335.3333333333333px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:568.6666666666666px;top:546px;width:309.3333333333333px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">37.7225</div>
+<div class="el" style="left:892.0px;top:534px;width:335.3333333333333px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:906.0px;top:546px;width:309.3333333333333px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">+1.6548</div>
+<div class="el" style="left:1229.3333333333333px;top:534px;width:304.66666666666663px;height:82px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1243.3333333333333px;top:546px;width:278.66666666666663px;height:67px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">−0.0982</div>
+<div class="el" style="left:64px;top:655px;width:1472px;height:92px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Trial 2 đang chạy tại snapshot; chưa có completed canonical result.
+Chi phí 2 trial hoàn tất: 300 epoch / 4.6795 giờ; chưa là cost cả search.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Kết quả tốt nhất hoàn tất là startup random; chưa chứng minh TPE pretrained tìm tốt hơn.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">KB3 / CONTROLLER RL</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB3-B — Quan sát, hành động và reward</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">28</div>
+<div class="el" style="left:64px;top:235px;width:474px;height:470px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:470px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:426px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">OBSERVATION</div>
+<div class="el" style="left:88px;top:338px;width:426px;height:352px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">20 chiều quality B:
+
+Tiến độ, loss, xu hướng, metric,
+best AP, độ trì trệ, lịch và HP.</div>
+<div class="el" style="left:563px;top:235px;width:474px;height:470px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:563px;top:235px;width:5px;height:470px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:587px;top:256px;width:426px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">ACTION</div>
+<div class="el" style="left:587px;top:338px;width:426px;height:352px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">LR, weight decay, momentum,
+augmentation strength.
+
+Mask lựa chọn vượt bounds.</div>
+<div class="el" style="left:1062px;top:235px;width:474px;height:470px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:1062px;top:235px;width:5px;height:470px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:1086px;top:256px;width:426px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">REWARD</div>
+<div class="el" style="left:1086px;top:338px;width:426px;height:352px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">rt = 100(bt+1 − bt)
+γ = 1
+
+bt: best canonical validation AP
+của epoch đã train.</div>
+<div class="el" style="left:64px;top:717px;width:1472px;height:45px;font-size:22px;color:#5E726E;font-weight:400;text-align:left;">Continuity: weights, optimizer, scheduler, EMA, RNG và dataloader tiếp tục trong episode.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Quality B đã có trong code; chưa đủ bằng chứng PPO học policy hữu ích trên dữ liệu thật.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">KB3 / TIẾP THEO</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">KB3 — Kết quả kỹ thuật và định hướng</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">29</div>
+<div class="el" style="left:64px;top:235px;width:712px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:235px;width:5px;height:490px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:256px;width:664px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">Đã đạt</div>
+<div class="el" style="left:88px;top:338px;width:664px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">Pipeline A pretrained; tách recipe / init / reference.
+
+Manifest/hash, checkpoint selection, completed-trial
+resume và cost.
+
+B có integration gate continuity/action.</div>
+<div class="el" style="left:800px;top:235px;width:736px;height:490px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:235px;width:5px;height:490px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:256px;width:688px;height:75px;font-size:27px;color:#B87324;font-weight:700;text-align:left;">Tiếp theo — theo thứ tự</div>
+<div class="el" style="left:824px;top:338px;width:688px;height:372px;font-size:25px;color:#17332F;font-weight:400;text-align:left;">1. Audit anchor và baseline; hoàn tất A.
+
+2. Xác nhận seed mới; so random cùng budget.
+
+3. B LR-only residual quanh strong A.
+
+4. Hold-only / random / progress-only; frozen-policy
+evaluation.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Chưa kết luận A vượt KB1, TPE vượt random hoặc B vượt A.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">TIẾN ĐỘ / TỔNG HỢP</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Tổng hợp tiến độ ba kịch bản</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">30</div>
+<div class="el" style="left:64px;top:238px;width:254.00000000000006px;height:76px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:250px;width:228.00000000000006px;height:61px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Hạng mục</div>
+<div class="el" style="left:320.00000000000006px;top:238px;width:670.0000000000001px;height:76px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:334.00000000000006px;top:250px;width:644.0000000000001px;height:61px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Bằng chứng hiện có</div>
+<div class="el" style="left:992.0000000000002px;top:238px;width:542.0000000000001px;height:76px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:1006.0000000000002px;top:250px;width:516.0000000000001px;height:61px;font-size:24px;color:#FFFFFF;font-weight:700;text-align:left;">Việc tiếp theo</div>
+<div class="el" style="left:64px;top:316px;width:254.00000000000006px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:328px;width:228.00000000000006px;height:61px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">Dữ liệu</div>
+<div class="el" style="left:320.00000000000006px;top:316px;width:670.0000000000001px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:334.00000000000006px;top:328px;width:644.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">3.129 ảnh; 28 class; source-ID audit</div>
+<div class="el" style="left:992.0000000000002px;top:316px;width:542.0000000000001px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1006.0000000000002px;top:328px;width:516.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Visualization; near-duplicate</div>
+<div class="el" style="left:64px;top:394px;width:254.00000000000006px;height:76px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:406px;width:228.00000000000006px;height:61px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">KB1</div>
+<div class="el" style="left:320.00000000000006px;top:394px;width:670.0000000000001px;height:76px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:334.00000000000006px;top:406px;width:644.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Validation + test; G&gt;S0 ở 21/21 cặp</div>
+<div class="el" style="left:992.0000000000002px;top:394px;width:542.0000000000001px;height:76px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:1006.0000000000002px;top:406px;width:516.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Nhiều S0; bất định/objective</div>
+<div class="el" style="left:64px;top:472px;width:254.00000000000006px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:484px;width:228.00000000000006px;height:61px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">KB2</div>
+<div class="el" style="left:320.00000000000006px;top:472px;width:670.0000000000001px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:334.00000000000006px;top:484px;width:644.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Validation; AP hơn native 3/3 seed</div>
+<div class="el" style="left:992.0000000000002px;top:472px;width:542.0000000000001px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1006.0000000000002px;top:484px;width:516.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Holdout/test; BCE; coverage</div>
+<div class="el" style="left:64px;top:550px;width:254.00000000000006px;height:76px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:562px;width:228.00000000000006px;height:61px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">KB3-A</div>
+<div class="el" style="left:320.00000000000006px;top:550px;width:670.0000000000001px;height:76px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:334.00000000000006px;top:562px;width:644.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">2/8 trial ở snapshot 15/10</div>
+<div class="el" style="left:992.0000000000002px;top:550px;width:542.0000000000001px;height:76px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:1006.0000000000002px;top:562px;width:516.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Audit; hoàn tất và xác nhận</div>
+<div class="el" style="left:64px;top:628px;width:254.00000000000006px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:640px;width:228.00000000000006px;height:61px;font-size:24px;color:#17332F;font-weight:700;text-align:left;">KB3-B</div>
+<div class="el" style="left:320.00000000000006px;top:628px;width:670.0000000000001px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:334.00000000000006px;top:640px;width:644.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Cơ chế + integration gates</div>
+<div class="el" style="left:992.0000000000002px;top:628px;width:542.0000000000001px;height:76px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1006.0000000000002px;top:640px;width:516.0000000000001px;height:61px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Learning pilot; frozen evaluation</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Đây là bảng tiến độ, không phải xếp hạng hiệu năng giữa các KB.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">ỨNG DỤNG / ĐỀ XUẤT</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Website nhận diện — kế hoạch tích hợp</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">31</div>
+<div class="el" style="left:64px;top:215px;width:1472px;height:50px;font-size:27px;color:#17836B;font-weight:700;text-align:left;">Ba report chưa xác nhận tiến độ triển khai website.</div>
+<div class="el" style="left:64.0px;top:307px;width:266.4px;height:132px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:357.04px;width:242.39999999999998px;height:120px;font-size:24px;color:#17836B;font-weight:700;text-align:center;">Upload ảnh</div>
+<div class="el" style="left:334.4px;top:351.0px;width:30px;height:55px;font-size:31px;color:#17836B;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:365.4px;top:307px;width:266.4px;height:132px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:377.4px;top:357.04px;width:242.39999999999998px;height:120px;font-size:24px;color:#17836B;font-weight:700;text-align:center;">API kiểm ảnh</div>
+<div class="el" style="left:635.8px;top:351.0px;width:30px;height:55px;font-size:31px;color:#17836B;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:666.8px;top:307px;width:266.4px;height:132px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:678.8px;top:357.04px;width:242.39999999999998px;height:120px;font-size:24px;color:#17836B;font-weight:700;text-align:center;">YOLO inference</div>
+<div class="el" style="left:937.1999999999999px;top:351.0px;width:30px;height:55px;font-size:31px;color:#17836B;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:968.1999999999999px;top:307px;width:266.4px;height:132px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:980.1999999999999px;top:357.04px;width:242.39999999999998px;height:120px;font-size:24px;color:#17836B;font-weight:700;text-align:center;">Box / class /
+score</div>
+<div class="el" style="left:1238.6px;top:351.0px;width:30px;height:55px;font-size:31px;color:#17836B;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1269.6px;top:307px;width:266.4px;height:132px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1281.6px;top:357.04px;width:242.39999999999998px;height:120px;font-size:24px;color:#17836B;font-weight:700;text-align:center;">Hiển thị kết quả</div>
+<div class="el" style="left:64px;top:494px;width:712px;height:228px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:64px;top:494px;width:5px;height:228px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:88px;top:515px;width:664px;height:75px;font-size:27px;color:#17836B;font-weight:700;text-align:left;">Giao diện</div>
+<div class="el" style="left:88px;top:597px;width:664px;height:110px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Upload; xem box/class/confidence; xử lý không có
+detection.</div>
+<div class="el" style="left:800px;top:494px;width:736px;height:228px;background:#FFFFFF;border-radius:14px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:800px;top:494px;width:5px;height:228px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:824px;top:515px;width:688px;height:75px;font-size:27px;color:#17836B;font-weight:700;text-align:left;">Tích hợp model</div>
+<div class="el" style="left:824px;top:597px;width:688px;height:110px;font-size:24px;color:#17332F;font-weight:400;text-align:left;">Khóa checkpoint/version; đúng preprocessing; đo
+latency và bộ nhớ.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Model triển khai cần chất lượng đã xác nhận và chi phí phục vụ phù hợp.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#17836B;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#17836B;font-weight:700;text-align:left;">LỘ TRÌNH / TRAO ĐỔI</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">Kế hoạch giai đoạn tiếp theo</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#17836B;font-weight:700;text-align:left;">32</div>
+<div class="el" style="left:64px;top:230px;width:1472px;height:108px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:86px;top:250px;width:405px;height:70px;font-size:25px;color:#17836B;font-weight:700;text-align:left;">DỮ LIỆU &amp; BÁO CÁO</div>
+<div class="el" style="left:510px;top:250px;width:1000px;height:82px;font-size:26px;color:#17332F;font-weight:400;text-align:left;">Hoàn thiện visualization; thống nhất bảng số và phạm vi kết luận.</div>
+<div class="el" style="left:64px;top:359px;width:1472px;height:108px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:86px;top:379px;width:405px;height:70px;font-size:25px;color:#17836B;font-weight:700;text-align:left;">XÁC NHẬN MÔ HÌNH</div>
+<div class="el" style="left:510px;top:379px;width:1000px;height:82px;font-size:26px;color:#17332F;font-weight:400;text-align:left;">KB2 holdout/test; KB3 audit và xác nhận A; bất định KB1.</div>
+<div class="el" style="left:64px;top:488px;width:1472px;height:108px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:86px;top:508px;width:405px;height:70px;font-size:25px;color:#17836B;font-weight:700;text-align:left;">NGHIÊN CỨU RL</div>
+<div class="el" style="left:510px;top:508px;width:1000px;height:82px;font-size:26px;color:#17332F;font-weight:400;text-align:left;">Reward/FN surrogate; pilot controller B có đối chứng.</div>
+<div class="el" style="left:64px;top:617px;width:1472px;height:108px;background:#FFFFFF;border-radius:12px;border:1px solid #DCE5E1;"></div>
+<div class="el" style="left:86px;top:637px;width:405px;height:70px;font-size:25px;color:#17836B;font-weight:700;text-align:left;">ỨNG DỤNG</div>
+<div class="el" style="left:510px;top:637px;width:1000px;height:82px;font-size:26px;color:#17332F;font-weight:400;text-align:left;">Đóng gói inference, dựng website và đo chất lượng phục vụ.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#17836B;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">CẢM ƠN · TRAO ĐỔI</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#286BC0;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#286BC0;font-weight:700;text-align:left;">PHỤ LỤC / KB1</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">A1 — Chọn checkpoint và diễn biến KB1</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#286BC0;font-weight:700;text-align:left;">33</div>
+<div class="el" style="left:64px;top:255px;width:25px;height:40px;font-size:30px;color:#286BC0;font-weight:700;text-align:left;">•</div>
+<div class="el" style="left:94px;top:255px;width:1442px;height:42.900000000000006px;font-size:30px;color:#17332F;font-weight:400;text-align:left;">Continuation: chọn best theo canonical validation, có early stopping.</div>
+<div class="el" style="left:64px;top:326.9px;width:25px;height:40px;font-size:30px;color:#286BC0;font-weight:700;text-align:left;">•</div>
+<div class="el" style="left:94px;top:326.9px;width:1442px;height:42.900000000000006px;font-size:30px;color:#17332F;font-weight:400;text-align:left;">Ablation: so last tại cùng 10.000 micro-step / 5.000 update.</div>
+<div class="el" style="left:64px;top:398.79999999999995px;width:25px;height:40px;font-size:30px;color:#286BC0;font-weight:700;text-align:left;">•</div>
+<div class="el" style="left:94px;top:398.79999999999995px;width:1442px;height:42.900000000000006px;font-size:30px;color:#17332F;font-weight:400;text-align:left;">Không gộp best-validation và fixed-final thành một mean/SD.</div>
+<div class="el" style="left:64px;top:470.69999999999993px;width:25px;height:40px;font-size:30px;color:#286BC0;font-weight:700;text-align:left;">•</div>
+<div class="el" style="left:94px;top:470.69999999999993px;width:1442px;height:42.900000000000006px;font-size:30px;color:#17332F;font-weight:400;text-align:left;">Các seed continuation cùng một S0; chưa phải nhiều supervised initialization.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#286BC0;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Đường validation dùng lựa chọn checkpoint; không gọi đó là đường test.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">PHỤ LỤC / KB2</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">A2 — Từ whole-action sang conditional DPO</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">34</div>
+<div class="el" style="left:64.0px;top:270px;width:341.75px;height:180px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:76.0px;top:326.75px;width:317.75px;height:168px;font-size:25px;color:#7954B4;font-weight:700;text-align:center;">Whole-action
+khác nhiều slot</div>
+<div class="el" style="left:409.75px;top:338.0px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:440.75px;top:270px;width:341.75px;height:180px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:452.75px;top:326.75px;width:317.75px;height:168px;font-size:25px;color:#7954B4;font-weight:700;text-align:center;">Margin tốt
+chưa chắc cứu FN</div>
+<div class="el" style="left:786.5px;top:338.0px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:817.5px;top:270px;width:341.75px;height:180px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:829.5px;top:343.375px;width:317.75px;height:168px;font-size:25px;color:#7954B4;font-weight:700;text-align:center;">Audit score / GT</div>
+<div class="el" style="left:1163.25px;top:338.0px;width:30px;height:55px;font-size:31px;color:#7954B4;font-weight:700;text-align:left;">→</div>
+<div class="el" style="left:1194.25px;top:270px;width:341.75px;height:180px;background:#FFFFFF;border-radius:12px;border:1px solid #D3DED8;"></div>
+<div class="el" style="left:1206.25px;top:326.75px;width:317.75px;height:168px;font-size:25px;color:#7954B4;font-weight:700;text-align:center;">Một candidate
+gate toàn ảnh</div>
+<div class="el" style="left:64px;top:551px;width:1472px;height:132px;font-size:29px;color:#17332F;font-weight:400;text-align:left;">Mục tiêu: gắn tín hiệu preference với quyết định có thể trace.
+Recipe lịch sử khác action space, mask và numerics; không phải ablation chỉ đổi một biến.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Preference loss giảm chưa đủ; phải kiểm ordinary prediction và GT recovered/lost.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#7954B4;font-weight:700;text-align:left;">PHỤ LỤC / KB2</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">A3 — KB2 tại cùng ngân sách FP</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#7954B4;font-weight:700;text-align:left;">35</div>
+<div class="el" style="left:64px;top:280px;width:423.24444444444447px;height:93px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:292px;width:397.24444444444447px;height:78px;font-size:28px;color:#FFFFFF;font-weight:700;text-align:left;">Tại FP=984</div>
+<div class="el" style="left:489.24444444444447px;top:280px;width:259.6888888888889px;height:93px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:503.24444444444447px;top:292px;width:233.68888888888893px;height:78px;font-size:28px;color:#FFFFFF;font-weight:700;text-align:left;">S0 FN</div>
+<div class="el" style="left:750.9333333333334px;top:280px;width:390.5333333333333px;height:93px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:764.9333333333334px;top:292px;width:364.5333333333333px;height:78px;font-size:28px;color:#FFFFFF;font-weight:700;text-align:left;">Native best FN</div>
+<div class="el" style="left:1143.4666666666667px;top:280px;width:390.5333333333333px;height:93px;background:#7954B4;border-radius:0px;"></div>
+<div class="el" style="left:1157.4666666666667px;top:292px;width:364.5333333333333px;height:78px;font-size:28px;color:#FFFFFF;font-weight:700;text-align:left;">DPO best FN</div>
+<div class="el" style="left:64px;top:375px;width:423.24444444444447px;height:93px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:387px;width:397.24444444444447px;height:78px;font-size:28px;color:#17332F;font-weight:700;text-align:left;">Mean 3 seed</div>
+<div class="el" style="left:489.24444444444447px;top:375px;width:259.6888888888889px;height:93px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:503.24444444444447px;top:387px;width:233.68888888888893px;height:78px;font-size:28px;color:#17332F;font-weight:400;text-align:left;">866</div>
+<div class="el" style="left:750.9333333333334px;top:375px;width:390.5333333333333px;height:93px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:764.9333333333334px;top:387px;width:364.5333333333333px;height:78px;font-size:28px;color:#17332F;font-weight:400;text-align:left;">861.00</div>
+<div class="el" style="left:1143.4666666666667px;top:375px;width:390.5333333333333px;height:93px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1157.4666666666667px;top:387px;width:364.5333333333333px;height:78px;font-size:28px;color:#17332F;font-weight:400;text-align:left;">857.33</div>
+<div class="el" style="left:64px;top:558px;width:1472px;height:133px;font-size:29px;color:#17332F;font-weight:400;text-align:left;">DPO giảm 3.67 FN so native best tại điểm FP này.
+Cutoff được quét riêng trên validation; không thay bảng chính ở confidence 0.25.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#7954B4;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Diagnostic tại một điểm; chưa chứng minh toàn PR curve vượt trội hoặc cutoff tốt trên test.</div>
+</section>
+<section class="slide">
+<div class="el" style="left:0px;top:0px;width:1600px;height:900px;background:#F6F8F7;border-radius:0px;"></div>
+<div class="el" style="left:0px;top:0px;width:12px;height:900px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:35px;width:1400px;height:30px;font-size:18px;color:#B87324;font-weight:700;text-align:left;">PHỤ LỤC / KB3</div>
+<div class="el" style="left:64px;top:87px;width:1472px;height:104px;font-size:38px;color:#17332F;font-weight:700;text-align:left;">A4 — Scratch lịch sử không gộp pretrained</div>
+<div class="el" style="left:64px;top:192px;width:1472px;height:2px;background:#DCE5E1;border-radius:0px;"></div>
+<div class="el" style="left:64px;top:860px;width:1200px;height:22px;font-size:13px;color:#5E726E;font-weight:400;text-align:left;">RL–YOLO / BÁO CÁO TIẾN ĐỘ</div>
+<div class="el" style="left:1460px;top:850px;width:76px;height:32px;font-size:20px;color:#B87324;font-weight:700;text-align:left;">36</div>
+<div class="el" style="left:64px;top:255px;width:517.5294117647059px;height:83px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:267px;width:491.52941176470586px;height:68px;font-size:27px;color:#FFFFFF;font-weight:700;text-align:left;">Protocol</div>
+<div class="el" style="left:583.5294117647059px;top:255px;width:517.5294117647059px;height:83px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:597.5294117647059px;top:267px;width:491.52941176470586px;height:68px;font-size:27px;color:#FFFFFF;font-weight:700;text-align:left;">Mốc</div>
+<div class="el" style="left:1103.0588235294117px;top:255px;width:430.94117647058823px;height:83px;background:#B87324;border-radius:0px;"></div>
+<div class="el" style="left:1117.0588235294117px;top:267px;width:404.94117647058823px;height:68px;font-size:27px;color:#FFFFFF;font-weight:700;text-align:left;">Val mAP50–95 (%)</div>
+<div class="el" style="left:64px;top:340px;width:517.5294117647059px;height:83px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:352px;width:491.52941176470586px;height:68px;font-size:27px;color:#17332F;font-weight:700;text-align:left;">Scratch v1</div>
+<div class="el" style="left:583.5294117647059px;top:340px;width:517.5294117647059px;height:83px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:597.5294117647059px;top:352px;width:491.52941176470586px;height:68px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">Anchor</div>
+<div class="el" style="left:1103.0588235294117px;top:340px;width:430.94117647058823px;height:83px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1117.0588235294117px;top:352px;width:404.94117647058823px;height:68px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">34.8556</div>
+<div class="el" style="left:64px;top:425px;width:517.5294117647059px;height:83px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:437px;width:491.52941176470586px;height:68px;font-size:27px;color:#17332F;font-weight:700;text-align:left;">Scratch v1</div>
+<div class="el" style="left:583.5294117647059px;top:425px;width:517.5294117647059px;height:83px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:597.5294117647059px;top:437px;width:491.52941176470586px;height:68px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">Winner trial 5</div>
+<div class="el" style="left:1103.0588235294117px;top:425px;width:430.94117647058823px;height:83px;background:#EBF0ED;border-radius:0px;"></div>
+<div class="el" style="left:1117.0588235294117px;top:437px;width:404.94117647058823px;height:68px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">36.1185</div>
+<div class="el" style="left:64px;top:510px;width:517.5294117647059px;height:83px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:78px;top:522px;width:491.52941176470586px;height:68px;font-size:27px;color:#17332F;font-weight:700;text-align:left;">Pretrained KB1</div>
+<div class="el" style="left:583.5294117647059px;top:510px;width:517.5294117647059px;height:83px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:597.5294117647059px;top:522px;width:491.52941176470586px;height:68px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">Reference</div>
+<div class="el" style="left:1103.0588235294117px;top:510px;width:430.94117647058823px;height:83px;background:#FFFFFF;border-radius:0px;"></div>
+<div class="el" style="left:1117.0588235294117px;top:522px;width:404.94117647058823px;height:68px;font-size:27px;color:#17332F;font-weight:400;text-align:left;">37.8207</div>
+<div class="el" style="left:64px;top:647px;width:1472px;height:94px;font-size:26px;color:#17332F;font-weight:400;text-align:left;">Scratch winner: +1.2629 đpt so scratch anchor; −1.7022 đpt so KB1.
+Tám selected weights scratch đã xóa; logs/metrics còn lưu.</div>
+<div class="el" style="left:64px;top:772px;width:1472px;height:64px;background:#B87324;border-radius:12px;"></div>
+<div class="el" style="left:84px;top:784px;width:1430px;height:43px;font-size:23px;color:#FFFFFF;font-weight:700;text-align:left;">Đây là pilot scratch một seed; không phải kết quả pretrained hoặc thành tích RL.</div>
+</section>
+</body></html>

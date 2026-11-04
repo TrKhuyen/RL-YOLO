@@ -1,0 +1,71 @@
+{
+  "source_audit": "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_candidate_rank_audit_20261101",
+  "config": {
+    "confidence": 0.25,
+    "nms_iou": 0.6,
+    "match_iou": 0.5,
+    "max_det": 300,
+    "max_source_iou": 0.85,
+    "min_iou_gain": 0.1,
+    "min_total_iou_gain": 0.05,
+    "attempts_per_gt": 3,
+    "max_pairs_per_image": 4
+  },
+  "counts": {
+    "attempts": 260,
+    "accepted": 20,
+    "rejected": 240
+  },
+  "overlapping_rejection_reasons": {
+    "chosen_candidate_not_matched_to_target": 239,
+    "target_IoU_gain_too_small": 194,
+    "total_IoU_gain_too_small": 128,
+    "lost_GT_at_any_IoU50_to95": 22,
+    "lost_GT_at_IoU50": 1,
+    "increased_FP": 13
+  },
+  "chosen_not_matched_breakdown": {
+    "good_not_present_after_NMS": 237,
+    "good_present_but_not_target_match": 2
+  },
+  "good_missing_with_cap_saturated": 0,
+  "GT_status_counts": {
+    "source_already_tight": 7689,
+    "no_better_suppressed_candidate": 1949,
+    "whole_image_gate_rejected": 131,
+    "S0_missed": 544,
+    "accepted": 20
+  },
+  "accepted_class_counts": {
+    "8": 1,
+    "24": 4,
+    "22": 1,
+    "5": 2,
+    "27": 1,
+    "14": 2,
+    "21": 2,
+    "17": 1,
+    "25": 1,
+    "2": 1,
+    "11": 1,
+    "13": 2,
+    "10": 1
+  },
+  "accepted_train_images": 15,
+  "accepted_train_classes": [
+    2,
+    5,
+    10,
+    11,
+    13,
+    14,
+    17,
+    21,
+    22,
+    24,
+    25,
+    27
+  ],
+  "scope": "Replayed identical fixed proposals; rejection reasons overlap; no thresholds changed",
+  "script_sha256": "66608a44a86568b44092fe4f970b7e9959dcbf48e340a399a9302b88a861de56"
+}

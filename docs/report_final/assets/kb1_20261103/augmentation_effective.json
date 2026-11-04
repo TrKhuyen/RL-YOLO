@@ -1,0 +1,234 @@
+{
+  "train": {
+    "__version__": "2.0.8",
+    "transform": {
+      "__class_fullname__": "Compose",
+      "p": 1.0,
+      "transforms": [
+        {
+          "__class_fullname__": "LongestMaxSize",
+          "p": 1.0,
+          "area_for_downscale": null,
+          "interpolation": 1,
+          "mask_interpolation": 0,
+          "max_size": 640,
+          "max_size_hw": null
+        },
+        {
+          "__class_fullname__": "PadIfNeeded",
+          "p": 1.0,
+          "border_mode": 0,
+          "fill": 114.0,
+          "fill_mask": 0.0,
+          "min_height": 640,
+          "min_width": 640,
+          "pad_height_divisor": null,
+          "pad_width_divisor": null,
+          "padding": 0,
+          "position": "center"
+        },
+        {
+          "__class_fullname__": "RandomBrightnessContrast",
+          "p": 0.5,
+          "brightness_by_max": true,
+          "brightness_limit": [
+            -0.3,
+            0.3
+          ],
+          "contrast_limit": [
+            -0.3,
+            0.3
+          ],
+          "ensure_safe_range": false
+        },
+        {
+          "__class_fullname__": "HueSaturationValue",
+          "p": 0.4,
+          "hue_shift_limit": [
+            -15.0,
+            15.0
+          ],
+          "sat_shift_limit": [
+            -30.0,
+            30.0
+          ],
+          "val_shift_limit": [
+            -20.0,
+            20.0
+          ]
+        },
+        {
+          "__class_fullname__": "GaussNoise",
+          "p": 0.3,
+          "mean_range": [
+            0.0,
+            0.0
+          ],
+          "noise_scale_factor": 1.0,
+          "per_channel": true,
+          "std_range": [
+            0.02,
+            0.12
+          ]
+        },
+        {
+          "__class_fullname__": "MotionBlur",
+          "p": 0.2,
+          "allow_shifted": true,
+          "angle_range": [
+            0.0,
+            360.0
+          ],
+          "blur_limit": [
+            3,
+            5
+          ],
+          "direction_range": [
+            -1.0,
+            1.0
+          ]
+        },
+        {
+          "__class_fullname__": "HorizontalFlip",
+          "p": 0.5
+        },
+        {
+          "__class_fullname__": "VerticalFlip",
+          "p": 0.3
+        },
+        {
+          "__class_fullname__": "Rotate",
+          "p": 0.4,
+          "border_mode": 0,
+          "crop_border": false,
+          "fill": 114.0,
+          "fill_mask": 0.0,
+          "interpolation": 1,
+          "limit": [
+            -15.0,
+            15.0
+          ],
+          "mask_interpolation": 0,
+          "rotate_method": "largest_box"
+        },
+        {
+          "__class_fullname__": "CLAHE",
+          "p": 0.2,
+          "clip_limit": [
+            1.0,
+            2.0
+          ],
+          "tile_grid_size": [
+            8,
+            8
+          ]
+        },
+        {
+          "__class_fullname__": "Normalize",
+          "p": 1.0,
+          "max_pixel_value": 255.0,
+          "mean": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normalization": "standard",
+          "std": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "__class_fullname__": "ToTensorV2",
+          "p": 1.0,
+          "transpose_mask": false
+        }
+      ],
+      "bbox_params": {
+        "format": "yolo",
+        "label_fields": [
+          "class_labels"
+        ],
+        "min_area": 0.0,
+        "min_visibility": 0.3,
+        "min_width": 0.0,
+        "min_height": 0.0,
+        "check_each_transform": true,
+        "clip": true,
+        "max_accept_ratio": null
+      },
+      "keypoint_params": null,
+      "additional_targets": {},
+      "is_check_shapes": true
+    }
+  },
+  "val_test": {
+    "__version__": "2.0.8",
+    "transform": {
+      "__class_fullname__": "Compose",
+      "p": 1.0,
+      "transforms": [
+        {
+          "__class_fullname__": "LongestMaxSize",
+          "p": 1.0,
+          "area_for_downscale": null,
+          "interpolation": 1,
+          "mask_interpolation": 0,
+          "max_size": 640,
+          "max_size_hw": null
+        },
+        {
+          "__class_fullname__": "PadIfNeeded",
+          "p": 1.0,
+          "border_mode": 0,
+          "fill": 114.0,
+          "fill_mask": 0.0,
+          "min_height": 640,
+          "min_width": 640,
+          "pad_height_divisor": null,
+          "pad_width_divisor": null,
+          "padding": 0,
+          "position": "center"
+        },
+        {
+          "__class_fullname__": "Normalize",
+          "p": 1.0,
+          "max_pixel_value": 255.0,
+          "mean": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normalization": "standard",
+          "std": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "__class_fullname__": "ToTensorV2",
+          "p": 1.0,
+          "transpose_mask": false
+        }
+      ],
+      "bbox_params": {
+        "format": "yolo",
+        "label_fields": [
+          "class_labels"
+        ],
+        "min_area": 0.0,
+        "min_visibility": 0.0,
+        "min_width": 0.0,
+        "min_height": 0.0,
+        "check_each_transform": true,
+        "clip": true,
+        "max_accept_ratio": null
+      },
+      "keypoint_params": null,
+      "additional_targets": {},
+      "is_check_shapes": true
+    }
+  }
+}

@@ -1,3 +1,7 @@
+> V0 giữ/bỏ đã triển khai và kiểm kỹ thuật31/10: [báo cáo/code/lệnh pilot](report_final/KB2_CONDITIONAL_V0_IMPLEMENTATION_20261031.md). Chưa chạy pilot2.000 update; phần dưới là lịch sử brainstorm.
+
+> Bản tổng hợp và review mới ngày31/10/2026: [KB2_DPO_DESIGN_BRAINSTORM_20261031.md](KB2_DPO_DESIGN_BRAINSTORM_20261031.md). Phân biệt đề xuất V0 giữ/bỏ, các mở rộng chưa kiểm chứng và thiếu sót cần giải trước code; phần dưới giữ làm ghi chép brainstorm trước đó.
+
 Mình đề xuất xây lại KB2 theo mục tiêu:
 Dùng DPO để YOLO ưu tiên một bộ detection hoàn chỉnh tốt hơn trên cùng ảnh, với preference được xác định bằng cách so với GT.
 

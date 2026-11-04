@@ -1,0 +1,52 @@
+{
+  "s0": {
+    "confidence": 0.25028350949287415,
+    "tp": 1021,
+    "fp": 984,
+    "fn": 866,
+    "recall": 0.5410704822469529,
+    "precision": 0.5092269326683292,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  },
+  "original_native": {
+    "confidence": 0.18774272501468658,
+    "tp": 1023,
+    "fp": 984,
+    "fn": 864,
+    "recall": 0.5421303656597775,
+    "precision": 0.5097159940209267,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  },
+  "original_dpo": {
+    "confidence": 0.1876225471496582,
+    "tp": 1023,
+    "fp": 984,
+    "fn": 864,
+    "recall": 0.5421303656597775,
+    "precision": 0.5097159940209267,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  },
+  "reduced_native": {
+    "confidence": 0.23695272207260132,
+    "tp": 1023,
+    "fp": 984,
+    "fn": 864,
+    "recall": 0.5421303656597775,
+    "precision": 0.5097159940209267,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  },
+  "reduced_dpo": {
+    "confidence": 0.23680326342582703,
+    "tp": 1025,
+    "fp": 984,
+    "fn": 862,
+    "recall": 0.543190249072602,
+    "precision": 0.5102040816326531,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  }
+}

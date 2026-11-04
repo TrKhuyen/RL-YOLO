@@ -1,0 +1,11 @@
+{
+  "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/original_native/best.pt": "45138dd5b414390b0456ae3dc4b7f1775b2272a4793af8747cec190d1211fc2c",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/original_native/last.pt": "595c50a9229c360f267c7b6edd3b10fcced7aa89895c8898c211d253d2506148",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/original_dpo/best.pt": "da4eb00b16fd14b50018acfa5aca6b5c5e5236c2f6ef8734768b2fdaef27220b",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/original_dpo/last.pt": "6b515cb67184604afdd51c98bb197afce93a0112f88d043d5fceb271af97792f",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/reduced_native/best.pt": "39a0eaae0e89f8b4ad0777e432047d466b7e614a0256c96c4a93f625f144fa13",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/reduced_native/last.pt": "3eef88b37eaa135de9c6afa4c74d2733e0c1f413ae6b32b150d3ab36b033f007",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/reduced_dpo/best.pt": "51f5694ec9f226d90b0801205ebb84aa60a8077e713963573c0c2c933f754fae",
+  "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_native_background_s42_20261031_001256_145730/reduced_dpo/last.pt": "730c4bac2596f29be054ba8ca556a6f2231ff19f95e142554b91f7bf5012e139"
+}

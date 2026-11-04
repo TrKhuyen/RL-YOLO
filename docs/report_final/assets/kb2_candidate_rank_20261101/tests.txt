@@ -1,0 +1,10 @@
+test_cached_context_preserves_noncontiguous_original_slot_ids (kb2_preference_optimization.tests.test_candidate_ranking.CandidateRankingTests) ... ok
+test_no_pair_without_existing_better_box (kb2_preference_optimization.tests.test_candidate_ranking.CandidateRankingTests) ... ok
+test_normalized_XOR_policy_and_reference_DPO_gradient (kb2_preference_optimization.tests.test_candidate_ranking.CandidateRankingTests) ... ok
+test_pair_uses_real_suppressed_box_and_improves_localization (kb2_preference_optimization.tests.test_candidate_ranking.CandidateRankingTests) ... ok
+test_whole_image_rejects_candidate_suppressed_by_neighbor (kb2_preference_optimization.tests.test_candidate_ranking.CandidateRankingTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.034s
+
+OK

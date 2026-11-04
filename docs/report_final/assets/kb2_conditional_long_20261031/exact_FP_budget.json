@@ -1,0 +1,32 @@
+{
+  "S0": {
+    "confidence": 0.25028350949287415,
+    "tp": 1021,
+    "fp": 984,
+    "fn": 866,
+    "recall": 0.5410704822469529,
+    "precision": 0.5092269326683292,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  },
+  "native": {
+    "confidence": 0.15323181450366974,
+    "tp": 1027,
+    "fp": 984,
+    "fn": 860,
+    "recall": 0.5442501324854266,
+    "precision": 0.5106911984087519,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  },
+  "dpo": {
+    "confidence": 0.15334148705005646,
+    "tp": 1027,
+    "fp": 984,
+    "fn": 860,
+    "recall": 0.5442501324854266,
+    "precision": 0.5106911984087519,
+    "FP_budget": 984,
+    "scope": "Exploratory validation threshold; inclusive score ties; no interpolation or test tuning"
+  }
+}

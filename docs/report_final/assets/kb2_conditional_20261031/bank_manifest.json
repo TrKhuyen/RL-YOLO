@@ -1,0 +1,403 @@
+{
+  "objective_version": "conditional_detection_dpo_v0",
+  "provenance": {
+    "model": "yolov8n",
+    "source_checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt",
+    "source_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+    "dataset": {
+      "root": "/home/celine/Celine/graduate/RL-YOLO/pre-data/data/v2i_cleanned",
+      "config": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/configs/pest.yaml",
+      "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+      "counts": {
+        "train": {
+          "images": 2411,
+          "labels": 2411,
+          "known_augmented_images": 667
+        },
+        "valid": {
+          "images": 479,
+          "labels": 479,
+          "known_augmented_images": 0
+        },
+        "test": {
+          "images": 239,
+          "labels": 239,
+          "known_augmented_images": 0
+        }
+      },
+      "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+    },
+    "supervised": {
+      "model": "yolov8n",
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+      "checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "dataset": {
+        "root": "D:\\graduate\\RL-YOLO\\pre-data\\data\\v2i_cleanned",
+        "config": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\configs\\pest.yaml",
+        "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+        "counts": {
+          "train": {
+            "images": 2411,
+            "labels": 2411,
+            "known_augmented_images": 667
+          },
+          "valid": {
+            "images": 479,
+            "labels": 479,
+            "known_augmented_images": 0
+          },
+          "test": {
+            "images": 239,
+            "labels": 239,
+            "known_augmented_images": 0
+          }
+        },
+        "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+      },
+      "pretrained_name": "yolov8n.pt",
+      "pretrained_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "data_config_sha256": "cbc7c93bee7848ea6bf4f0f6b52e444ba78aee8a203987578f7addfdeadae308",
+      "dp_flags": {
+        "w3f": false,
+        "psa": false
+      }
+    },
+    "runtime": {
+      "python": "3.10.20",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "versions": {
+        "torch": "2.5.1+cu121",
+        "torchvision": "0.20.1+cu121",
+        "ultralytics": "8.4.163",
+        "torchmetrics": "1.9.0",
+        "faster-coco-eval": "1.7.2",
+        "albumentations": "2.0.8",
+        "numpy": "2.2.6",
+        "opencv-python": "4.13.0.92",
+        "PyYAML": "6.0.3",
+        "scipy": "1.15.3"
+      },
+      "cuda": "12.1",
+      "cudnn": 90100,
+      "ultralytics_code_sha256": {
+        "utils/loss.py": "c1d4847a833da3f3ca71afdace689e0b0d78949face65c207723fcc0563a9533",
+        "nn/tasks.py": "50ffe702b9b122150f06105b50ea7b8c7990b709b990c50681a7de670717fe9e",
+        "nn/modules/head.py": "617b5bdd6e2d609c7187e00df11500fd40825f3d2232a349e6d8f3f07656d979"
+      }
+    },
+    "code_sha256": {
+      "__init__.py": "911b5dc5b7f3e00efa2d287ce13c895cfbd41889254b528a79ef8c955078c1bd",
+      "adapter.py": "059f7932e673ac2a025649a34f2b403885dfd740eb008a20aa7ba16a1f6c7ef3",
+      "artifacts.py": "18e7243c15e19d46d0fc5ad61b0079a5f8e8b8d9e7b3fdd49aef1f0b5783908a",
+      "data.py": "788799c890c95c7557e9c4140a083d19dd5d82958277bbfa84ae4ec66089997f",
+      "evaluate.py": "bd12c085a592a00f66aee429f8a7ae598c9aa281b1450b2ad6636484db42dc44",
+      "generate_preferences.py": "aa03f76335deb3479bafb54924a6335d5940de338d9e8ae22fe189610d0b78ae",
+      "metrics.py": "3e014f9b07b2fc00deb12aa5337bc8d4cce919a1987121133cd10564e6622ed6",
+      "policy.py": "53110e27ee2d8c29ecc00c70f2aaae235180611f86446bed153f6c242a24eae0",
+      "preferences.py": "613a37254833cb3993974b8567efacdd8517edc416c1a5ed4d0e3e6f3002fc29",
+      "preview.py": "76ca589315c5a99c4b9239402b637f7103b750e9e8688d5e2d2f06601b525ce4",
+      "quality.py": "4416a7fb52ada6a8e27c5005c45010fe9905ffc70fa85b031bfd016c336701f4",
+      "run.py": "3e6bd316136c3299ac777427b939815c6132d944478e1fe4c1050a50d67773e6",
+      "train_dpo.py": "e7d5f2e6764f9546c5fc3326beeafd31145cc171289977a8ff53ad2103a41122"
+    },
+    "objective_version": "structured_detection_dpo_v1",
+    "transform_version": "longest_max_size_center_pad114_rgb_unit_v1"
+  },
+  "conditional_code_sha256": {
+    "__init__.py": "fc7088de93ca9af028014926a1eac192037f4e5ca4691d9b571bfd5721ebc01b",
+    "bank.py": "b3e397241e8d115c55819a9b9596b38587f4ec705be8b8c064029b7e9174d0b0",
+    "evaluate.py": "2b580b98fe17b4507eb1efb806a2f9a9cc1784a3351a351d82d4f7c2d42e3e7e",
+    "evaluation.py": "da1dd5821636b916c2e4c5aa8b2bf41c8f3158686ac5c90a8d439b6ac9a6bb67",
+    "pairs.py": "6c44606522755df2c83f1a2a49f377f4891ec8fe8521e36a728ddbe08c8884e7",
+    "policy.py": "0ca295d75dea2fbc8c7e56b254100bee20514c64b2233052d32e4643117970cf",
+    "run.py": "e64146ee0f451cd02276fd3569453dc0c86b77ceef218658d37aea94741bd537",
+    "train.py": "b80c0c7861d6b1afe4bc7c956c1d324fb32206eaf3bbe05b4e2e91f607d2be80"
+  },
+  "config": {
+    "operating_conf": 0.25,
+    "match_iou": 0.5,
+    "recovery_min_score": 0.05,
+    "recovery_min_iou": 0.6,
+    "background_max_iou": 0.1,
+    "nms_iou": 0.6,
+    "max_det": 300,
+    "attempts_per_gt": 3,
+    "max_pairs_per_group": 4
+  },
+  "image_size": 640,
+  "reference_state_sha256": "0d2b026f7d251d2578ef9c44631fc7163f0e541368a41ed0e24a0473e6c067c3",
+  "pairs_sha256": "89552849ce50cba424834e8d0d0c17233b07c5a49499a5a082ec27091de9bd72",
+  "contexts_sha256": "b9712c410e933251fb7c6778fa6fd2f4f073c7adf62a5548d18b044e067a2915",
+  "partial_bank": false,
+  "processed_images": 2411,
+  "probe_scope": "train images excluded from DPO only; native may use them; not independent holdout",
+  "judge_scope": "keep bypasses operating confidence; scores/boxes remain S0; whole-image NMS then GT",
+  "numerics": {
+    "tf32": false,
+    "amp": false,
+    "generation_batch": 1
+  },
+  "audit": {
+    "totals": {
+      "images": 2411,
+      "gt": 10333,
+      "s0_fn": 544,
+      "s0_fp": 3393,
+      "pairs": 784,
+      "recovery_gt": 296,
+      "gate_rejected": 11467,
+      "probe_images": 232,
+      "pair_images": 435,
+      "no_pair_images": 1976
+    },
+    "groups": {
+      "background": {
+        "pairs": 353,
+        "train": 292,
+        "probe": 61
+      },
+      "recovery": {
+        "pairs": 296,
+        "train": 263,
+        "probe": 33
+      },
+      "duplicate": {
+        "pairs": 44,
+        "train": 31,
+        "probe": 13
+      },
+      "preservation": {
+        "pairs": 91,
+        "train": 77,
+        "probe": 14
+      }
+    },
+    "per_class": {
+      "21": {
+        "gt": 352,
+        "s0_fn": 38,
+        "recovery_gt": 18,
+        "pair_gt": 26
+      },
+      "17": {
+        "gt": 380,
+        "s0_fn": 4,
+        "recovery_gt": 3,
+        "pair_gt": 4
+      },
+      "4": {
+        "gt": 320,
+        "s0_fn": 13,
+        "recovery_gt": 5,
+        "pair_gt": 8
+      },
+      "27": {
+        "gt": 350,
+        "s0_fn": 2,
+        "recovery_gt": 1,
+        "pair_gt": 2
+      },
+      "12": {
+        "gt": 371,
+        "s0_fn": 20,
+        "recovery_gt": 5,
+        "pair_gt": 9
+      },
+      "11": {
+        "gt": 354,
+        "s0_fn": 18,
+        "recovery_gt": 14,
+        "pair_gt": 21
+      },
+      "10": {
+        "gt": 410,
+        "s0_fn": 13,
+        "recovery_gt": 9,
+        "pair_gt": 19
+      },
+      "3": {
+        "gt": 369,
+        "s0_fn": 13,
+        "recovery_gt": 11,
+        "pair_gt": 15
+      },
+      "20": {
+        "gt": 397,
+        "s0_fn": 14,
+        "recovery_gt": 7,
+        "pair_gt": 11
+      },
+      "8": {
+        "gt": 327,
+        "s0_fn": 43,
+        "recovery_gt": 26,
+        "pair_gt": 39
+      },
+      "0": {
+        "gt": 319,
+        "s0_fn": 5,
+        "recovery_gt": 2,
+        "pair_gt": 3
+      },
+      "2": {
+        "gt": 346,
+        "s0_fn": 3,
+        "recovery_gt": 2,
+        "pair_gt": 4
+      },
+      "18": {
+        "gt": 354,
+        "s0_fn": 55,
+        "recovery_gt": 16,
+        "pair_gt": 20
+      },
+      "24": {
+        "gt": 523,
+        "s0_fn": 73,
+        "recovery_gt": 54,
+        "pair_gt": 66
+      },
+      "9": {
+        "gt": 336,
+        "s0_fn": 0,
+        "recovery_gt": 0,
+        "pair_gt": 0
+      },
+      "15": {
+        "gt": 351,
+        "s0_fn": 9,
+        "recovery_gt": 6,
+        "pair_gt": 13
+      },
+      "14": {
+        "gt": 520,
+        "s0_fn": 18,
+        "recovery_gt": 8,
+        "pair_gt": 13
+      },
+      "16": {
+        "gt": 351,
+        "s0_fn": 9,
+        "recovery_gt": 4,
+        "pair_gt": 10
+      },
+      "25": {
+        "gt": 325,
+        "s0_fn": 37,
+        "recovery_gt": 19,
+        "pair_gt": 25
+      },
+      "6": {
+        "gt": 333,
+        "s0_fn": 8,
+        "recovery_gt": 6,
+        "pair_gt": 8
+      },
+      "26": {
+        "gt": 355,
+        "s0_fn": 10,
+        "recovery_gt": 9,
+        "pair_gt": 10
+      },
+      "22": {
+        "gt": 353,
+        "s0_fn": 5,
+        "recovery_gt": 2,
+        "pair_gt": 5
+      },
+      "7": {
+        "gt": 202,
+        "s0_fn": 6,
+        "recovery_gt": 1,
+        "pair_gt": 4
+      },
+      "19": {
+        "gt": 389,
+        "s0_fn": 32,
+        "recovery_gt": 15,
+        "pair_gt": 20
+      },
+      "23": {
+        "gt": 351,
+        "s0_fn": 33,
+        "recovery_gt": 17,
+        "pair_gt": 22
+      },
+      "13": {
+        "gt": 361,
+        "s0_fn": 25,
+        "recovery_gt": 12,
+        "pair_gt": 18
+      },
+      "5": {
+        "gt": 598,
+        "s0_fn": 32,
+        "recovery_gt": 20,
+        "pair_gt": 28
+      },
+      "1": {
+        "gt": 336,
+        "s0_fn": 6,
+        "recovery_gt": 4,
+        "pair_gt": 7
+      }
+    },
+    "density": {
+      "1-2": {
+        "images": 1229,
+        "gt": 1447,
+        "s0_fn": 40,
+        "pairs": 50,
+        "recovery_gt": 8
+      },
+      "3-5": {
+        "images": 592,
+        "gt": 2294,
+        "s0_fn": 139,
+        "pairs": 164,
+        "recovery_gt": 66
+      },
+      "6+": {
+        "images": 590,
+        "gt": 6592,
+        "s0_fn": 365,
+        "pairs": 570,
+        "recovery_gt": 222
+      }
+    },
+    "size": {
+      "large": {
+        "gt": 6898,
+        "s0_fn": 242,
+        "recovery_gt": 98,
+        "pair_gt": 163
+      },
+      "medium": {
+        "gt": 3370,
+        "s0_fn": 280,
+        "recovery_gt": 192,
+        "pair_gt": 258
+      },
+      "small": {
+        "gt": 65,
+        "s0_fn": 22,
+        "recovery_gt": 6,
+        "pair_gt": 9
+      }
+    },
+    "gt_overlap": {
+      "iou<.3": {
+        "gt": 10034,
+        "s0_fn": 521,
+        "recovery_gt": 288,
+        "pair_gt": 416
+      },
+      "iou>=.3": {
+        "gt": 299,
+        "s0_fn": 23,
+        "recovery_gt": 8,
+        "pair_gt": 14
+      }
+    }
+  }
+}

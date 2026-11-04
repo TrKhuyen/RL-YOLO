@@ -12,12 +12,18 @@ from torchvision.ops import box_iou
 class QualityConfig:
     detection_weight: float = 0.8
     min_gap: float = 0.02
+    f_beta: float = 2.0
+    version: str = 'whole_set_fbeta_iou_v2'
 
     def __post_init__(self):
         if not 0 <= self.detection_weight <= 1:
             raise ValueError('detection_weight must be in [0,1]')
         if not math.isfinite(self.min_gap) or self.min_gap <= 0:
             raise ValueError('min_gap must be finite and positive')
+        if not math.isfinite(self.f_beta) or self.f_beta <= 0:
+            raise ValueError('f_beta must be finite and positive')
+        if self.version != 'whole_set_fbeta_iou_v2':
+            raise ValueError('Unsupported preference quality version')
 
     def to_dict(self):
         return asdict(self)
@@ -48,9 +54,10 @@ def quality_score(prediction, target, config=QualityConfig()):
     n_pred, n_gt = len(prediction['boxes']), len(target['boxes'])
     if n_gt == 0:
         return {'score': 1.0 / (1 + n_pred), 'mean_f1': 1.0 / (1 + n_pred),
+                'mean_f2': 1.0 / (1 + n_pred), 'mean_fbeta': 1.0 / (1 + n_pred),
                 'gt_normalized_iou': 0., 'tp': 0, 'fp': n_pred, 'fn': 0,
                 'matched_iou_sum': 0., 'num_gt': 0, 'num_predictions': n_pred}
-    f1s = []
+    f1s, f2s, fbetas = [], [], []
     matches50 = None
     for i in range(10):
         matches = match_boxes(prediction, target, 0.5 + 0.05 * i)
@@ -58,13 +65,20 @@ def quality_score(prediction, target, config=QualityConfig()):
             matches50 = matches
         # 2 TP + FP + FN == n_pred + n_gt.
         f1s.append(2 * len(matches) / (n_pred + n_gt))
+        # (1 + beta^2) TP + beta^2 FN + FP == beta^2 Ngt + Npred.
+        f2s.append(5 * len(matches) / (4 * n_gt + n_pred))
+        beta_sq = config.f_beta ** 2
+        fbetas.append((1 + beta_sq) * len(matches) / (beta_sq * n_gt + n_pred))
     tp = len(matches50)
     iou_sum = sum(v for _, _, v in matches50)
     mean_f1 = sum(f1s) / len(f1s)
+    mean_f2 = sum(f2s) / len(f2s)
+    mean_fbeta = sum(fbetas) / len(fbetas)
     coverage_iou = iou_sum / n_gt
-    return {'score': config.detection_weight * mean_f1
+    return {'score': config.detection_weight * mean_fbeta
             + (1 - config.detection_weight) * coverage_iou,
-            'mean_f1': mean_f1, 'gt_normalized_iou': coverage_iou,
+            'mean_f1': mean_f1, 'mean_f2': mean_f2, 'mean_fbeta': mean_fbeta,
+            'gt_normalized_iou': coverage_iou,
             'tp': tp, 'fp': n_pred - tp, 'fn': n_gt - tp,
             'matched_iou_sum': iou_sum, 'num_gt': n_gt, 'num_predictions': n_pred}
 
