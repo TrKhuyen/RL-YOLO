@@ -1,0 +1,32 @@
+{
+  "type": "diagnostic_only_no_optimizer_step",
+  "model": "yolov8s",
+  "checkpoint": "kb1_reward_guided_training/checkpoint_reward_guide_trainning/remaining_seed43_44_ablation_v1/ablation/seed43/yolov8s/proxy_only/last.pt",
+  "checkpoint_sha256": "f5920a7b90fd8b26c0e4716f037c7ef2c15e141dee20b517109af9e91c0c9d4d",
+  "split": "val",
+  "batch_size": 8,
+  "prediction_confidence": 0.2,
+  "prediction_nms_iou": 0.45,
+  "proxy_loss_weight": 0.25,
+  "proxy_loss_unweighted": 0.4790039360523224,
+  "parameter_scope": "final Detect module only, cv2.* regression and cv3.* classification",
+  "gradient_groups": {
+    "box_branch": {
+      "parameter_tensors": 24,
+      "tensors_with_gradient": 24,
+      "tensors_with_nonzero_gradient": 0,
+      "gradient_L2_norm": 0.0
+    },
+    "class_score_branch": {
+      "parameter_tensors": 24,
+      "tensors_with_gradient": 24,
+      "tensors_with_nonzero_gradient": 16,
+      "gradient_L2_norm": 0.9663339753371536
+    }
+  },
+  "code_sha256": {
+    "kb1_reward_guided_training/train_rl.py": "e622ec722dcade7d51a508a1592ec932024f0755686bc9be05e3f9aa5c20fc38",
+    "kb1_reward_guided_training/adapters/ultralytics_adapter.py": "a98691ab45496e6f95d4bcd3a55eaf4172f3436da0f0115e92c2653026098080"
+  },
+  "limitations": "One fixed validation batch; confirms graph connectivity, not per-term causal attribution or the sign of every model-score change. No weights updated."
+}

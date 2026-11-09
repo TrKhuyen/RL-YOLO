@@ -1,0 +1,43 @@
+{
+  "run": "kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261106_030407_969341",
+  "steps": 30000,
+  "best_step": 1000,
+  "evaluation_checkpoint_hashes_verified": 31,
+  "source_and_bank_provenance_verified": true,
+  "best_last_match_saved_steps": true,
+  "best_weights_optimizer_identical_to_15k_run_best": true,
+  "step15000_weights_optimizer_identical_to_15k_run_last": true,
+  "first15000_stream_and_validation_metrics_identical": true,
+  "full30000_stream_reconstructed": true,
+  "reference_and_frozen_state_unchanged_recorded": true,
+  "wall_minutes_including_periodic_eval": 29.419635790016674,
+  "metric_maxima": {
+    "mAP50_95": {
+      "step": 1000,
+      "value": 0.3859618902206421
+    },
+    "precision": {
+      "step": 29000,
+      "value": 0.5641173087981599
+    },
+    "operating_recall": {
+      "step": 0,
+      "value": 0.5537890832008479
+    },
+    "f1": {
+      "step": 11000,
+      "value": 0.5429815016322088
+    },
+    "APs": {
+      "step": 24000,
+      "value": 0.07401833683252335
+    },
+    "APm": {
+      "step": 26000,
+      "value": 0.18878598511219025
+    }
+  },
+  "fresh_GPU_full_validation_last_S0_TPE_match": true,
+  "fresh_validation_images": 479,
+  "fresh_validation_GT": 1887
+}

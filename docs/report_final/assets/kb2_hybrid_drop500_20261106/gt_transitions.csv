@@ -1,0 +1,8 @@
+﻿model,recovered,lost,net_recovery
+TPE,0,0,0
+drop1000_best,3,24,-21
+drop1000_last,8,49,-41
+drop500_best,3,24,-21
+drop500_last,8,46,-38
+drop500_common_grid_best,4,24,-20
+S0,0,0,0

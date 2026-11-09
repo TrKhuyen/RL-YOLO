@@ -1,6 +1,77 @@
-# KB2 — Conditional keep/drop DPO V0 (31/10/2026)
+# KB2 — Pipeline DPO cho YOLO
+
+**Phạm vi hiện tại — 06/11/2026:** DPO là toàn bộ pipeline KB2: tạo A/B,
+chấm preference bằng GT, chọn/cân bằng cặp và huấn luyện policy với
+`L_detection + λ L_DPO`. Bỏ nhánh native-only khỏi các launcher hiện tại.
+Native detection loss vẫn là thành phần của KB2; không bỏ loss này.
+
+Đánh giá KB2 độc lập từ S0: **S0 → KB2 DPO**. Với hybrid: **S0 → KB3/TPE → KB2 DPO**,
+bảng kết quả chính gồm S0, TPE và checkpoint sau KB2. Không yêu cầu chạy thêm
+native-only. [Thiết kế và kết quả hiện tại](../docs/report_final/KB2_CURRENT_PIPELINE_20261106.md).
+
+**Kết quả đã chốt 08/11:** hybrid best TPE → KB2 DPO **λ0,03/background0,5**,
+best tại500 trong run15k, mAP50–95 **38,7133%**. Giữ sampler cũ. Checkpoint và
+SHA256 cùng giải thích lý thuyết/thực nghiệm:
+[Bản chốt và minh chứng](../docs/report_final/KB2_HYBRID_SELECTED_EXPLANATION_20261108.md).
+Default launcher lịch sử không được đổi chỉ vì chốt kết quả báo cáo; recipe
+λ0,03/eval dày được mô tả riêng ở phần lịch LR bên dưới.
 
 > **Báo cáo tổng hợp KB2:** [Report_KB2_DPO_20261103.md](../docs/report_final/Report_KB2_DPO_20261103.md), gồm lý thuyết, ánh xạ, lịch sử chỉnh sửa, lý do chọn tham số, kết quả ba seed và định hướng tiếp theo.
+
+### Hybrid KB3 → KB2 — 06/11/2026
+
+Runner riêng dùng **checkpoint TPE tốt nhất làm initialization và frozen reference**,
+sinh bank mới rồi tối ưu native + DPO. Hiện winner là trial2 của pretrained TPE v2;
+runner resolve đường dẫn Linux theo trial ID và kiểm SHA256 với artifacts KB3.
+Từ repo root, chạy **một lượt DPO15k trên GPU, seed42**:
+
+```bash
+bash kb2_preference_optimization/run_hybrid_kb3_kb2.sh --device cuda --steps 15000 --eval-interval 1000 --seed 42 --dpo-weight 0.1 --background-weight 0.5
+```
+
+Mỗi lần tạo folder mới `outputs/yolov8n_hybrid_tpe2_s42_<timestamp>/`, gồm
+`preferences/`, `run.log`, `dpo/best.pt`, `dpo/last.pt`, checkpoint mỗi mốc eval
+và `comparison.json` so hybrid với **TPE và S0 được chấm lại cùng protocol**.
+Best theo validation mAP50–95; checkpoint TPE step0 vẫn là ứng viên nếu train
+không cải thiện. Không sửa weights TPE/S0, không dùng bank S0 cũ hoặc chạy lại HPO.
+Engine và artifact lịch sử được giữ nguyên để kiểm tra lại kết quả cũ.
+Hai launcher hiện tại chỉ chạy một pipeline DPO; `--arms dpo` cũ vẫn hợp lệ,
+`--arms native`, `--arms native dpo` và `--arms bce` bị từ chối trước khi train.
+
+[Chi tiết triển khai/kiểm chứng hybrid](../docs/report_final/KB2_KB3_HYBRID_LAUNCH_20261106.md).
+Chênh hybrid−TPE đo lợi ích của pipeline KB2 sau TPE; hybrid−S0 đo lợi ích
+toàn pipeline kết hợp KB3→KB2. Chọn best tiếp tục theo validation mAP50–95.
+
+Thử nghiệm lịch LR mới giữλ0,03/background0,5: LR1e-6 tới hết update1.000,
+LR1e-7 từ update1.001; eval mỗi250 tới2k rồi mỗi1k. Các cờ này chỉ hỗ trợ nguồn
+TPE, mặc định không bật và không thay recipe cũ. Dùng lại bank TPE đã xác minh:
+
+```bash
+bash kb2_preference_optimization/run_hybrid_kb3_kb2.sh --device cuda --steps 15000 --eval-interval 1000 --seed 42 --dpo-weight 0.03 --background-weight 0.5 --lr-drop-step 1000 --lr-drop-factor 0.1 --early-eval-interval 250 --early-eval-until 2000 --preferences kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences
+```
+
+[Thiết kế/kết quả thử lịch LR](../docs/report_final/KB2_HYBRID_SCHEDULE_REVIEW_20261106.md).
+Run đã hoàn tất15k và nạp lại checkpoint: best500 đạt mAP38,7133%, so TPE38,5097%
+và S0 37,8218%; AP/P/R/F1 đều cao hơn S0. Best500 có trước mốc giảm LR nên phần
+tăng best đến từ lịch eval dày. Trên lịch1k chung, LR giảm tăng selected best
+0,0295 điểm. Kết quả một continuation seed trên validation, chưa dùng test.
+
+Thử tiếp `--lr-drop-step 500` đã hoàn tất15k: best vẫn500/mAP38,7133% và weights
+giống hệt best trước; last tăng từ38,5167% lên38,6300%. Không thay model ứng viên
+vì phép thử này. [Review drop500](../docs/report_final/KB2_HYBRID_DROP500_REVIEW_20261106.md).
+
+08/11: pilot sampler 35% preservation / 25% recovery / 20% background / 20%
+duplicate đã hoàn tất 2k, seed42, cùng lịch LR drop1k. Best mới 1k đạt
+mAP38,7046% so best cũ 500 đạt38,7133%; precision/F1/AP50/APsmall/APmedium tăng,
+FP giảm9 nhưng FN tăng1. Giữ best/recipe hiện tại; chưa chạy dài sampler mới.
+[Review preservation sampling](../docs/report_final/KB2_PRESERVATION_SAMPLING_PILOT_20261108.md).
+
+### Lịch sử thí nghiệm KB2 — giữ để truy vết
+
+Phần bên dưới ghi thiết kế/lệnh và đối chứng tại thời điểm thực hiện. Các kết
+quả native-only đã có là lịch sử, không phải nhánh chạy hoặc đối chứng bắt buộc
+hiện tại. `run_all_kb2.sh` hiện chỉ chạy DPO từ S0; recipe V0 mặc định2k của
+launcher này được giữ, còn hybrid ở trên mặc định15k.
 
 > 03/11: [Đã chạy lại đủba seed42/43/44, native và DPO mỗi seed](../docs/report_final/KB2_DPO_STRENGTH_LONG_REVIEW_20261101.md). DPO best mAP38,1707 ± 0,0429% so native38,1196 ± 0,0608%, S0 37,8218%; AP cao hơn native3/3 seed. Đã nạp best/last và xác nhận native/DPO seed42 tái hiện chính xác weights/optimizer15k cũ. Recall tại0,25 vẫn giảm so S0; số liệu mới ở phần bổ sung03/11 cuối báo cáo.
 
@@ -16,7 +87,7 @@
 > native-only FN886/FP878, best vẫn S0. Tại cùng FP984, DPO FN859/native-only FN860
 > so S0 FN866; phần thêm DPO chỉ1 GT. Xem [review dài background](../docs/report_final/KB2_NATIVE_BACKGROUND_LONG_REVIEW_20261031.md) và [plan/log](../docs/report_final/KB2_NATIVE_BACKGROUND_LONG_RUN_20261031.md).
 
-Runner chính hiện dùng `conditional_detection_dpo_v0`, triển khai bước đầu của
+Runner S0 tại thời điểm31/10 dùng `conditional_detection_dpo_v0`, triển khai bước đầu của
 [brainstorm mới](../docs/KB2_DPO_DESIGN_BRAINSTORM_20261031.md). Model đầu tiên là
 YOLOv8n; policy/reference cùng bắt đầu từ **S0 supervised của KB1**. Chỉ nhánh
 classification `cv3` được học; regression, backbone/neck và BN running statistics

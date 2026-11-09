@@ -1,0 +1,9 @@
+﻿model,group,actual_decisions,actual_fraction,expected_fraction,requested_fraction,unique_pairs_all_groups,unique_images_all_groups
+old_sampler,preservation,996,0.249,0.24940169284094976,0.25,622,376
+old_sampler,duplicate,1050,0.2625,0.25004597702999554,0.25,622,376
+old_sampler,recovery,970,0.2425,0.2491549485180738,0.25,622,376
+old_sampler,background,984,0.246,0.25139738161098085,0.25,622,376
+preservation_sampler,background,802,0.2005,0.20141684208587265,0.2,609,383
+preservation_sampler,duplicate,818,0.2045,0.20028148731008713,0.2,609,383
+preservation_sampler,recovery,983,0.24575,0.24920626741013854,0.25,609,383
+preservation_sampler,preservation,1397,0.34925,0.34909540319390187,0.35,609,383

@@ -1,0 +1,133 @@
+{
+  "date_local": "2026-11-09",
+  "purpose": "explanatory calculations, no new training or model inference",
+  "toy_AP_example": {
+    "scope": "illustration only; synthetic boxes and scores, not model predictions",
+    "boxes": [
+      [
+        0.0,
+        0.0,
+        100.0,
+        80.0
+      ],
+      [
+        90.47618865966797,
+        0.0,
+        190.4761962890625,
+        100.0
+      ]
+    ],
+    "GT_box": [
+      [
+        0.0,
+        0.0,
+        100.0,
+        100.0
+      ]
+    ],
+    "IoU_to_GT": [
+      0.800000011920929,
+      0.05000000819563866
+    ],
+    "cases": [
+      {
+        "case": "before",
+        "scores": [
+          0.8,
+          0.9
+        ],
+        "AP75": 0.5,
+        "TP_at_conf025": 1,
+        "FP_at_conf025": 1,
+        "recall_at_conf025": 1.0,
+        "precision_at_conf025": 0.5
+      },
+      {
+        "case": "after",
+        "scores": [
+          0.8,
+          0.6
+        ],
+        "AP75": 1.0,
+        "TP_at_conf025": 1,
+        "FP_at_conf025": 1,
+        "recall_at_conf025": 1.0,
+        "precision_at_conf025": 0.5
+      }
+    ]
+  },
+  "toy_score_example": {
+    "scope": "illustration only; logit increment not a measured update",
+    "source_score": 0.2,
+    "assumed_delta_logit": 0.4,
+    "new_score": 0.2716446317527227
+  },
+  "measured_class_examples_and_counts": {
+    "TPE": {
+      "source": "docs/report_final/assets/kb2_hybrid_schedule_20261106/TPE.json",
+      "source_sha256": "aab601573273c4fbfb6cbc38dfc710a097b69cf9d53f647732bfae58bf7fd89a",
+      "classes": {
+        "19": {
+          "AP50_95": 0.18700255453586578,
+          "AR300": 0.4399999976158142,
+          "tp": 24,
+          "fp": 57,
+          "fn": 36,
+          "gt_support": 60
+        },
+        "25": {
+          "AP50_95": 0.12626181542873383,
+          "AR300": 0.5320000052452087,
+          "tp": 17,
+          "fp": 59,
+          "fn": 33,
+          "gt_support": 50
+        },
+        "23": {
+          "AP50_95": 0.18715959787368774,
+          "AR300": 0.46585366129875183,
+          "tp": 11,
+          "fp": 26,
+          "fn": 30,
+          "gt_support": 41
+        }
+      },
+      "P_recomputed": 0.508763388510224,
+      "R_recomputed": 0.5537890832008479,
+      "F1_recomputed": 0.5303222532352195
+    },
+    "hybrid": {
+      "source": "docs/report_final/assets/kb2_hybrid_schedule_20261106/scheduled_lambda003_best.json",
+      "source_sha256": "05339511440f63a4d7e002acb4a9bf7832d3734c30d5d2014637dc3246f9f541",
+      "classes": {
+        "19": {
+          "AP50_95": 0.196840301156044,
+          "AR300": 0.4466666579246521,
+          "tp": 25,
+          "fp": 56,
+          "fn": 35,
+          "gt_support": 60
+        },
+        "25": {
+          "AP50_95": 0.13549219071865082,
+          "AR300": 0.5320000052452087,
+          "tp": 12,
+          "fp": 45,
+          "fn": 38,
+          "gt_support": 50
+        },
+        "23": {
+          "AP50_95": 0.17660799622535706,
+          "AR300": 0.43414634466171265,
+          "tp": 11,
+          "fp": 24,
+          "fn": 30,
+          "gt_support": 41
+        }
+      },
+      "P_recomputed": 0.526207605344296,
+      "R_recomputed": 0.5426603073661898,
+      "F1_recomputed": 0.5343073310722671
+    }
+  }
+}

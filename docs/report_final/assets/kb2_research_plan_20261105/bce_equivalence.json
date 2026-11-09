@@ -1,0 +1,11 @@
+{
+  "scope": "Synthetic float64 algebra/gradient identity check, not training or performance evidence",
+  "samples": 64,
+  "beta": 0.1,
+  "DPO_loss": 0.703328988094934,
+  "reference_centered_BCE_loss": 0.703328988094934,
+  "absolute_loss_difference": 0.0,
+  "maximum_policy_gradient_difference": 2.168404344971009e-19,
+  "reference_detached": true,
+  "implementation": "kb2_preference_optimization/conditional/policy.py:pair_loss"
+}

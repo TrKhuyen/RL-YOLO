@@ -13,4 +13,4 @@ export NO_ALBUMENTATIONS_UPDATE=1
 export YOLO_CONFIG_DIR="${YOLO_CONFIG_DIR:-/tmp}"
 export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/kb2-matplotlib}"
 cd "$KB2_REPO"
-exec "$KB2_PYTHON" -m kb2_preference_optimization.conditional.run "$@"
+exec "$KB2_PYTHON" -u -m scripts.run_kb2_dpo --initialization s0 "$@"

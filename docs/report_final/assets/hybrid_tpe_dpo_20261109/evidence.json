@@ -1,0 +1,1836 @@
+{
+  "date_local": "2026-11-09",
+  "timezone": "Asia/Bangkok",
+  "no_new_training_or_model_evaluation": true,
+  "TPE_evaluation": {
+    "protocol": "kb3_tpe_v2_kb1_pretrained",
+    "method": "A-TPE",
+    "metrics_split": "validation",
+    "requested_trials": 8,
+    "completed_trials": 8,
+    "best_trial": 2,
+    "best_checkpoint": "D:\\graduate\\RL-YOLO\\kb3_hyperparameter_optimization\\checkpoint_hyperparameter_optimization\\quality\\tpe_kb1_pretrained_v2\\yolov8n\\tpe\\trial_0002\\selected_best.pt",
+    "best_checkpoint_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+    "ranking": [
+      2,
+      4,
+      7,
+      1,
+      6,
+      3,
+      5,
+      0
+    ],
+    "paired_pretrained_anchor_trial": 0,
+    "detector_seed": 0,
+    "independent_detector_seeds": 1,
+    "initialization": "pretrained",
+    "pretrained_source": {
+      "checkpoint": "D:\\graduate\\RL-YOLO\\yolov8n.pt",
+      "checkpoint_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "role": "original_pretrained_source_from_kb1_yaml",
+      "architecture": "yolov8n",
+      "recipe_path": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\args.yaml",
+      "recipe_sha256": "cbfebea30c2d8f933648eaa5c4972d8eda89019fd70e48d196057c0597f30f42"
+    },
+    "checkpoint_selection": "kb1_native_validation_fitness_best_ema",
+    "trajectory_metrics_protocol": "ultralytics_native_validation",
+    "extra_training_performed": false,
+    "rl_training_runs": 0,
+    "test_evaluated": false,
+    "actual_epochs": 1387,
+    "detector_hours": 22.703813556638888,
+    "comparison_caveat": "Exploratory in-sample validation selection with one detector seed; no proof of general superiority. KB1 supervised best is a historical checkpoint; matching recipe/source does not guarantee exact reproduction."
+  },
+  "TPE_settings": {
+    "protocol": "kb3_tpe_v2_kb1_pretrained",
+    "method": "tpe",
+    "rl_enabled": false,
+    "recipe_source": "kb1_supervised",
+    "initialization": "pretrained",
+    "trials": 4,
+    "seed": 0,
+    "sampler_seed": 42,
+    "n_startup_trials": 2,
+    "n_ei_candidates": 24,
+    "local_factors": {
+      "lr0": [
+        0.5,
+        1.5
+      ],
+      "weight_decay": [
+        0.5,
+        2.0
+      ]
+    },
+    "epochs": 200,
+    "patience": 30,
+    "warmup_epochs": 3,
+    "lrf": 0.01,
+    "batch_size": 16,
+    "img_size": 640,
+    "workers": 0,
+    "device": "0",
+    "trainer_recipe": {
+      "optimizer": "SGD",
+      "nbs": 64,
+      "amp": true,
+      "cos_lr": false,
+      "close_mosaic": 10,
+      "warmup_momentum": 0.8,
+      "warmup_bias_lr": 0.1,
+      "hsv_h": 0.015,
+      "hsv_s": 0.7,
+      "hsv_v": 0.4,
+      "degrees": 10.0,
+      "translate": 0.1,
+      "scale": 0.5,
+      "shear": 0.0,
+      "perspective": 0.0,
+      "flipud": 0.3,
+      "fliplr": 0.5,
+      "bgr": 0.0,
+      "mosaic": 1.0,
+      "mixup": 0.1,
+      "cutmix": 0.0,
+      "copy_paste": 0.0,
+      "copy_paste_mode": "flip",
+      "box": 7.5,
+      "cls": 0.5,
+      "dfl": 1.5,
+      "pose": 12.0,
+      "kobj": 1.0,
+      "rect": false,
+      "single_cls": false,
+      "fraction": 1.0,
+      "multi_scale": 0.0,
+      "deterministic": true,
+      "freeze": null,
+      "dropout": 0.0,
+      "cache": false,
+      "overlap_mask": true,
+      "mask_ratio": 4,
+      "val": true,
+      "conf": null,
+      "iou": 0.7,
+      "max_det": 300,
+      "agnostic_nms": false,
+      "classes": null,
+      "save_json": false
+    },
+    "pretrained_source": {
+      "checkpoint": "D:\\graduate\\RL-YOLO\\yolov8n.pt",
+      "checkpoint_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "role": "original_pretrained_source_from_kb1_yaml",
+      "architecture": "yolov8n",
+      "recipe_path": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\args.yaml",
+      "recipe_sha256": "cbfebea30c2d8f933648eaa5c4972d8eda89019fd70e48d196057c0597f30f42"
+    },
+    "smoke": false,
+    "kb1_reference": {
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+      "checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "recipe_path": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\args.yaml",
+      "recipe_sha256": "cbfebea30c2d8f933648eaa5c4972d8eda89019fd70e48d196057c0597f30f42",
+      "dataset_sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+      "initialization": "pretrained",
+      "seed": 0,
+      "declared_epochs": 200,
+      "patience": 30,
+      "checkpoint_selection": "KB1 native best; re-evaluated with the shared canonical evaluator",
+      "model": "yolov8n"
+    }
+  },
+  "TPE_dependencies": {
+    "optuna": "4.5.0",
+    "torch": "2.5.1+cu121",
+    "torchvision": "0.20.1+cu121",
+    "ultralytics": "8.4.163",
+    "torchmetrics": "1.9.0",
+    "faster-coco-eval": "1.7.2",
+    "pycocotools": "2.0.11",
+    "numpy": "2.2.6",
+    "albumentations": "2.0.8"
+  },
+  "TPE_trial_rows": [
+    {
+      "trial": 0,
+      "mode": "kb1_anchor",
+      "sampler_seed": 42,
+      "lr0": 0.01,
+      "weight_decay": 0.0005,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 91,
+      "actual_epochs": 121,
+      "detector_hours": 1.9258127951944446,
+      "mAP50_95": 0.3606765866279602,
+      "mAP50": 0.477005273103714,
+      "precision": 0.4907846234860453,
+      "operating_recall": 0.4939056703762586,
+      "f1": 0.49234020073956686,
+      "last_mAP50_95": 0.34257179498672485,
+      "checkpoint_sha256": "d3c82f5a564c8841e19e0510c35415d2ae8d3a7752a25b577fb8be7a066a4d71"
+    },
+    {
+      "trial": 1,
+      "mode": "startup_random",
+      "sampler_seed": 43,
+      "lr0": 0.00567368190490513,
+      "weight_decay": 0.0005816136681054273,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 149,
+      "actual_epochs": 179,
+      "detector_hours": 2.753655423111111,
+      "mAP50_95": 0.3772250711917877,
+      "mAP50": 0.49455317854881287,
+      "precision": 0.49591542527630944,
+      "operating_recall": 0.5468998410174881,
+      "f1": 0.5201612903225806,
+      "last_mAP50_95": 0.3714156150817871,
+      "checkpoint_sha256": "3bda508e3998c7be6660095dd1de64ebc2e939f5f638822b9ec0f7125f2bc6ac"
+    },
+    {
+      "trial": 2,
+      "mode": "tpe",
+      "sampler_seed": 44,
+      "lr0": 0.005354944281299181,
+      "weight_decay": 0.0009130337123429847,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 139,
+      "actual_epochs": 169,
+      "detector_hours": 2.6115608796111114,
+      "mAP50_95": 0.38507065176963806,
+      "mAP50": 0.5042979717254639,
+      "precision": 0.508763388510224,
+      "operating_recall": 0.5537890832008479,
+      "f1": 0.5303222532352195,
+      "last_mAP50_95": 0.3684416711330414,
+      "checkpoint_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d"
+    },
+    {
+      "trial": 3,
+      "mode": "tpe",
+      "sampler_seed": 45,
+      "lr0": 0.0052499911441150696,
+      "weight_decay": 0.0009900199462912055,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 187,
+      "actual_epochs": 200,
+      "detector_hours": 2.9102795048611108,
+      "mAP50_95": 0.3708771765232086,
+      "mAP50": 0.48254239559173584,
+      "precision": 0.518981018981019,
+      "operating_recall": 0.5506094329623742,
+      "f1": 0.5343275906402675,
+      "last_mAP50_95": 0.37636739015579224,
+      "checkpoint_sha256": "f5790f3195c4a6bfbc0130ece467171a4ac1d2f5c78dea868c5b87e5c2d537e4"
+    },
+    {
+      "trial": 4,
+      "mode": "tpe",
+      "sampler_seed": 46,
+      "lr0": 0.014831580772163165,
+      "weight_decay": 0.00026972622323183755,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 146,
+      "actual_epochs": 176,
+      "detector_hours": 2.5355090823888897,
+      "mAP50_95": 0.3834594190120697,
+      "mAP50": 0.4937017858028412,
+      "precision": 0.506416584402764,
+      "operating_recall": 0.5437201907790143,
+      "f1": 0.524405826731408,
+      "last_mAP50_95": 0.37327560782432556,
+      "checkpoint_sha256": "ffa01b0b668b4cb13d14ce39de43b5e1e45ed4a36d301d49ec0be70862e6cb37"
+    },
+    {
+      "trial": 5,
+      "mode": "tpe",
+      "sampler_seed": 47,
+      "lr0": 0.00748311031435692,
+      "weight_decay": 0.000981896079399495,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 115,
+      "actual_epochs": 145,
+      "detector_hours": 3.0796205916944444,
+      "mAP50_95": 0.36287036538124084,
+      "mAP50": 0.47718316316604614,
+      "precision": 0.5051194539249146,
+      "operating_recall": 0.5490196078431373,
+      "f1": 0.5261554088369731,
+      "last_mAP50_95": 0.3510792553424835,
+      "checkpoint_sha256": "4f28ef2c95436afafaa1b676eb2992d394e270bdc7b1c48207c306e207d54e5d"
+    },
+    {
+      "trial": 6,
+      "mode": "tpe",
+      "sampler_seed": 48,
+      "lr0": 0.007700055975317726,
+      "weight_decay": 0.0005644946197959258,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 186,
+      "actual_epochs": 200,
+      "detector_hours": 3.389388053888888,
+      "mAP50_95": 0.37265467643737793,
+      "mAP50": 0.4780808389186859,
+      "precision": 0.5086032388663968,
+      "operating_recall": 0.5325914149443561,
+      "f1": 0.5203209940460782,
+      "last_mAP50_95": 0.3700655698776245,
+      "checkpoint_sha256": "961c67f306ba0f6120d4dc2115ce05ddb453f9e4e88eccf75b7bd75b46afee46"
+    },
+    {
+      "trial": 7,
+      "mode": "tpe",
+      "sampler_seed": 49,
+      "lr0": 0.010322016337374403,
+      "weight_decay": 0.0007540660677170819,
+      "momentum": 0.937,
+      "augmentation_strength": 0.5,
+      "native_selected_epoch": 167,
+      "actual_epochs": 197,
+      "detector_hours": 3.4979872258888887,
+      "mAP50_95": 0.38229334354400635,
+      "mAP50": 0.4964824914932251,
+      "precision": 0.5213082259663032,
+      "operating_recall": 0.5574986751457339,
+      "f1": 0.5387964148527528,
+      "last_mAP50_95": 0.362570583820343,
+      "checkpoint_sha256": "e068bdf26cfc13abe13d6490f7e83e605695d18e197a7982a1d0a419b609635d"
+    }
+  ],
+  "same_initial_hash_all_8_trials": "edef3b9abfab22c8a425f6860b2d9210c8713f6b5bfa3cf79083ec8b8fb727f2",
+  "architecture": {
+    "parameters": 3016308,
+    "DPO_trainable_parameters": 374868,
+    "DPO_trainable_tensors": 24,
+    "nc": 28,
+    "reg_max": 16,
+    "strides": [
+      8.0,
+      16.0,
+      32.0
+    ],
+    "yaml": {
+      "nc": 28,
+      "depth_multiple": 0.33,
+      "width_multiple": 0.25,
+      "backbone": [
+        [
+          -1,
+          1,
+          "Conv",
+          [
+            64,
+            3,
+            2
+          ]
+        ],
+        [
+          -1,
+          1,
+          "Conv",
+          [
+            128,
+            3,
+            2
+          ]
+        ],
+        [
+          -1,
+          3,
+          "C2f",
+          [
+            128,
+            true
+          ]
+        ],
+        [
+          -1,
+          1,
+          "Conv",
+          [
+            256,
+            3,
+            2
+          ]
+        ],
+        [
+          -1,
+          6,
+          "C2f",
+          [
+            256,
+            true
+          ]
+        ],
+        [
+          -1,
+          1,
+          "Conv",
+          [
+            512,
+            3,
+            2
+          ]
+        ],
+        [
+          -1,
+          6,
+          "C2f",
+          [
+            512,
+            true
+          ]
+        ],
+        [
+          -1,
+          1,
+          "Conv",
+          [
+            1024,
+            3,
+            2
+          ]
+        ],
+        [
+          -1,
+          3,
+          "C2f",
+          [
+            1024,
+            true
+          ]
+        ],
+        [
+          -1,
+          1,
+          "SPPF",
+          [
+            1024,
+            5
+          ]
+        ]
+      ],
+      "head": [
+        [
+          -1,
+          1,
+          "nn.Upsample",
+          [
+            "None",
+            2,
+            "nearest"
+          ]
+        ],
+        [
+          [
+            -1,
+            6
+          ],
+          1,
+          "Concat",
+          [
+            1
+          ]
+        ],
+        [
+          -1,
+          3,
+          "C2f",
+          [
+            512
+          ]
+        ],
+        [
+          -1,
+          1,
+          "nn.Upsample",
+          [
+            "None",
+            2,
+            "nearest"
+          ]
+        ],
+        [
+          [
+            -1,
+            4
+          ],
+          1,
+          "Concat",
+          [
+            1
+          ]
+        ],
+        [
+          -1,
+          3,
+          "C2f",
+          [
+            256
+          ]
+        ],
+        [
+          -1,
+          1,
+          "Conv",
+          [
+            256,
+            3,
+            2
+          ]
+        ],
+        [
+          [
+            -1,
+            12
+          ],
+          1,
+          "Concat",
+          [
+            1
+          ]
+        ],
+        [
+          -1,
+          3,
+          "C2f",
+          [
+            512
+          ]
+        ],
+        [
+          -1,
+          1,
+          "Conv",
+          [
+            512,
+            3,
+            2
+          ]
+        ],
+        [
+          [
+            -1,
+            9
+          ],
+          1,
+          "Concat",
+          [
+            1
+          ]
+        ],
+        [
+          -1,
+          3,
+          "C2f",
+          [
+            1024
+          ]
+        ],
+        [
+          [
+            15,
+            18,
+            21
+          ],
+          1,
+          "Detect",
+          [
+            "nc"
+          ]
+        ]
+      ],
+      "ch": 3,
+      "channels": 3
+    }
+  },
+  "selection": {
+    "decision_date_local": "2026-11-08",
+    "timezone": "Asia/Bangkok",
+    "user_selected": true,
+    "method": "hybrid KB3 TPE -> KB2 DPO pipeline",
+    "checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_schedule_s42_20261106_trial3/run/dpo/best.pt",
+    "checkpoint_sha256": "7b371f3313f1fe8fd5de157d16c961f076874c7659a6060e6947b4b8f31a80a4",
+    "trained_budget_updates": 15000,
+    "selected_update": 500,
+    "seed": 42,
+    "lambda": 0.03,
+    "beta": 0.1,
+    "native_background_weight": 0.5,
+    "native_foreground_weight": 1.0,
+    "initialization_and_reference": {
+      "model": "yolov8n",
+      "source_checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/selected_best.pt",
+      "source_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+      "dataset": {
+        "root": "/home/celine/Celine/graduate/RL-YOLO/pre-data/data/v2i_cleanned",
+        "config": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/configs/pest.yaml",
+        "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+        "counts": {
+          "train": {
+            "images": 2411,
+            "labels": 2411,
+            "known_augmented_images": 667
+          },
+          "valid": {
+            "images": 479,
+            "labels": 479,
+            "known_augmented_images": 0
+          },
+          "test": {
+            "images": 239,
+            "labels": 239,
+            "known_augmented_images": 0
+          }
+        },
+        "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+      },
+      "supervised": {
+        "model": "yolov8n",
+        "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+        "checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+        "dataset": {
+          "root": "D:\\graduate\\RL-YOLO\\pre-data\\data\\v2i_cleanned",
+          "config": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\configs\\pest.yaml",
+          "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+          "counts": {
+            "train": {
+              "images": 2411,
+              "labels": 2411,
+              "known_augmented_images": 667
+            },
+            "valid": {
+              "images": 479,
+              "labels": 479,
+              "known_augmented_images": 0
+            },
+            "test": {
+              "images": 239,
+              "labels": 239,
+              "known_augmented_images": 0
+            }
+          },
+          "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+        },
+        "pretrained_name": "yolov8n.pt",
+        "pretrained_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+        "data_config_sha256": "cbc7c93bee7848ea6bf4f0f6b52e444ba78aee8a203987578f7addfdeadae308",
+        "dp_flags": {
+          "w3f": false,
+          "psa": false
+        }
+      },
+      "runtime": {
+        "python": "3.10.20",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43",
+        "versions": {
+          "torch": "2.5.1+cu121",
+          "torchvision": "0.20.1+cu121",
+          "ultralytics": "8.4.163",
+          "torchmetrics": "1.9.0",
+          "faster-coco-eval": "1.7.2",
+          "albumentations": "2.0.8",
+          "numpy": "2.2.6",
+          "opencv-python": "4.13.0.92",
+          "PyYAML": "6.0.3",
+          "scipy": "1.15.3"
+        },
+        "cuda": "12.1",
+        "cudnn": 90100,
+        "ultralytics_code_sha256": {
+          "utils/loss.py": "c1d4847a833da3f3ca71afdace689e0b0d78949face65c207723fcc0563a9533",
+          "nn/tasks.py": "50ffe702b9b122150f06105b50ea7b8c7990b709b990c50681a7de670717fe9e",
+          "nn/modules/head.py": "617b5bdd6e2d609c7187e00df11500fd40825f3d2232a349e6d8f3f07656d979"
+        }
+      },
+      "code_sha256": {
+        "__init__.py": "911b5dc5b7f3e00efa2d287ce13c895cfbd41889254b528a79ef8c955078c1bd",
+        "adapter.py": "059f7932e673ac2a025649a34f2b403885dfd740eb008a20aa7ba16a1f6c7ef3",
+        "artifacts.py": "18e7243c15e19d46d0fc5ad61b0079a5f8e8b8d9e7b3fdd49aef1f0b5783908a",
+        "data.py": "788799c890c95c7557e9c4140a083d19dd5d82958277bbfa84ae4ec66089997f",
+        "evaluate.py": "bd12c085a592a00f66aee429f8a7ae598c9aa281b1450b2ad6636484db42dc44",
+        "generate_preferences.py": "aa03f76335deb3479bafb54924a6335d5940de338d9e8ae22fe189610d0b78ae",
+        "metrics.py": "3e014f9b07b2fc00deb12aa5337bc8d4cce919a1987121133cd10564e6622ed6",
+        "policy.py": "53110e27ee2d8c29ecc00c70f2aaae235180611f86446bed153f6c242a24eae0",
+        "preferences.py": "613a37254833cb3993974b8567efacdd8517edc416c1a5ed4d0e3e6f3002fc29",
+        "preview.py": "76ca589315c5a99c4b9239402b637f7103b750e9e8688d5e2d2f06601b525ce4",
+        "quality.py": "4416a7fb52ada6a8e27c5005c45010fe9905ffc70fa85b031bfd016c336701f4",
+        "run.py": "3e6bd316136c3299ac777427b939815c6132d944478e1fe4c1050a50d67773e6",
+        "train_dpo.py": "e7d5f2e6764f9546c5fc3326beeafd31145cc171289977a8ff53ad2103a41122"
+      },
+      "objective_version": "structured_detection_dpo_v1",
+      "transform_version": "longest_max_size_center_pad114_rgb_unit_v1",
+      "source_kind": "kb3_tpe_winner",
+      "source_tpe": {
+        "checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/selected_best.pt",
+        "checkpoint_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+        "trial": 2,
+        "historical_validation": {
+          "mAP50_95": 0.38507065176963806,
+          "mAP50": 0.5042979717254639,
+          "APs": 0.04099680855870247,
+          "precision": 0.508763388510224,
+          "AR300": 0.582611620426178,
+          "operating_recall": 0.5537890832008479,
+          "f1": 0.5303222532352195,
+          "macro_f1": 0.5128175888618615,
+          "APm": 0.18436191976070404,
+          "APl": 0.43857309222221375,
+          "recall": 0.582611620426178,
+          "eval_protocol": "kb1_canonical_v2_ar300",
+          "fps": 0.0,
+          "n_images": 479
+        },
+        "hyperparameters": {
+          "lr0": 0.005354944281299181,
+          "weight_decay": 0.0009130337123429847,
+          "momentum": 0.937,
+          "augmentation_strength": 0.5
+        },
+        "seed": 0,
+        "selection": "kb1_native_validation_fitness_best_ema",
+        "dataset_sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+        "evaluation_sha256": "14cf46b1b77040dada70107cefa96a5dad821216112d910488b2eb598b024e8f",
+        "manifest_sha256": "26eeceb49697f1c96d3674b90f4b49f0bfeff92d97e297186d6c5ba8bb7ffd8e",
+        "result_sha256": "a0a0ea9a340047a36f607fedc4860149afc74cec5ad34e4ee91edd70eedf93b4",
+        "spec_sha256": "1d48cf0ca1aea9af34be14dc4d3f9d20f04ebbae4c93cf20896397a0c0d4bbfb"
+      },
+      "hybrid_version": "hybrid_tpe_conditional_strength_v1",
+      "shared_S0": {
+        "checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt",
+        "sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9"
+      },
+      "hybrid_code_sha256": {
+        "__init__.py": "402ff809c72606b8059881537bc809d01da3e79453dfa621545c0060ae18d299",
+        "bank.py": "f4e25199d5785110f9af12aa463db612558ecaf70fc0b108f6249fcf62ad2815",
+        "evaluate.py": "d97746b20a3cf88ac17a66066b318a7a11984389682a47347c81f1d6db632d0c",
+        "run.py": "7ce53769231c454d927ccffbd26644769e604acfe7ee48bf416b820cfed63dd7",
+        "source.py": "bccbd3cd4bae32fe894ce489a92a3772674cd5321440b3bc8fd8295ad528cbda",
+        "train.py": "8bf1ffc5e76fd9e8c5fb2359bf2b18c9034974751a699e7233d0a021f0c135f2"
+      },
+      "conditional_code_sha256": {
+        "__init__.py": "fc7088de93ca9af028014926a1eac192037f4e5ca4691d9b571bfd5721ebc01b",
+        "bank.py": "b3e397241e8d115c55819a9b9596b38587f4ec705be8b8c064029b7e9174d0b0",
+        "evaluate.py": "2b580b98fe17b4507eb1efb806a2f9a9cc1784a3351a351d82d4f7c2d42e3e7e",
+        "evaluation.py": "da1dd5821636b916c2e4c5aa8b2bf41c8f3158686ac5c90a8d439b6ac9a6bb67",
+        "pairs.py": "6c44606522755df2c83f1a2a49f377f4891ec8fe8521e36a728ddbe08c8884e7",
+        "policy.py": "0ca295d75dea2fbc8c7e56b254100bee20514c64b2233052d32e4643117970cf",
+        "run.py": "e64146ee0f451cd02276fd3569453dc0c86b77ceef218658d37aea94741bd537",
+        "train.py": "b80c0c7861d6b1afe4bc7c956c1d324fb32206eaf3bbe05b4e2e91f607d2be80"
+      },
+      "background_code_sha256": {
+        "__init__.py": "a0aa6c645e21509121830adc5b14d460a888875fa0f340a988eb9aaa351e540c",
+        "loss.py": "61c207e0c761a2b298e800db89cba90e1034aa8144c75332b2f868507bfc6ca0",
+        "run.py": "32782a8dcb72605ed44ba857a97d5ab3a196018ef2cc7c274c3e5c043f9c6d67",
+        "train.py": "d6fb8100d3122cd042c19f7cb77dd53d99ecf6f17e738f269551495559ec68b2"
+      },
+      "strength_code_sha256": {
+        "__init__.py": "c4506e51dcae0c841653efa7d576a340ac72f83e0e746a4d9f4179e009d3e4aa",
+        "selection.py": "3c6b0a453d1fe80324162eb2961ab03dcd2939182479f85a4eb5ad1fd3fb586f",
+        "step_audit.py": "d0614043834631a2bf684eb3c9aaa39385f29ff31e5cd4507d9e8418530dde57",
+        "train.py": "cd05b6599344f0b67319ae344624f113613a7a21b9650fe4609df62d044160b7"
+      }
+    },
+    "config": {
+      "arm": "dpo",
+      "device": "cuda",
+      "steps": 15000,
+      "seed": 42,
+      "effective_dpo_weight": 0.03,
+      "training_variant": "kb2_dpo_step_lr_dense_eval_v1",
+      "lr_schedule": {
+        "drop_after_update": 1000,
+        "factor": 0.1,
+        "initial_lr": 1e-06,
+        "updates_are_one_based": true
+      },
+      "evaluation_steps": [
+        0,
+        250,
+        500,
+        750,
+        1000,
+        1250,
+        1500,
+        1750,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000
+      ],
+      "early_eval_interval": 250,
+      "early_eval_until": 2000,
+      "native_background_weight": 0.5,
+      "native_foreground_weight": 1.0,
+      "native_denominator": "original_target_score_sum",
+      "input": 640,
+      "native_batch": 4,
+      "preference_batch": 2,
+      "native_stream": "2 uniform full-train + 2 sampled preference images",
+      "beta": 0.1,
+      "dpo_weight": 0.03,
+      "lr": 1e-06,
+      "weight_decay": 0.0005,
+      "clip_norm": 1.0,
+      "eval_interval": 1000,
+      "eval_limit": 0,
+      "partial_bank": false,
+      "sampler": {
+        "type": "sign_group_class_target_mixture_then_image_cap",
+        "class_mix": 0.5,
+        "max_image_repeat_factor": 5.0,
+        "eligible_images": 392,
+        "max_image_probability": 0.012755102040816327,
+        "image_probability_cap": 0.012755102040816327,
+        "expected_keep_fraction": 0.49855664135902356,
+        "expected_group_probability": {
+          "recovery": 0.2491549485180738,
+          "duplicate": 0.25004597702999554,
+          "background": 0.25139738161098085,
+          "preservation": 0.24940169284094976
+        },
+        "expected_class_probability": {
+          "11": 0.04985362492540544,
+          "20": 0.0344540194402277,
+          "8": 0.06285892737634284,
+          "24": 0.0722629753852612,
+          "4": 0.03684533702423685,
+          "27": 0.021756596507993442,
+          "10": 0.04646920633843633,
+          "12": 0.03325858906522069,
+          "14": 0.0281324362266602,
+          "3": 0.02389556394760045,
+          "17": 0.03497037926966324,
+          "19": 0.04013547148631938,
+          "2": 0.02578098341969847,
+          "23": 0.038453953711246824,
+          "22": 0.02873617841704663,
+          "13": 0.051020254722141514,
+          "21": 0.04353166356695207,
+          "16": 0.023949274000552447,
+          "6": 0.037245928342848136,
+          "15": 0.03833839983881519,
+          "5": 0.03449242956165908,
+          "18": 0.043157969351632075,
+          "0": 0.014779086381181254,
+          "1": 0.02635327073158392,
+          "25": 0.049292901269559014,
+          "9": 0.014107873015568907,
+          "7": 0.02402689570656456,
+          "26": 0.021839810969582128
+        },
+        "bound_scope": "expected image exposure; not hard per-run count or equal class gradient"
+      },
+      "selection": "max mAP50_95, min_delta=1e-4; TPE eligible; no recall gate",
+      "all_evaluation_checkpoints_saved": true,
+      "pareto_metrics": [
+        "mAP50_95",
+        "precision",
+        "operating_recall"
+      ],
+      "fp_tolerance": 0.05,
+      "ap_tolerance": 0.001,
+      "selection_min_delta": 0.0001,
+      "TPE_eligible": true,
+      "pilot": false,
+      "resume_supported": false,
+      "precision": "float32_tf32_off_same_batch_reference"
+    },
+    "metrics": {
+      "mAP50_95": 0.38713255524635315,
+      "mAP50": 0.5062865614891052,
+      "mAP75": 0.4370797276496887,
+      "AR300": 0.5807305574417114,
+      "APs": 0.04120910167694092,
+      "APm": 0.18300822377204895,
+      "APl": 0.44033318758010864,
+      "precision": 0.526207605344296,
+      "operating_recall": 0.5426603073661898,
+      "f1": 0.5343073310722671,
+      "macro_f1": 0.516693070078048,
+      "tp": 1024,
+      "fp": 922,
+      "fn": 863,
+      "fp_per_image": 1.9248434237995824,
+      "fn_rate": 0.4573396926338103,
+      "matched_mean_iou": 0.8698197134071961,
+      "geometry_gt_coverage": 0.5426603073661898,
+      "gt_normalized_iou": 0.4720166330307201,
+      "geometry_matcher": "class_aware_max_cardinality_then_iou",
+      "operating_matcher": "confidence_ordered_greedy_same_as_kb1",
+      "area_gt_support": {
+        "small": 94,
+        "medium": 577,
+        "large": 1216
+      },
+      "per_class": {
+        "0": {
+          "AP50_95": 0.45414477586746216,
+          "AR300": 0.581250011920929,
+          "tp": 16,
+          "fp": 7,
+          "fn": 16,
+          "gt_support": 32
+        },
+        "1": {
+          "AP50_95": 0.6377428770065308,
+          "AR300": 0.7956521511077881,
+          "tp": 39,
+          "fp": 26,
+          "fn": 7,
+          "gt_support": 46
+        },
+        "2": {
+          "AP50_95": 0.4718650281429291,
+          "AR300": 0.6195651888847351,
+          "tp": 33,
+          "fp": 14,
+          "fn": 13,
+          "gt_support": 46
+        },
+        "3": {
+          "AP50_95": 0.48234573006629944,
+          "AR300": 0.7379310131072998,
+          "tp": 21,
+          "fp": 49,
+          "fn": 8,
+          "gt_support": 29
+        },
+        "4": {
+          "AP50_95": 0.33955618739128113,
+          "AR300": 0.6489796042442322,
+          "tp": 20,
+          "fp": 18,
+          "fn": 29,
+          "gt_support": 49
+        },
+        "5": {
+          "AP50_95": 0.47802379727363586,
+          "AR300": 0.6588607430458069,
+          "tp": 113,
+          "fp": 67,
+          "fn": 45,
+          "gt_support": 158
+        },
+        "6": {
+          "AP50_95": 0.44703319668769836,
+          "AR300": 0.6371428370475769,
+          "tp": 39,
+          "fp": 27,
+          "fn": 31,
+          "gt_support": 70
+        },
+        "7": {
+          "AP50_95": 0.4084702432155609,
+          "AR300": 0.75,
+          "tp": 11,
+          "fp": 18,
+          "fn": 3,
+          "gt_support": 14
+        },
+        "8": {
+          "AP50_95": 0.5063236355781555,
+          "AR300": 0.6589285731315613,
+          "tp": 42,
+          "fp": 23,
+          "fn": 14,
+          "gt_support": 56
+        },
+        "9": {
+          "AP50_95": 0.6607023477554321,
+          "AR300": 0.692307710647583,
+          "tp": 31,
+          "fp": 4,
+          "fn": 8,
+          "gt_support": 39
+        },
+        "10": {
+          "AP50_95": 0.4861128628253937,
+          "AR300": 0.6514285802841187,
+          "tp": 51,
+          "fp": 33,
+          "fn": 19,
+          "gt_support": 70
+        },
+        "11": {
+          "AP50_95": 0.03337917476892471,
+          "AR300": 0.24146340787410736,
+          "tp": 2,
+          "fp": 7,
+          "fn": 39,
+          "gt_support": 41
+        },
+        "12": {
+          "AP50_95": 0.14823977649211884,
+          "AR300": 0.3348837196826935,
+          "tp": 40,
+          "fp": 47,
+          "fn": 132,
+          "gt_support": 172
+        },
+        "13": {
+          "AP50_95": 0.2395760416984558,
+          "AR300": 0.5080645084381104,
+          "tp": 31,
+          "fp": 67,
+          "fn": 31,
+          "gt_support": 62
+        },
+        "14": {
+          "AP50_95": 0.6352638602256775,
+          "AR300": 0.7492307424545288,
+          "tp": 107,
+          "fp": 40,
+          "fn": 23,
+          "gt_support": 130
+        },
+        "15": {
+          "AP50_95": 0.5067936182022095,
+          "AR300": 0.6545454263687134,
+          "tp": 38,
+          "fp": 24,
+          "fn": 28,
+          "gt_support": 66
+        },
+        "16": {
+          "AP50_95": 0.46881043910980225,
+          "AR300": 0.7277777791023254,
+          "tp": 36,
+          "fp": 39,
+          "fn": 18,
+          "gt_support": 54
+        },
+        "17": {
+          "AP50_95": 0.7182409763336182,
+          "AR300": 0.8107526898384094,
+          "tp": 78,
+          "fp": 22,
+          "fn": 15,
+          "gt_support": 93
+        },
+        "18": {
+          "AP50_95": 0.1299779862165451,
+          "AR300": 0.3100000023841858,
+          "tp": 9,
+          "fp": 19,
+          "fn": 31,
+          "gt_support": 40
+        },
+        "19": {
+          "AP50_95": 0.196840301156044,
+          "AR300": 0.4466666579246521,
+          "tp": 25,
+          "fp": 56,
+          "fn": 35,
+          "gt_support": 60
+        },
+        "20": {
+          "AP50_95": 0.1898786872625351,
+          "AR300": 0.38960000872612,
+          "tp": 45,
+          "fp": 62,
+          "fn": 80,
+          "gt_support": 125
+        },
+        "21": {
+          "AP50_95": 0.06975363194942474,
+          "AR300": 0.2549999952316284,
+          "tp": 14,
+          "fp": 58,
+          "fn": 46,
+          "gt_support": 60
+        },
+        "22": {
+          "AP50_95": 0.3835673928260803,
+          "AR300": 0.5693877339363098,
+          "tp": 31,
+          "fp": 29,
+          "fn": 18,
+          "gt_support": 49
+        },
+        "23": {
+          "AP50_95": 0.17660799622535706,
+          "AR300": 0.43414634466171265,
+          "tp": 11,
+          "fp": 24,
+          "fn": 30,
+          "gt_support": 41
+        },
+        "24": {
+          "AP50_95": 0.21148847043514252,
+          "AR300": 0.4371951222419739,
+          "tp": 76,
+          "fp": 71,
+          "fn": 88,
+          "gt_support": 164
+        },
+        "25": {
+          "AP50_95": 0.13549219071865082,
+          "AR300": 0.5320000052452087,
+          "tp": 12,
+          "fp": 45,
+          "fn": 38,
+          "gt_support": 50
+        },
+        "26": {
+          "AP50_95": 0.6525889039039612,
+          "AR300": 0.7491227984428406,
+          "tp": 45,
+          "fp": 22,
+          "fn": 12,
+          "gt_support": 57
+        },
+        "27": {
+          "AP50_95": 0.5708912014961243,
+          "AR300": 0.6785714030265808,
+          "tp": 8,
+          "fp": 4,
+          "fn": 6,
+          "gt_support": 14
+        }
+      },
+      "num_images": 479,
+      "num_gt": 1887,
+      "evaluation_wall_seconds": 6.891078828999525,
+      "protocol": {
+        "version": "kb2_canonical_v1_ar300",
+        "conf": 0.001,
+        "nms_iou": 0.6,
+        "max_det": 300,
+        "operating_conf": 0.25,
+        "operating_iou": 0.5,
+        "selection": "mAP50_95",
+        "area_coordinates": "transformed_image",
+        "inference": "ordinary_deterministic_yolo"
+      },
+      "partial_evaluation": false,
+      "macro_recall": 0.5505293189842885,
+      "checkpoint_selection": "macro_recall_subject_to_S0_micro_recall_FP_AP_gates",
+      "source_gt_transitions": {
+        "persistent_miss": 839,
+        "gt": 1887,
+        "retained": 1021,
+        "lost": 24,
+        "recovered": 3,
+        "net_recovery": -21,
+        "per_class": {
+          "12": {
+            "persistent_miss": 130,
+            "gt": 172,
+            "retained": 40,
+            "lost": 2
+          },
+          "26": {
+            "retained": 45,
+            "gt": 57,
+            "persistent_miss": 12
+          },
+          "3": {
+            "retained": 21,
+            "gt": 29,
+            "persistent_miss": 8
+          },
+          "10": {
+            "persistent_miss": 18,
+            "gt": 70,
+            "retained": 51,
+            "lost": 1
+          },
+          "6": {
+            "retained": 39,
+            "gt": 70,
+            "persistent_miss": 29,
+            "lost": 2
+          },
+          "8": {
+            "retained": 41,
+            "gt": 56,
+            "persistent_miss": 14,
+            "recovered": 1
+          },
+          "4": {
+            "retained": 20,
+            "gt": 49,
+            "persistent_miss": 27,
+            "lost": 2
+          },
+          "0": {
+            "retained": 16,
+            "gt": 32,
+            "persistent_miss": 16
+          },
+          "7": {
+            "retained": 11,
+            "gt": 14,
+            "persistent_miss": 3
+          },
+          "9": {
+            "retained": 31,
+            "gt": 39,
+            "persistent_miss": 8
+          },
+          "19": {
+            "persistent_miss": 35,
+            "gt": 60,
+            "retained": 24,
+            "recovered": 1
+          },
+          "2": {
+            "persistent_miss": 13,
+            "gt": 46,
+            "retained": 33
+          },
+          "16": {
+            "retained": 36,
+            "gt": 54,
+            "persistent_miss": 18
+          },
+          "14": {
+            "retained": 107,
+            "gt": 130,
+            "persistent_miss": 22,
+            "lost": 1
+          },
+          "22": {
+            "retained": 31,
+            "gt": 49,
+            "persistent_miss": 18
+          },
+          "18": {
+            "persistent_miss": 31,
+            "gt": 40,
+            "retained": 8,
+            "recovered": 1
+          },
+          "20": {
+            "retained": 45,
+            "gt": 125,
+            "persistent_miss": 77,
+            "lost": 3
+          },
+          "11": {
+            "persistent_miss": 39,
+            "gt": 41,
+            "retained": 2
+          },
+          "25": {
+            "persistent_miss": 33,
+            "gt": 50,
+            "lost": 5,
+            "retained": 12
+          },
+          "5": {
+            "retained": 113,
+            "gt": 158,
+            "persistent_miss": 44,
+            "lost": 1
+          },
+          "13": {
+            "retained": 31,
+            "gt": 62,
+            "persistent_miss": 31
+          },
+          "24": {
+            "persistent_miss": 84,
+            "gt": 164,
+            "lost": 4,
+            "retained": 76
+          },
+          "27": {
+            "persistent_miss": 6,
+            "gt": 14,
+            "retained": 8
+          },
+          "23": {
+            "persistent_miss": 30,
+            "gt": 41,
+            "retained": 11
+          },
+          "17": {
+            "retained": 78,
+            "gt": 93,
+            "persistent_miss": 15
+          },
+          "21": {
+            "persistent_miss": 45,
+            "gt": 60,
+            "retained": 14,
+            "lost": 1
+          },
+          "15": {
+            "persistent_miss": 26,
+            "gt": 66,
+            "retained": 38,
+            "lost": 2
+          },
+          "1": {
+            "retained": 39,
+            "gt": 46,
+            "persistent_miss": 7
+          }
+        },
+        "density": {
+          "1-2": {
+            "persistent_miss": 98,
+            "gt": 313,
+            "retained": 214,
+            "recovered": 1
+          },
+          "3-5": {
+            "retained": 285,
+            "gt": 473,
+            "persistent_miss": 182,
+            "lost": 5,
+            "recovered": 1
+          },
+          "6+": {
+            "persistent_miss": 559,
+            "gt": 1101,
+            "retained": 522,
+            "lost": 19,
+            "recovered": 1
+          }
+        },
+        "size": {
+          "large": {
+            "persistent_miss": 431,
+            "gt": 1216,
+            "retained": 770,
+            "lost": 12,
+            "recovered": 3
+          },
+          "medium": {
+            "persistent_miss": 325,
+            "gt": 577,
+            "retained": 243,
+            "lost": 9
+          },
+          "small": {
+            "persistent_miss": 83,
+            "gt": 94,
+            "retained": 8,
+            "lost": 3
+          }
+        },
+        "gt_overlap": {
+          "iou<.3": {
+            "persistent_miss": 825,
+            "gt": 1843,
+            "retained": 992,
+            "lost": 23,
+            "recovered": 3
+          },
+          "iou>=.3": {
+            "retained": 29,
+            "gt": 44,
+            "persistent_miss": 14,
+            "lost": 1
+          }
+        },
+        "common_detected_mean_iou_S0": 0.869976444295758,
+        "common_detected_mean_iou_policy": 0.8697817827065008,
+        "common_detected_support": 1021
+      },
+      "threshold_control": {
+        "scope": "validation diagnostic on a fixed coarse threshold grid; not calibration or test tuning",
+        "S0_FP_budget_at_conf25": 1009,
+        "max_recall_at_S0_FP_budget_on_grid": 0.5426603073661898,
+        "curve": [
+          {
+            "confidence": 0.05,
+            "recall": 0.6412294647588765,
+            "fp": 2326
+          },
+          {
+            "confidence": 0.1,
+            "recall": 0.6147323794382618,
+            "fp": 1657
+          },
+          {
+            "confidence": 0.15,
+            "recall": 0.5866454689984102,
+            "fp": 1289
+          },
+          {
+            "confidence": 0.2,
+            "recall": 0.5638579756226815,
+            "fp": 1074
+          },
+          {
+            "confidence": 0.25,
+            "recall": 0.5426603073661898,
+            "fp": 922
+          },
+          {
+            "confidence": 0.3,
+            "recall": 0.5214626391096979,
+            "fp": 791
+          },
+          {
+            "confidence": 0.35,
+            "recall": 0.5066242713301536,
+            "fp": 694
+          },
+          {
+            "confidence": 0.4,
+            "recall": 0.48913619501854794,
+            "fp": 619
+          },
+          {
+            "confidence": 0.5,
+            "recall": 0.45045045045045046,
+            "fp": 462
+          },
+          {
+            "confidence": 0.6,
+            "recall": 0.4170641229464759,
+            "fp": 341
+          },
+          {
+            "confidence": 0.7,
+            "recall": 0.3640699523052464,
+            "fp": 227
+          },
+          {
+            "confidence": 0.8,
+            "recall": 0.3004769475357711,
+            "fp": 138
+          },
+          {
+            "confidence": 0.9,
+            "recall": 0.18177000529941706,
+            "fp": 47
+          }
+        ]
+      }
+    },
+    "scope": "selected on development validation; one continuation seed; not independent confirmation",
+    "source_report": "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/review.json"
+  },
+  "bank_audit": {
+    "totals": {
+      "images": 2411,
+      "gt": 10333,
+      "s0_fn": 331,
+      "s0_fp": 3976,
+      "pairs": 773,
+      "recovery_gt": 167,
+      "gate_rejected": 12014,
+      "probe_images": 232,
+      "pair_images": 448,
+      "no_pair_images": 1963
+    },
+    "groups": {
+      "recovery": {
+        "pairs": 167,
+        "train": 149,
+        "probe": 18
+      },
+      "duplicate": {
+        "pairs": 58,
+        "train": 54,
+        "probe": 4
+      },
+      "background": {
+        "pairs": 468,
+        "train": 391,
+        "probe": 77
+      },
+      "preservation": {
+        "pairs": 80,
+        "train": 68,
+        "probe": 12
+      }
+    },
+    "per_class": {
+      "21": {
+        "gt": 352,
+        "s0_fn": 14,
+        "recovery_gt": 8,
+        "pair_gt": 13
+      },
+      "17": {
+        "gt": 380,
+        "s0_fn": 7,
+        "recovery_gt": 5,
+        "pair_gt": 12
+      },
+      "4": {
+        "gt": 320,
+        "s0_fn": 10,
+        "recovery_gt": 4,
+        "pair_gt": 8
+      },
+      "27": {
+        "gt": 350,
+        "s0_fn": 0,
+        "recovery_gt": 0,
+        "pair_gt": 4
+      },
+      "12": {
+        "gt": 371,
+        "s0_fn": 15,
+        "recovery_gt": 5,
+        "pair_gt": 7
+      },
+      "11": {
+        "gt": 354,
+        "s0_fn": 10,
+        "recovery_gt": 8,
+        "pair_gt": 18
+      },
+      "10": {
+        "gt": 410,
+        "s0_fn": 7,
+        "recovery_gt": 3,
+        "pair_gt": 11
+      },
+      "3": {
+        "gt": 369,
+        "s0_fn": 4,
+        "recovery_gt": 2,
+        "pair_gt": 3
+      },
+      "20": {
+        "gt": 397,
+        "s0_fn": 12,
+        "recovery_gt": 6,
+        "pair_gt": 10
+      },
+      "8": {
+        "gt": 327,
+        "s0_fn": 27,
+        "recovery_gt": 10,
+        "pair_gt": 24
+      },
+      "0": {
+        "gt": 319,
+        "s0_fn": 6,
+        "recovery_gt": 3,
+        "pair_gt": 3
+      },
+      "2": {
+        "gt": 346,
+        "s0_fn": 0,
+        "recovery_gt": 0,
+        "pair_gt": 5
+      },
+      "18": {
+        "gt": 354,
+        "s0_fn": 38,
+        "recovery_gt": 14,
+        "pair_gt": 21
+      },
+      "24": {
+        "gt": 523,
+        "s0_fn": 41,
+        "recovery_gt": 28,
+        "pair_gt": 38
+      },
+      "9": {
+        "gt": 336,
+        "s0_fn": 0,
+        "recovery_gt": 0,
+        "pair_gt": 1
+      },
+      "15": {
+        "gt": 351,
+        "s0_fn": 6,
+        "recovery_gt": 6,
+        "pair_gt": 10
+      },
+      "14": {
+        "gt": 520,
+        "s0_fn": 16,
+        "recovery_gt": 6,
+        "pair_gt": 9
+      },
+      "16": {
+        "gt": 351,
+        "s0_fn": 3,
+        "recovery_gt": 0,
+        "pair_gt": 2
+      },
+      "25": {
+        "gt": 325,
+        "s0_fn": 10,
+        "recovery_gt": 5,
+        "pair_gt": 14
+      },
+      "6": {
+        "gt": 333,
+        "s0_fn": 2,
+        "recovery_gt": 2,
+        "pair_gt": 6
+      },
+      "26": {
+        "gt": 355,
+        "s0_fn": 4,
+        "recovery_gt": 2,
+        "pair_gt": 4
+      },
+      "22": {
+        "gt": 353,
+        "s0_fn": 14,
+        "recovery_gt": 8,
+        "pair_gt": 9
+      },
+      "7": {
+        "gt": 202,
+        "s0_fn": 4,
+        "recovery_gt": 0,
+        "pair_gt": 3
+      },
+      "19": {
+        "gt": 389,
+        "s0_fn": 19,
+        "recovery_gt": 11,
+        "pair_gt": 18
+      },
+      "23": {
+        "gt": 351,
+        "s0_fn": 16,
+        "recovery_gt": 6,
+        "pair_gt": 9
+      },
+      "13": {
+        "gt": 361,
+        "s0_fn": 10,
+        "recovery_gt": 5,
+        "pair_gt": 15
+      },
+      "5": {
+        "gt": 598,
+        "s0_fn": 29,
+        "recovery_gt": 16,
+        "pair_gt": 19
+      },
+      "1": {
+        "gt": 336,
+        "s0_fn": 7,
+        "recovery_gt": 4,
+        "pair_gt": 6
+      }
+    },
+    "density": {
+      "1-2": {
+        "images": 1229,
+        "gt": 1447,
+        "s0_fn": 28,
+        "pairs": 63,
+        "recovery_gt": 8
+      },
+      "3-5": {
+        "images": 592,
+        "gt": 2294,
+        "s0_fn": 74,
+        "pairs": 154,
+        "recovery_gt": 35
+      },
+      "6+": {
+        "images": 590,
+        "gt": 6592,
+        "s0_fn": 229,
+        "pairs": 556,
+        "recovery_gt": 124
+      }
+    },
+    "size": {
+      "large": {
+        "gt": 6898,
+        "s0_fn": 141,
+        "recovery_gt": 66,
+        "pair_gt": 144
+      },
+      "medium": {
+        "gt": 3370,
+        "s0_fn": 166,
+        "recovery_gt": 92,
+        "pair_gt": 143
+      },
+      "small": {
+        "gt": 65,
+        "s0_fn": 24,
+        "recovery_gt": 9,
+        "pair_gt": 15
+      }
+    },
+    "gt_overlap": {
+      "iou<.3": {
+        "gt": 10034,
+        "s0_fn": 317,
+        "recovery_gt": 166,
+        "pair_gt": 289
+      },
+      "iou>=.3": {
+        "gt": 299,
+        "s0_fn": 14,
+        "recovery_gt": 1,
+        "pair_gt": 13
+      }
+    }
+  },
+  "current_metrics": [
+    {
+      "model": "S0",
+      "mAP50_95": 0.37821754813194275,
+      "mAP50": 0.4912252426147461,
+      "mAP75": 0.4296802282333374,
+      "precision": 0.5092269326683292,
+      "operating_recall": 0.5410704822469529,
+      "f1": 0.5246659815005138,
+      "macro_f1": 0.5137067483457981,
+      "macro_recall": 0.545462905883436,
+      "AR300": 0.5620436668395996,
+      "APs": 0.04396539553999901,
+      "APm": 0.1797035038471222,
+      "APl": 0.42567628622055054,
+      "tp": 1021,
+      "fp": 984,
+      "fn": 866
+    },
+    {
+      "model": "TPE",
+      "mAP50_95": 0.3850966989994049,
+      "mAP50": 0.504305899143219,
+      "mAP75": 0.4349445700645447,
+      "precision": 0.508763388510224,
+      "operating_recall": 0.5537890832008479,
+      "f1": 0.5303222532352195,
+      "macro_f1": 0.5128175888618615,
+      "macro_recall": 0.5592849950317593,
+      "AR300": 0.582611620426178,
+      "APs": 0.04099680855870247,
+      "APm": 0.18436191976070404,
+      "APl": 0.43859267234802246,
+      "tp": 1045,
+      "fp": 1009,
+      "fn": 842
+    },
+    {
+      "model": "hybrid_best",
+      "mAP50_95": 0.38713255524635315,
+      "mAP50": 0.5062865614891052,
+      "mAP75": 0.4370797276496887,
+      "precision": 0.526207605344296,
+      "operating_recall": 0.5426603073661898,
+      "f1": 0.5343073310722671,
+      "macro_f1": 0.516693070078048,
+      "macro_recall": 0.5505293189842885,
+      "AR300": 0.5807305574417114,
+      "APs": 0.04120910167694092,
+      "APm": 0.18300822377204895,
+      "APl": 0.44033318758010864,
+      "tp": 1024,
+      "fp": 922,
+      "fn": 863
+    },
+    {
+      "model": "hybrid_last",
+      "mAP50_95": 0.3851669728755951,
+      "mAP50": 0.5036841034889221,
+      "mAP75": 0.43512266874313354,
+      "precision": 0.5389157273215244,
+      "operating_recall": 0.5320614732379438,
+      "f1": 0.5354666666666666,
+      "macro_f1": 0.5188662167820509,
+      "macro_recall": 0.539998063209118,
+      "AR300": 0.5726305246353149,
+      "APs": 0.04357816278934479,
+      "APm": 0.18239787220954895,
+      "APl": 0.43764016032218933,
+      "tp": 1004,
+      "fp": 859,
+      "fn": 883
+    },
+    {
+      "model": "lambda010_best",
+      "mAP50_95": 0.3859618902206421,
+      "mAP50": 0.505191445350647,
+      "mAP75": 0.43613189458847046,
+      "precision": 0.5280373831775701,
+      "operating_recall": 0.5389507154213037,
+      "f1": 0.5334382376081825,
+      "macro_f1": 0.5170568707566724,
+      "macro_recall": 0.5475042963693443,
+      "AR300": 0.577954888343811,
+      "APs": 0.04259594902396202,
+      "APm": 0.18245019018650055,
+      "APl": 0.4388081729412079,
+      "tp": 1017,
+      "fp": 909,
+      "fn": 870
+    },
+    {
+      "model": "constant_lambda003_best",
+      "mAP50_95": 0.386314332485199,
+      "mAP50": 0.5055562853813171,
+      "mAP75": 0.4365217983722687,
+      "precision": 0.5296566077003122,
+      "operating_recall": 0.539480657127716,
+      "f1": 0.5345234969808349,
+      "macro_f1": 0.5176762614629833,
+      "macro_recall": 0.5479364273612759,
+      "AR300": 0.5769860148429871,
+      "APs": 0.042601779103279114,
+      "APm": 0.1821182668209076,
+      "APl": 0.4392508566379547,
+      "tp": 1018,
+      "fp": 904,
+      "fn": 869
+    }
+  ],
+  "protected_files": {
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/evaluation.json": "14cf46b1b77040dada70107cefa96a5dad821216112d910488b2eb598b024e8f",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/manifest.json": "26eeceb49697f1c96d3674b90f4b49f0bfeff92d97e297186d6c5ba8bb7ffd8e",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0000/selected_best.pt": "d3c82f5a564c8841e19e0510c35415d2ae8d3a7752a25b577fb8be7a066a4d71",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0000/result.json": "daee439e9e88871d79195b42961aeb353381458662ecc4e330423a7f2c48c863",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0001/selected_best.pt": "3bda508e3998c7be6660095dd1de64ebc2e939f5f638822b9ec0f7125f2bc6ac",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0001/result.json": "979c187fe96a19a8766a854acc011adb7338fcd8cbc943a19dc90144f9c1ba7e",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/selected_best.pt": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/result.json": "a0a0ea9a340047a36f607fedc4860149afc74cec5ad34e4ee91edd70eedf93b4",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0003/selected_best.pt": "f5790f3195c4a6bfbc0130ece467171a4ac1d2f5c78dea868c5b87e5c2d537e4",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0003/result.json": "d7f59614b73c92938421971a8e0c1a9fbafba894c5872ca266250732ecdb4eb1",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0004/selected_best.pt": "ffa01b0b668b4cb13d14ce39de43b5e1e45ed4a36d301d49ec0be70862e6cb37",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0004/result.json": "7e20d6ae38faa286f890d76450d5ec9ef0962bfa38726a3f95763d6ad7fb1b48",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0005/selected_best.pt": "4f28ef2c95436afafaa1b676eb2992d394e270bdc7b1c48207c306e207d54e5d",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0005/result.json": "61376cb5de5c07a3e333e4c551f47fb368902d904430780044eeb46f645ba268",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0006/selected_best.pt": "961c67f306ba0f6120d4dc2115ce05ddb453f9e4e88eccf75b7bd75b46afee46",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0006/result.json": "4b490abd3cdd1f702b243945ec1b2b1a15a421271360cc46bf9aaa289ee32a4f",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0007/selected_best.pt": "e068bdf26cfc13abe13d6490f7e83e605695d18e197a7982a1d0a419b609635d",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0007/result.json": "8cb770fd1c013d7fdf320cc3b4bfa4bc0862b45682a8b6fd8696b9d5d839025c",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_schedule_s42_20261106_trial3/run/dpo/best.pt": "7b371f3313f1fe8fd5de157d16c961f076874c7659a6060e6947b4b8f31a80a4",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/S0.json": "9e18cb522ccc389be5f6f76b1eb9a61b9f36f73d3720eb415277d7f5982ec5fe",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/TPE.json": "aab601573273c4fbfb6cbc38dfc710a097b69cf9d53f647732bfae58bf7fd89a",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/scheduled_lambda003_best.json": "05339511440f63a4d7e002acb4a9bf7832d3734c30d5d2014637dc3246f9f541",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/scheduled_lambda003_last.json": "ad13850c3b7783a9e9b507f0750ae211d1e664aa7b639c6a4761f5f043310ada",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/constant_lambda010_best.json": "772f91efd213c764a72d77bea5f551864d117a57127d53fa7c1758ebb559078f",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/constant_lambda003_best.json": "5169e938d49cf9d9d29140fc0a5d0bb41b33c1424aaf25baf5b7b1efa6904ef0",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences/manifest.json": "fd27beb8c3e51be0bb5730976b9d1a7a5d5abca12991d37fc4bbb72c0262b377",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences/pairs.jsonl": "eb174404ad6ac5e332d822fea3042bce9968abea1e68e22c76177e55d7735535",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences/contexts.jsonl": "e58279a9bce074a41a070606012c187ba6ff4e92dd9527c4688f4ad26f9a9b13",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_selected_20261108/selection.json": "d279dce75677e914c416d09f1788e411a8445a7b8f0aafec278f34792a08513f",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_selected_20261108/mechanism_evidence.json": "1d3cde0ea118d9d0ba31990d73b338e822f8feab25a56fa1d3e609c2556b3938",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_selected_20261108/clarification_examples_20261109.json": "a786ca6e0ba01d186392e0702cff7314c086788430a94815d1be58fe8d891359"
+  },
+  "historical_control_scope": "S0 initialization, lambda .1, seeds42/43/44; not hybrid confirmation"
+}

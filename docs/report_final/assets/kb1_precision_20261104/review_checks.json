@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-04",
+  "report_table_notes_checked": 30,
+  "new_validation_cells_checked": 20,
+  "validation_checkpoints": 10,
+  "images_per_checkpoint": 479,
+  "GT_per_checkpoint": 1887,
+  "all_selected_points_retain_S0_TP": true,
+  "P_precision_above_G_in_all_three_seeds": true,
+  "original_dataset_origin_sections_unchanged": true,
+  "links_svg_math_format": "PASS",
+  "test_inference": false,
+  "training_performed": false,
+  "ranked_curve_vs_canonical_counts_threshold_checks": 50,
+  "report_sha256": "205dac09acdda2f1214d0ae28db174b824a59048eed09fa0ed0ce2662f5f0bb8"
+}

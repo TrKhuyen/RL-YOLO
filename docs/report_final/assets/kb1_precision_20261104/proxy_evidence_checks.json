@@ -1,0 +1,150 @@
+{
+  "date": "2026-11-04",
+  "controlled_pairs": [
+    {
+      "model": "YOLOv8s",
+      "seed": 42,
+      "source_code_runtime_protocol_config_equal_except_mode": true,
+      "micro_steps": 10000,
+      "optimizer_updates": 5000,
+      "effective_weights_S1": {
+        "native": 0.25,
+        "proxy": 0.0,
+        "reward": 0.0,
+        "stability": 0.001
+      },
+      "effective_weights_P": {
+        "native": 0.25,
+        "proxy": 0.25,
+        "reward": 0.0,
+        "stability": 0.001
+      }
+    },
+    {
+      "model": "YOLOv8s",
+      "seed": 43,
+      "source_code_runtime_protocol_config_equal_except_mode": true,
+      "micro_steps": 10000,
+      "optimizer_updates": 5000,
+      "effective_weights_S1": {
+        "native": 0.25,
+        "proxy": 0.0,
+        "reward": 0.0,
+        "stability": 0.001
+      },
+      "effective_weights_P": {
+        "native": 0.25,
+        "proxy": 0.25,
+        "reward": 0.0,
+        "stability": 0.001
+      }
+    },
+    {
+      "model": "YOLOv8s",
+      "seed": 44,
+      "source_code_runtime_protocol_config_equal_except_mode": true,
+      "micro_steps": 10000,
+      "optimizer_updates": 5000,
+      "effective_weights_S1": {
+        "native": 0.25,
+        "proxy": 0.0,
+        "reward": 0.0,
+        "stability": 0.001
+      },
+      "effective_weights_P": {
+        "native": 0.25,
+        "proxy": 0.25,
+        "reward": 0.0,
+        "stability": 0.001
+      }
+    },
+    {
+      "model": "YOLOv11n",
+      "seed": 42,
+      "source_code_runtime_protocol_config_equal_except_mode": true,
+      "micro_steps": 10000,
+      "optimizer_updates": 5000,
+      "effective_weights_S1": {
+        "native": 0.25,
+        "proxy": 0.0,
+        "reward": 0.0,
+        "stability": 0.001
+      },
+      "effective_weights_P": {
+        "native": 0.25,
+        "proxy": 0.25,
+        "reward": 0.0,
+        "stability": 0.001
+      }
+    },
+    {
+      "model": "YOLOv11n",
+      "seed": 43,
+      "source_code_runtime_protocol_config_equal_except_mode": true,
+      "micro_steps": 10000,
+      "optimizer_updates": 5000,
+      "effective_weights_S1": {
+        "native": 0.25,
+        "proxy": 0.0,
+        "reward": 0.0,
+        "stability": 0.001
+      },
+      "effective_weights_P": {
+        "native": 0.25,
+        "proxy": 0.25,
+        "reward": 0.0,
+        "stability": 0.001
+      }
+    },
+    {
+      "model": "YOLOv11n",
+      "seed": 44,
+      "source_code_runtime_protocol_config_equal_except_mode": true,
+      "micro_steps": 10000,
+      "optimizer_updates": 5000,
+      "effective_weights_S1": {
+        "native": 0.25,
+        "proxy": 0.0,
+        "reward": 0.0,
+        "stability": 0.001
+      },
+      "effective_weights_P": {
+        "native": 0.25,
+        "proxy": 0.25,
+        "reward": 0.0,
+        "stability": 0.001
+      }
+    }
+  ],
+  "all_P_minus_S1_AP_positive_val_test": true,
+  "observations": 12,
+  "score_gradient_check": {
+    "one_TP_one_background_FP": true,
+    "FN_term_inactive": true,
+    "score_TP_FP": [
+      0.4000000059604645,
+      0.4000000059604645
+    ],
+    "weighted_loss": 0.2929258942604065,
+    "gradient_TP_FP": [
+      -0.625,
+      0.2083333283662796
+    ],
+    "illustrative_independent_score_space_step": [
+      0.40625,
+      0.39791667461395264
+    ],
+    "weights_updated": false
+  },
+  "source_sha256": {
+    "kb1_reward_guided_training/checkpoint_reward_guide_trainning/remaining_seed43_44_ablation_v1/results_all.csv": "f59a6c9f7911d7916944903eb7eafe8dc1fd488f39858086a1fcd07304176292",
+    "kb1_reward_guided_training/train_rl.py": "e622ec722dcade7d51a508a1592ec932024f0755686bc9be05e3f9aa5c20fc38",
+    "kb1_reward_guided_training/experiment_modes.py": "53737e124d4708d88a504b2d36169310c581795d8e6136ce74704555824998e5",
+    "docs/report_final/assets/kb1_precision_20261104/validation_thresholds.csv": "20320f7801b25133b9278bd9862ced10c01d5f59a464d8d2f3f76b0c0de8d3ec"
+  },
+  "limitations": [
+    "Three continuation seeds on one S0 per architecture.",
+    "No ablation separates TP, FP and FN terms.",
+    "No new test inference or weight training."
+  ]
+}

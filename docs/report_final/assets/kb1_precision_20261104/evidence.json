@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-04",
+  "fresh_validation_inference": true,
+  "test_inference": false,
+  "raw_audit": "kb1_reward_guided_training/results/precision_validation_20261104_v2",
+  "validation_images_per_checkpoint": 479,
+  "checkpoints": 10,
+  "historical_cuda_parity_failures": 1,
+  "max_backend_AP_difference_pp": 0.015628337860107422,
+  "sources_sha256": {
+    "kb1_reward_guided_training/results/precision_validation_20261104_v2/completed.json": "eb1ab3d1102c9e0bddf260feeb698116de899fb47c5f9015f7babd8d7b0c0725",
+    "kb1_reward_guided_training/results/precision_validation_20261104_v2/validation_precision.csv": "20320f7801b25133b9278bd9862ced10c01d5f59a464d8d2f3f76b0c0de8d3ec",
+    "kb1_reward_guided_training/results/precision_validation_20261104_v2/validation_manifest.json": "d9fb4bf5fcb88c12023c34a90722f39b41a073230961c47a7773ef47cdb78383",
+    "kb1_reward_guided_training/results/precision_validation_20261104_v2/validation_pr_curve.csv": "f09e840b4d586e0f9324a276ecb15196f6124012c35732058e06c77ccf79596a",
+    "kb1_reward_guided_training/checkpoint_reward_guide_trainning/remaining_seed43_44_ablation_v1/results_all.csv": "f59a6c9f7911d7916944903eb7eafe8dc1fd488f39858086a1fcd07304176292",
+    "scripts/review_kb1_precision.py": "e12f6313df8d285cf44f510ecdaf239322572f397b992bc921308d33d9491733"
+  }
+}

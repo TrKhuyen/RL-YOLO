@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-06",
+  "scope": "Technical GPU smoke only; no long-run/quality conclusion",
+  "unit_checks": {
+    "passed": 8,
+    "failed": 0
+  },
+  "GPU_smoke": {
+    "output": "/tmp/kb2_hybrid_tpe_gpu_smoke_20261106_v2",
+    "bank_images": 32,
+    "validation_images": 8,
+    "pairs": 9,
+    "arms": {
+      "native": {
+        "steps": 2,
+        "trainable_tensors": 24,
+        "maximum_trainable_parameter_change": 2.0265579223632812e-06,
+        "frozen_state_unchanged": true,
+        "reference_unchanged": true,
+        "first_margin": 0.0,
+        "first_DPO_loss": 0.6931471824645996,
+        "first_raw_box_drift": 0.0
+      },
+      "dpo": {
+        "steps": 2,
+        "trainable_tensors": 24,
+        "maximum_trainable_parameter_change": 2.0265579223632812e-06,
+        "frozen_state_unchanged": true,
+        "reference_unchanged": true,
+        "first_margin": 0.0,
+        "first_DPO_loss": 0.6931471824645996,
+        "first_raw_box_drift": 0.0
+      }
+    },
+    "matched_stream": true,
+    "partial_bank": true,
+    "partial_evaluation": true
+  },
+  "reloaded_last_metrics_match": true,
+  "historical_sources_and_checkpoints_unchanged": true,
+  "protected_files_checked": 31,
+  "TPE_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d"
+}

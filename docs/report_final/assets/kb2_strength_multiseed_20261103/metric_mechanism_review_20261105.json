@@ -1,0 +1,258 @@
+{
+  "scope": "Existing logs and verified validation JSON only; no new training or causal intervention",
+  "eligible_DPO_checkpoints": 45,
+  "DPO_metric_maxima": [
+    {
+      "metric": "mAP50_95",
+      "seed": 43,
+      "step": 15000,
+      "value": 0.38218745589256287,
+      "S0_value": 0.37821754813194275,
+      "delta_S0": 0.003969907760620117
+    },
+    {
+      "metric": "mAP50",
+      "seed": 43,
+      "step": 15000,
+      "value": 0.49631553888320923,
+      "S0_value": 0.4912252426147461,
+      "delta_S0": 0.005090296268463135
+    },
+    {
+      "metric": "mAP75",
+      "seed": 43,
+      "step": 15000,
+      "value": 0.43466562032699585,
+      "S0_value": 0.4296802282333374,
+      "delta_S0": 0.004985392093658447
+    },
+    {
+      "metric": "precision",
+      "seed": 43,
+      "step": 14000,
+      "value": 0.5337259100642399,
+      "S0_value": 0.5092269326683292,
+      "delta_S0": 0.02449897739591067
+    },
+    {
+      "metric": "operating_recall",
+      "seed": 44,
+      "step": 1000,
+      "value": 0.5400105988341283,
+      "S0_value": 0.5410704822469529,
+      "delta_S0": -0.0010598834128245915
+    },
+    {
+      "metric": "f1",
+      "seed": 42,
+      "step": 9000,
+      "value": 0.5320326918006855,
+      "S0_value": 0.5246659815005138,
+      "delta_S0": 0.007366710300171664
+    },
+    {
+      "metric": "macro_f1",
+      "seed": 43,
+      "step": 15000,
+      "value": 0.5278825516077582,
+      "S0_value": 0.5137067483457981,
+      "delta_S0": 0.014175803261960107
+    },
+    {
+      "metric": "AR300",
+      "seed": 44,
+      "step": 1000,
+      "value": 0.5694297552108765,
+      "S0_value": 0.5620436668395996,
+      "delta_S0": 0.0073860883712768555
+    },
+    {
+      "metric": "APs",
+      "seed": 42,
+      "step": 3000,
+      "value": 0.04907733574509621,
+      "S0_value": 0.04396539553999901,
+      "delta_S0": 0.0051119402050971985
+    },
+    {
+      "metric": "APm",
+      "seed": 44,
+      "step": 14000,
+      "value": 0.1821804642677307,
+      "S0_value": 0.1797035038471222,
+      "delta_S0": 0.0024769604206085205
+    },
+    {
+      "metric": "APl",
+      "seed": 42,
+      "step": 11000,
+      "value": 0.43031761050224304,
+      "S0_value": 0.42567628622055054,
+      "delta_S0": 0.004641324281692505
+    }
+  ],
+  "precision_F1_count_example": {
+    "seed": 43,
+    "step": 15000,
+    "T": 1021,
+    "F": 984,
+    "GT": 1887,
+    "lost_TP_net": 20,
+    "reduced_FP_net": 108,
+    "Tb": 110268,
+    "aF": 19680,
+    "a_NplusF": 57420,
+    "precision_before": 0.5092269326683292,
+    "precision_after": 0.5332978156632925,
+    "F1_before": 0.5246659815005138,
+    "F1_after": 0.5318809776833155
+  },
+  "class_count_changes": [
+    {
+      "class_id": "0",
+      "delta_FP_mean": -2.3333333333333335,
+      "delta_FN_mean": 0
+    },
+    {
+      "class_id": "1",
+      "delta_FP_mean": -8,
+      "delta_FN_mean": 0.666666666666667
+    },
+    {
+      "class_id": "2",
+      "delta_FP_mean": -4.333333333333334,
+      "delta_FN_mean": 1.666666666666666
+    },
+    {
+      "class_id": "3",
+      "delta_FP_mean": -9,
+      "delta_FN_mean": 0
+    },
+    {
+      "class_id": "4",
+      "delta_FP_mean": 0.33333333333333215,
+      "delta_FN_mean": -1
+    },
+    {
+      "class_id": "5",
+      "delta_FP_mean": 1.6666666666666714,
+      "delta_FN_mean": -2
+    },
+    {
+      "class_id": "6",
+      "delta_FP_mean": -5,
+      "delta_FN_mean": 1
+    },
+    {
+      "class_id": "7",
+      "delta_FP_mean": 6.666666666666668,
+      "delta_FN_mean": -3.6666666666666665
+    },
+    {
+      "class_id": "8",
+      "delta_FP_mean": -9.333333333333332,
+      "delta_FN_mean": 2
+    },
+    {
+      "class_id": "9",
+      "delta_FP_mean": -1.6666666666666665,
+      "delta_FN_mean": 1
+    },
+    {
+      "class_id": "10",
+      "delta_FP_mean": -5.333333333333332,
+      "delta_FN_mean": 1.3333333333333321
+    },
+    {
+      "class_id": "11",
+      "delta_FP_mean": 2.666666666666668,
+      "delta_FN_mean": 0
+    },
+    {
+      "class_id": "12",
+      "delta_FP_mean": -0.6666666666666643,
+      "delta_FN_mean": -0.3333333333333286
+    },
+    {
+      "class_id": "13",
+      "delta_FP_mean": -11.666666666666664,
+      "delta_FN_mean": 5
+    },
+    {
+      "class_id": "14",
+      "delta_FP_mean": -7.333333333333336,
+      "delta_FN_mean": 2
+    },
+    {
+      "class_id": "15",
+      "delta_FP_mean": -3,
+      "delta_FN_mean": -1
+    },
+    {
+      "class_id": "16",
+      "delta_FP_mean": 2.3333333333333357,
+      "delta_FN_mean": -1
+    },
+    {
+      "class_id": "17",
+      "delta_FP_mean": -2,
+      "delta_FN_mean": 4
+    },
+    {
+      "class_id": "18",
+      "delta_FP_mean": -7.666666666666668,
+      "delta_FN_mean": 1
+    },
+    {
+      "class_id": "19",
+      "delta_FP_mean": -3.3333333333333357,
+      "delta_FN_mean": 1.6666666666666679
+    },
+    {
+      "class_id": "20",
+      "delta_FP_mean": -45,
+      "delta_FN_mean": 9.666666666666671
+    },
+    {
+      "class_id": "21",
+      "delta_FP_mean": 24,
+      "delta_FN_mean": -3
+    },
+    {
+      "class_id": "22",
+      "delta_FP_mean": -8,
+      "delta_FN_mean": 2.666666666666668
+    },
+    {
+      "class_id": "23",
+      "delta_FP_mean": -1.3333333333333321,
+      "delta_FN_mean": -1.6666666666666679
+    },
+    {
+      "class_id": "24",
+      "delta_FP_mean": -1.6666666666666643,
+      "delta_FN_mean": 2
+    },
+    {
+      "class_id": "25",
+      "delta_FP_mean": 0.6666666666666643,
+      "delta_FN_mean": -3
+    },
+    {
+      "class_id": "26",
+      "delta_FP_mean": -2,
+      "delta_FN_mean": 0.3333333333333339
+    },
+    {
+      "class_id": "27",
+      "delta_FP_mean": -1,
+      "delta_FN_mean": 0
+    }
+  ],
+  "source_review_sha256": "d74c89c9227039eadbe3d0db1ca3d99ccdc4583fdb4171d30bbb8bc5dccfca88",
+  "interpretation_limits": [
+    "Logit-gradient direction is exact; ordinary-inference gain is not guaranteed",
+    "Maxima are post-hoc diagnostics; selector remains mAP50_95 min_delta1e-4",
+    "Coordinate regression is frozen; AP75 gain is not proof of learned box regression"
+  ]
+}

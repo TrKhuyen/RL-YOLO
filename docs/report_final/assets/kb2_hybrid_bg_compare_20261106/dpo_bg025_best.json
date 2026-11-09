@@ -1,0 +1,540 @@
+{
+  "mAP50_95": 0.3850966989994049,
+  "mAP50": 0.504305899143219,
+  "mAP75": 0.4349445700645447,
+  "AR300": 0.582611620426178,
+  "APs": 0.04099680855870247,
+  "APm": 0.18436191976070404,
+  "APl": 0.43859267234802246,
+  "precision": 0.508763388510224,
+  "operating_recall": 0.5537890832008479,
+  "f1": 0.5303222532352195,
+  "macro_f1": 0.5128175888618615,
+  "tp": 1045,
+  "fp": 1009,
+  "fn": 842,
+  "fp_per_image": 2.106471816283925,
+  "fn_rate": 0.4462109167991521,
+  "matched_mean_iou": 0.8704256342358566,
+  "geometry_gt_coverage": 0.5537890832008479,
+  "gt_normalized_iou": 0.4820322139779916,
+  "geometry_matcher": "class_aware_max_cardinality_then_iou",
+  "operating_matcher": "confidence_ordered_greedy_same_as_kb1",
+  "area_gt_support": {
+    "small": 94,
+    "medium": 577,
+    "large": 1216
+  },
+  "per_class": {
+    "0": {
+      "AP50_95": 0.45071879029273987,
+      "AR300": 0.581250011920929,
+      "tp": 16,
+      "fp": 7,
+      "fn": 16,
+      "gt_support": 32
+    },
+    "1": {
+      "AP50_95": 0.632648766040802,
+      "AR300": 0.79347825050354,
+      "tp": 39,
+      "fp": 29,
+      "fn": 7,
+      "gt_support": 46
+    },
+    "2": {
+      "AP50_95": 0.4662264287471771,
+      "AR300": 0.6326087117195129,
+      "tp": 33,
+      "fp": 16,
+      "fn": 13,
+      "gt_support": 46
+    },
+    "3": {
+      "AP50_95": 0.4767562747001648,
+      "AR300": 0.7413793206214905,
+      "tp": 21,
+      "fp": 59,
+      "fn": 8,
+      "gt_support": 29
+    },
+    "4": {
+      "AP50_95": 0.3391006290912628,
+      "AR300": 0.6306122541427612,
+      "tp": 22,
+      "fp": 22,
+      "fn": 27,
+      "gt_support": 49
+    },
+    "5": {
+      "AP50_95": 0.47684210538864136,
+      "AR300": 0.6594936847686768,
+      "tp": 114,
+      "fp": 77,
+      "fn": 44,
+      "gt_support": 158
+    },
+    "6": {
+      "AP50_95": 0.44680607318878174,
+      "AR300": 0.6371428370475769,
+      "tp": 41,
+      "fp": 30,
+      "fn": 29,
+      "gt_support": 70
+    },
+    "7": {
+      "AP50_95": 0.40711116790771484,
+      "AR300": 0.75,
+      "tp": 11,
+      "fp": 19,
+      "fn": 3,
+      "gt_support": 14
+    },
+    "8": {
+      "AP50_95": 0.4985385537147522,
+      "AR300": 0.6589285731315613,
+      "tp": 41,
+      "fp": 22,
+      "fn": 15,
+      "gt_support": 56
+    },
+    "9": {
+      "AP50_95": 0.6607611775398254,
+      "AR300": 0.692307710647583,
+      "tp": 31,
+      "fp": 4,
+      "fn": 8,
+      "gt_support": 39
+    },
+    "10": {
+      "AP50_95": 0.4856724739074707,
+      "AR300": 0.6514285802841187,
+      "tp": 52,
+      "fp": 34,
+      "fn": 18,
+      "gt_support": 70
+    },
+    "11": {
+      "AP50_95": 0.03212372958660126,
+      "AR300": 0.23902438580989838,
+      "tp": 2,
+      "fp": 8,
+      "fn": 39,
+      "gt_support": 41
+    },
+    "12": {
+      "AP50_95": 0.14904621243476868,
+      "AR300": 0.3348837196826935,
+      "tp": 42,
+      "fp": 47,
+      "fn": 130,
+      "gt_support": 172
+    },
+    "13": {
+      "AP50_95": 0.23674334585666656,
+      "AR300": 0.5096774101257324,
+      "tp": 31,
+      "fp": 70,
+      "fn": 31,
+      "gt_support": 62
+    },
+    "14": {
+      "AP50_95": 0.6371210217475891,
+      "AR300": 0.7515384554862976,
+      "tp": 108,
+      "fp": 44,
+      "fn": 22,
+      "gt_support": 130
+    },
+    "15": {
+      "AP50_95": 0.5088080167770386,
+      "AR300": 0.6560605764389038,
+      "tp": 40,
+      "fp": 27,
+      "fn": 26,
+      "gt_support": 66
+    },
+    "16": {
+      "AP50_95": 0.46230000257492065,
+      "AR300": 0.7333333492279053,
+      "tp": 36,
+      "fp": 41,
+      "fn": 18,
+      "gt_support": 54
+    },
+    "17": {
+      "AP50_95": 0.7147822976112366,
+      "AR300": 0.802150547504425,
+      "tp": 78,
+      "fp": 23,
+      "fn": 15,
+      "gt_support": 93
+    },
+    "18": {
+      "AP50_95": 0.1305478811264038,
+      "AR300": 0.3100000023841858,
+      "tp": 8,
+      "fp": 21,
+      "fn": 32,
+      "gt_support": 40
+    },
+    "19": {
+      "AP50_95": 0.18700255453586578,
+      "AR300": 0.4399999976158142,
+      "tp": 24,
+      "fp": 57,
+      "fn": 36,
+      "gt_support": 60
+    },
+    "20": {
+      "AP50_95": 0.1882941573858261,
+      "AR300": 0.3928000032901764,
+      "tp": 48,
+      "fp": 66,
+      "fn": 77,
+      "gt_support": 125
+    },
+    "21": {
+      "AP50_95": 0.06902574747800827,
+      "AR300": 0.2616666555404663,
+      "tp": 15,
+      "fp": 60,
+      "fn": 45,
+      "gt_support": 60
+    },
+    "22": {
+      "AP50_95": 0.38549408316612244,
+      "AR300": 0.5918367505073547,
+      "tp": 31,
+      "fp": 30,
+      "fn": 18,
+      "gt_support": 49
+    },
+    "23": {
+      "AP50_95": 0.18715959787368774,
+      "AR300": 0.46585366129875183,
+      "tp": 11,
+      "fp": 26,
+      "fn": 30,
+      "gt_support": 41
+    },
+    "24": {
+      "AP50_95": 0.21476982533931732,
+      "AR300": 0.4359756112098694,
+      "tp": 80,
+      "fp": 82,
+      "fn": 84,
+      "gt_support": 164
+    },
+    "25": {
+      "AP50_95": 0.12626181542873383,
+      "AR300": 0.5320000052452087,
+      "tp": 17,
+      "fp": 59,
+      "fn": 33,
+      "gt_support": 50
+    },
+    "26": {
+      "AP50_95": 0.6488077044487,
+      "AR300": 0.7491227984428406,
+      "tp": 45,
+      "fp": 24,
+      "fn": 12,
+      "gt_support": 57
+    },
+    "27": {
+      "AP50_95": 0.5632373094558716,
+      "AR300": 0.6785714030265808,
+      "tp": 8,
+      "fp": 5,
+      "fn": 6,
+      "gt_support": 14
+    }
+  },
+  "num_images": 479,
+  "num_gt": 1887,
+  "evaluation_wall_seconds": 3.472433524999815,
+  "protocol": {
+    "version": "kb2_canonical_v1_ar300",
+    "conf": 0.001,
+    "nms_iou": 0.6,
+    "max_det": 300,
+    "operating_conf": 0.25,
+    "operating_iou": 0.5,
+    "selection": "mAP50_95",
+    "area_coordinates": "transformed_image",
+    "inference": "ordinary_deterministic_yolo"
+  },
+  "partial_evaluation": false,
+  "macro_recall": 0.5592849950317593,
+  "checkpoint_selection": "macro_recall_subject_to_S0_micro_recall_FP_AP_gates",
+  "source_gt_transitions": {
+    "persistent_miss": 842,
+    "gt": 1887,
+    "retained": 1045,
+    "net_recovery": 0,
+    "per_class": {
+      "12": {
+        "persistent_miss": 130,
+        "gt": 172,
+        "retained": 42
+      },
+      "26": {
+        "retained": 45,
+        "gt": 57,
+        "persistent_miss": 12
+      },
+      "3": {
+        "retained": 21,
+        "gt": 29,
+        "persistent_miss": 8
+      },
+      "10": {
+        "persistent_miss": 18,
+        "gt": 70,
+        "retained": 52
+      },
+      "6": {
+        "retained": 41,
+        "gt": 70,
+        "persistent_miss": 29
+      },
+      "8": {
+        "retained": 41,
+        "gt": 56,
+        "persistent_miss": 15
+      },
+      "4": {
+        "retained": 22,
+        "gt": 49,
+        "persistent_miss": 27
+      },
+      "0": {
+        "retained": 16,
+        "gt": 32,
+        "persistent_miss": 16
+      },
+      "7": {
+        "retained": 11,
+        "gt": 14,
+        "persistent_miss": 3
+      },
+      "9": {
+        "retained": 31,
+        "gt": 39,
+        "persistent_miss": 8
+      },
+      "19": {
+        "persistent_miss": 36,
+        "gt": 60,
+        "retained": 24
+      },
+      "2": {
+        "persistent_miss": 13,
+        "gt": 46,
+        "retained": 33
+      },
+      "16": {
+        "retained": 36,
+        "gt": 54,
+        "persistent_miss": 18
+      },
+      "14": {
+        "retained": 108,
+        "gt": 130,
+        "persistent_miss": 22
+      },
+      "22": {
+        "retained": 31,
+        "gt": 49,
+        "persistent_miss": 18
+      },
+      "18": {
+        "persistent_miss": 32,
+        "gt": 40,
+        "retained": 8
+      },
+      "20": {
+        "retained": 48,
+        "gt": 125,
+        "persistent_miss": 77
+      },
+      "11": {
+        "persistent_miss": 39,
+        "gt": 41,
+        "retained": 2
+      },
+      "25": {
+        "persistent_miss": 33,
+        "gt": 50,
+        "retained": 17
+      },
+      "5": {
+        "retained": 114,
+        "gt": 158,
+        "persistent_miss": 44
+      },
+      "13": {
+        "retained": 31,
+        "gt": 62,
+        "persistent_miss": 31
+      },
+      "24": {
+        "persistent_miss": 84,
+        "gt": 164,
+        "retained": 80
+      },
+      "27": {
+        "persistent_miss": 6,
+        "gt": 14,
+        "retained": 8
+      },
+      "23": {
+        "persistent_miss": 30,
+        "gt": 41,
+        "retained": 11
+      },
+      "17": {
+        "retained": 78,
+        "gt": 93,
+        "persistent_miss": 15
+      },
+      "21": {
+        "persistent_miss": 45,
+        "gt": 60,
+        "retained": 15
+      },
+      "15": {
+        "persistent_miss": 26,
+        "gt": 66,
+        "retained": 40
+      },
+      "1": {
+        "retained": 39,
+        "gt": 46,
+        "persistent_miss": 7
+      }
+    },
+    "density": {
+      "1-2": {
+        "persistent_miss": 99,
+        "gt": 313,
+        "retained": 214
+      },
+      "3-5": {
+        "retained": 290,
+        "gt": 473,
+        "persistent_miss": 183
+      },
+      "6+": {
+        "persistent_miss": 560,
+        "gt": 1101,
+        "retained": 541
+      }
+    },
+    "size": {
+      "large": {
+        "persistent_miss": 434,
+        "gt": 1216,
+        "retained": 782
+      },
+      "medium": {
+        "persistent_miss": 325,
+        "gt": 577,
+        "retained": 252
+      },
+      "small": {
+        "persistent_miss": 83,
+        "gt": 94,
+        "retained": 11
+      }
+    },
+    "gt_overlap": {
+      "iou<.3": {
+        "persistent_miss": 828,
+        "gt": 1843,
+        "retained": 1015
+      },
+      "iou>=.3": {
+        "retained": 30,
+        "gt": 44,
+        "persistent_miss": 14
+      }
+    },
+    "common_detected_mean_iou_S0": 0.8697023958680732,
+    "common_detected_mean_iou_policy": 0.8697023958680732,
+    "common_detected_support": 1045
+  },
+  "threshold_control": {
+    "scope": "validation diagnostic on a fixed coarse threshold grid; not calibration or test tuning",
+    "S0_FP_budget_at_conf25": 1009,
+    "max_recall_at_S0_FP_budget_on_grid": 0.5537890832008479,
+    "curve": [
+      {
+        "confidence": 0.05,
+        "recall": 0.6497085320614733,
+        "fp": 2599
+      },
+      {
+        "confidence": 0.1,
+        "recall": 0.6226815050344462,
+        "fp": 1813
+      },
+      {
+        "confidence": 0.15,
+        "recall": 0.5967143614202438,
+        "fp": 1442
+      },
+      {
+        "confidence": 0.2,
+        "recall": 0.5733969263381028,
+        "fp": 1197
+      },
+      {
+        "confidence": 0.25,
+        "recall": 0.5537890832008479,
+        "fp": 1009
+      },
+      {
+        "confidence": 0.3,
+        "recall": 0.5357710651828299,
+        "fp": 874
+      },
+      {
+        "confidence": 0.35,
+        "recall": 0.5156332803391627,
+        "fp": 773
+      },
+      {
+        "confidence": 0.4,
+        "recall": 0.49814520402755696,
+        "fp": 673
+      },
+      {
+        "confidence": 0.5,
+        "recall": 0.4615792262851086,
+        "fp": 526
+      },
+      {
+        "confidence": 0.6,
+        "recall": 0.4287228404875464,
+        "fp": 382
+      },
+      {
+        "confidence": 0.7,
+        "recall": 0.37413884472708003,
+        "fp": 257
+      },
+      {
+        "confidence": 0.8,
+        "recall": 0.31266560678325384,
+        "fp": 151
+      },
+      {
+        "confidence": 0.9,
+        "recall": 0.19342872284048754,
+        "fp": 55
+      }
+    ]
+  }
+}

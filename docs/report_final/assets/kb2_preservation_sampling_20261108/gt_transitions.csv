@@ -1,0 +1,6 @@
+﻿model,recovered,lost,net_recovery
+TPE,0,0,0
+old_sampler_best_2k,3,24,-21
+old_sampler_step2000,5,33,-28
+preservation_sampler_best_2k,8,30,-22
+preservation_sampler_step2000,8,33,-25
