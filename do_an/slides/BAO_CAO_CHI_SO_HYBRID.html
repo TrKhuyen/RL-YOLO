@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hybrid TPE + DPO: làm thế nào và vì sao tốt hơn</title>
+<!--
+  BẢN 25 SLIDE — trả lời: chỉ số nào tốt hơn, LÀM THẾ NÀO để tốt hơn, vì sao cách làm đó tạo ra con số đó, có ý nghĩa gì.
+  Bố cục:
+    1–6   Kết quả và chỉ số chính (mAP50–95)
+    7–14  Cách làm: KB3 (TPE) và KB2 (DPO) từng bước
+    15–20 Từ cách làm đến con số: vì sao AP, precision, FP thay đổi; bằng chứng
+    21–25 Ý nghĩa, độ tin cậy, giới hạn, kết luận, việc tiếp theo
+  - Mỗi slide là một khối <section class="slide s-XX">. Sửa chữ trực tiếp.
+  - Màu: s-g xanh lá, s-b xanh dương, s-p tím, s-o cam, s-k hồng.
+  - Trình chiếu: mở bằng Chrome/Edge. ← → hoặc Space chuyển slide, F toàn màn hình.
+  - Xuất PDF: Ctrl+P → Lưu dưới dạng PDF → bật "Đồ họa nền".
+  - Mọi số là validation 479 ảnh, seed 42, YOLOv8n. "Hybrid" = KB3 (TPE) rồi KB2 (DPO). "S0" = model train thường.
+  - Nguồn số: docs/report_final/Report_Hybrid_KB3_TPE_KB2_DPO_20261109.md và KB2_HYBRID_SELECTED_EXPLANATION_20261108.md.
+    Cột "so với S0" là số tự trừ. Các ví dụ có ghi "ví dụ tự đặt" là minh họa, không phải số đo.
+-->
+<style>
+:root{--ink:#12302B;--mute:#486560;--line:#D3E8E1;--bg:#F4FCF9;--ok:#0A7A4B;--bad:#B4470A}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E2A25;overflow:hidden;font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink)}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{width:1920px;height:1080px;position:relative;flex:none}
+.slide{position:absolute;inset:0;background:var(--bg);display:none;flex-direction:column;gap:30px;padding:70px 110px 112px 134px;overflow:hidden}
+.slide.on{display:flex}
+.slide::before{content:"";position:absolute;left:0;top:0;bottom:0;width:24px;background:var(--acc)}
+.slide::after{content:"";position:absolute;right:-120px;top:-120px;width:360px;height:360px;border-radius:50%;background:var(--hi);opacity:.7;z-index:0}
+.slide>*{position:relative;z-index:1}
+.s-g{--acc:#10B58C;--accd:#0A7A5F;--hi:#D5F5EA}
+.s-b{--acc:#2D7BFF;--accd:#1F5BD8;--hi:#DAE8FF}
+.s-p{--acc:#8B5CF6;--accd:#6B3FD6;--hi:#E8DDFF}
+.s-o{--acc:#FF9A1F;--accd:#B55F00;--hi:#FFE9C9}
+.s-k{--acc:#FF4D8D;--accd:#C2185B;--hi:#FFDDEA}
+.tag{font-size:28px;font-weight:800;letter-spacing:2px;color:var(--accd);text-transform:uppercase}
+h2{font-size:62px;line-height:1.12;font-weight:800;margin-top:6px}
+.foot{position:absolute!important;left:134px;right:110px;bottom:34px;display:flex;justify-content:space-between;font-size:24px;color:var(--mute)}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:26px}
+.row{display:flex;gap:32px}.row>*{flex:1;min-width:0}
+.cards{display:grid;gap:30px}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:2px solid var(--line);border-left:12px solid var(--acc);border-radius:28px;padding:30px 38px;font-size:32px;line-height:1.42}
+.card h3{font-size:38px;line-height:1.15;color:var(--accd);margin-bottom:12px}
+.card p+p,.card ul+p,.card p+ul{margin-top:12px}
+.card ul{padding-left:36px}.card li{margin:5px 0}
+.card.sm{font-size:29px;padding:24px 30px}.card.sm h3{font-size:34px;margin-bottom:8px}
+.cards[style="flex:1"] .card{font-size:36px;line-height:1.45}
+.cards[style="flex:1"] .card h3{font-size:42px;margin-bottom:16px}
+.small{font-size:28px;color:var(--mute)}
+.note{background:var(--accd);color:#fff;border-radius:20px;padding:20px 34px;font-size:30px;font-weight:700;line-height:1.35}
+.t{width:100%;border-collapse:separate;border-spacing:0;font-size:30px;background:#fff;border-radius:22px;overflow:hidden;border:2px solid var(--line)}
+.t th{background:var(--accd);color:#fff;text-align:left;padding:15px 22px;font-size:28px;font-weight:800}
+.t td{padding:13px 22px;border-top:1px solid var(--line)}
+.t tr:nth-child(even) td{background:#F4FBF8}
+.t .r{text-align:right;font-variant-numeric:tabular-nums}.t th.r{text-align:right}
+.t tr.hi td{background:var(--hi);font-weight:800}
+.t.sm{font-size:28px}.t.sm td{padding:11px 20px}.t.sm th{padding:12px 20px;font-size:26px}
+.kpi{background:#fff;border:2px solid var(--line);border-radius:30px;padding:30px 40px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.kpi .l{font-size:30px;font-weight:800;color:var(--mute)}
+.kpi .v{font-size:104px;font-weight:800;line-height:1.05;letter-spacing:-2px}
+.kpi .d{font-size:30px;font-weight:800;color:var(--ok)}
+.kpi.dark{background:linear-gradient(135deg,#C2185B,#7243D9);border:none;color:#fff}.kpi.dark .l{color:#FFE0EC}.kpi.dark .v{color:#FFE6A3}.kpi.dark .d{color:#C6FFE5}
+.flow{display:flex;align-items:stretch;gap:14px}
+.box{flex:1;background:#fff;border:2px solid var(--line);border-radius:24px;padding:22px 18px;text-align:center;font-size:30px;font-weight:800;color:var(--accd);min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;line-height:1.25}
+.box small{font-size:26px;font-weight:600;color:var(--mute)}
+.box.hl{border:3px solid var(--acc);background:var(--hi)}
+.arr{align-self:center;font-size:46px;font-weight:800;color:var(--acc)}
+.big{font-size:44px;font-weight:800;line-height:1.2}
+.pill{display:inline-block;border-radius:999px;padding:4px 18px;font-size:26px;font-weight:800;white-space:nowrap}
+.up{background:#D6F5E6;color:#066A41}.eq{background:#FFF0C7;color:#6B4300}.dn{background:#FFDCE6;color:#9A1245}
+.good{color:var(--ok);font-weight:800}.bad{color:var(--bad);font-weight:800}
+.cover{background:linear-gradient(135deg,#F4FCF9 0%,#E5F4FF 100%)}
+.cover .panel{flex:1;border-radius:44px;background:linear-gradient(135deg,#0A7A5F 0%,#1F5BD8 60%,#6B3FD6 100%);color:#fff;padding:70px 80px;display:flex;flex-direction:column;justify-content:center;gap:40px}
+.cover h1{font-size:80px;line-height:1.12;font-weight:800}
+.cover .who{font-size:34px;line-height:1.55}
+.dots{display:flex;gap:14px}.dots i{width:26px;height:26px;border-radius:50%;display:block}
+.t.ctr th,.t.ctr td{text-align:center}
+.say{background:#fff;border:3px dashed var(--acc);border-radius:20px;padding:16px 28px;font-size:29px;line-height:1.4}
+.say b{color:var(--accd)}
+.fx{background:#fff;border:2px solid var(--line);border-radius:24px;padding:22px 30px;text-align:center;font-family:"Cambria Math","Cambria","Times New Roman",serif;font-size:44px;line-height:1.3}
+.fx small{display:block;font-family:"Segoe UI",Roboto,Arial,sans-serif;font-size:27px;color:var(--mute);margin-top:6px}
+.step{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:var(--acc);color:#fff;font-size:30px;font-weight:800;margin-right:14px;flex:none}
+.sec{font-size:30px;font-weight:800;color:#fff;background:var(--accd);border-radius:999px;padding:6px 26px;align-self:flex-start}
+.fig{background:#fff;border:2px solid var(--line);border-radius:28px;padding:18px 22px;display:flex;align-items:center;justify-content:center}
+.fig svg{width:100%;height:auto;display:block}
+.tp{color:#066A41;font-weight:800}.fp{color:#B4470A;font-weight:800}
+#hud{position:fixed;right:14px;bottom:10px;font-size:14px;color:#9FC4BB;opacity:.75;pointer-events:none}
+@media print{
+  html,body{overflow:visible;height:auto;background:#fff}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:1920px;height:auto}
+  .slide{display:flex!important;position:relative;height:1080px;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #hud{display:none}
+  @page{size:1920px 1080px;margin:0}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+
+<!-- ===================== PHẦN 1: KẾT QUẢ ===================== -->
+
+<!-- 1. BÌA -->
+<section class="slide cover s-g">
+  <div class="tag">Báo cáo · Kết quả tối ưu YOLOv8n</div>
+  <div class="panel">
+    <h1>Hybrid TPE + DPO: làm thế nào, vì sao tốt hơn, và có ý nghĩa gì?</h1>
+    <div class="who">GVHD: Thầy Phạm Văn Cường<br>Trần Ngọc Khuyến · Nguyễn Minh Thắng<br>Tháng 11/2026</div>
+    <div class="dots"><i style="background:#10B58C"></i><i style="background:#2D7BFF"></i><i style="background:#8B5CF6"></i><i style="background:#FF9A1F"></i><i style="background:#FF4D8D"></i></div>
+  </div>
+</section>
+
+<!-- 2. TRẢ LỜI NGẮN -->
+<section class="slide s-g">
+  <header><div class="tag">Trả lời ngắn</div><h2>So với model gốc S0, hybrid như thế nào?</h2></header>
+  <div class="body">
+    <div class="cards c3" style="flex:1">
+      <div class="card" style="--acc:#10B58C;--accd:#0A7A5F"><h3>Tốt hơn</h3><ul style="font-size:34px"><li>mAP50–95 <b>+0,89</b></li><li>AP50 <b>+1,51</b></li><li>AR300 <b>+1,87</b></li><li>Precision <b>+1,70</b></li><li>F1 <b>+0,96</b></li><li>Báo nhầm (FP) <b>−62</b></li></ul></div>
+      <div class="card" style="--acc:#FF9A1F;--accd:#B55F00"><h3>Gần như bằng</h3><ul style="font-size:34px"><li>Recall <b>+0,16</b></li><li>Bỏ sót (FN) <b>−3</b></li><li>Lá tìm đúng <b>+3</b> trên 1.887</li></ul></div>
+      <div class="card" style="--acc:#FF4D8D;--accd:#C2185B"><h3>Kém hơn</h3><ul style="font-size:34px"><li>AP vật nhỏ <b>−0,28</b></li><li>13 trên 28 lớp giảm AP</li></ul></div>
+    </div>
+    <div class="note">Nói gọn: model báo nhầm ít hơn và xếp hạng tốt hơn; số lá tìm được gần như không đổi. Các slide 7–20 giải thích vì sao.</div>
+  </div>
+  <div class="foot"><span>Validation 479 ảnh · điểm phần trăm · seed 42</span><span class="pg"></span></div>
+</section>
+
+<!-- 3. SO VỚI CÁI GÌ -->
+<section class="slide s-g">
+  <header><div class="tag">Ba mốc so sánh</div><h2>Hybrid hơn S0 0,89 điểm, gồm hai phần</h2></header>
+  <div class="body" style="justify-content:space-evenly">
+    <div class="flow" style="align-items:center">
+      <div class="kpi" style="flex:1"><div class="l">S0 · train thường</div><div class="v">37,82</div><div class="l" style="font-weight:600">mAP50–95 (%) · mốc</div></div>
+      <div class="arr">→</div>
+      <div class="kpi" style="flex:1"><div class="l">TPE · KB3 chọn siêu tham số</div><div class="v">38,51</div><div class="d">+0,69 so với S0</div></div>
+      <div class="arr">→</div>
+      <div class="kpi dark" style="flex:1"><div class="l">Hybrid · KB2 DPO</div><div class="v">38,71</div><div class="d">+0,20 so với TPE</div></div>
+    </div>
+    <p style="font-size:34px;line-height:1.4">0,89 = <b>0,69</b> (đổi cách train, KB3) + <b>0,20</b> (sửa lỗi bằng DPO, KB2). Hai phần này đến từ hai cách làm khác nhau, giải thích ở slide 8–14.</p>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 2.3 và 15.1</span><span class="pg"></span></div>
+</section>
+
+<!-- 4. BẢNG CHỈ SỐ -->
+<section class="slide s-b">
+  <header><div class="tag">Chỉ số nào tốt hơn</div><h2>Tám chỉ số, hybrid so với S0</h2></header>
+  <div class="body">
+    <table class="t sm">
+      <tr><th style="width:17%">Chỉ số</th><th style="width:34%">Đo điều gì</th><th class="r" style="width:10%">S0</th><th class="r" style="width:11%">Hybrid</th><th class="r" style="width:10%">Chênh</th><th style="width:18%">Kết luận</th></tr>
+      <tr class="hi"><td>mAP50–95</td><td>Xếp hạng và độ khít hộp (chỉ số chính)</td><td class="r">37,82</td><td class="r">38,71</td><td class="r">+0,89</td><td><span class="pill up">Tốt hơn</span></td></tr>
+      <tr><td>AP50</td><td>Tìm đúng chỗ (IoU ≥ 0,5)</td><td class="r">49,12</td><td class="r">50,63</td><td class="r">+1,51</td><td><span class="pill up">Tốt hơn</span></td></tr>
+      <tr><td>AP75</td><td>Hộp khít hơn (IoU ≥ 0,75)</td><td class="r">42,97</td><td class="r">43,71</td><td class="r">+0,74</td><td><span class="pill up">Tốt hơn</span></td></tr>
+      <tr><td>AR300</td><td>Tìm được vật, mọi ngưỡng</td><td class="r">56,20</td><td class="r">58,07</td><td class="r">+1,87</td><td><span class="pill up">Tốt hơn</span></td></tr>
+      <tr><td>Precision</td><td>Báo ra thì đúng bao nhiêu</td><td class="r">50,92</td><td class="r">52,62</td><td class="r">+1,70</td><td><span class="pill up">Tốt hơn</span></td></tr>
+      <tr><td>Recall</td><td>Tìm được bao nhiêu lá thật</td><td class="r">54,11</td><td class="r">54,27</td><td class="r">+0,16</td><td><span class="pill eq">Gần bằng</span></td></tr>
+      <tr><td>F1</td><td>Cân bằng precision và recall</td><td class="r">52,47</td><td class="r">53,43</td><td class="r">+0,96</td><td><span class="pill up">Tốt hơn</span></td></tr>
+      <tr><td>AP vật nhỏ</td><td>Phát hiện vật nhỏ</td><td class="r">4,40</td><td class="r">4,12</td><td class="r">−0,28</td><td><span class="pill dn">Kém hơn</span></td></tr>
+    </table>
+    <div class="note">Precision, Recall, F1 đo ở confidence 0,25, IoU 0,5. AP và AR tính trên mọi ngưỡng.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 15.1 · cột Chênh tự tính</span><span class="pg"></span></div>
+</section>
+
+<!-- 5. mAP50-95 LÀ GÌ -->
+<section class="slide s-b">
+  <header><div class="tag">Chỉ số chính</div><h2>mAP50–95 là gì, tính thế nào</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">1 · Chấm từng hộp<small>So hộp dự đoán với hộp thật bằng IoU (độ chồng lên nhau; 1,0 là trùng khít)</small></div><div class="arr">→</div>
+      <div class="box">2 · Tính AP cho từng mức IoU<small>Xếp hộp theo độ tin cậy, đếm đúng / sai, lấy diện tích dưới đường Precision–Recall</small></div><div class="arr">→</div>
+      <div class="box hl">3 · Lấy trung bình<small>10 mức IoU (0,50; 0,55; … 0,95) và 28 lớp</small></div>
+    </div>
+    <div class="card" style="flex:none">
+      <h3>Ví dụ: một hộp dự đoán có IoU = 0,78 với hộp thật</h3>
+      <table class="t sm ctr">
+        <tr><th>Mức IoU phải đạt</th><th>0,50</th><th>0,60</th><th>0,70</th><th>0,75</th><th>0,80</th><th>0,90</th></tr>
+        <tr><td><b>Hộp này tính là</b></td><td><span class="pill up">Đúng</span></td><td><span class="pill up">Đúng</span></td><td><span class="pill up">Đúng</span></td><td><span class="pill up">Đúng</span></td><td><span class="pill dn">Sai</span></td><td><span class="pill dn">Sai</span></td></tr>
+      </table>
+      <p style="margin-top:14px">Hộp đúng ở 6 trên 10 mức (0,50 đến 0,75). Hộp càng khít với hộp thật thì đúng ở càng nhiều mức, và mAP50–95 càng cao.</p>
+    </div>
+    <div class="say"><b>Nói:</b> mAP50–95 giống một bài thi có nhiều mức chấm: hộp phải đúng lớp, được xếp trước hộp sai, và càng khít với hộp thật thì càng được nhiều điểm.</div>
+  </div>
+  <div class="foot"><span>Định nghĩa theo chuẩn COCO · cài đặt: canonical_eval.py</span><span class="pg"></span></div>
+</section>
+
+<!-- 6. VÌ SAO CHỌN mAP50-95 -->
+<section class="slide s-b">
+  <header><div class="tag">Chỉ số chính</div><h2>Vì sao lấy mAP50–95 làm chỉ số chính</h2></header>
+  <div class="body">
+    <div class="cards c3">
+      <div class="card" style="padding:24px 30px;font-size:30px"><h3 style="font-size:36px">Không phụ thuộc ngưỡng</h3>Precision, Recall, F1 phải chọn một ngưỡng tin cậy (ở đây 0,25); đổi ngưỡng là đổi số. mAP tính qua mọi ngưỡng.</div>
+      <div class="card" style="padding:24px 30px;font-size:30px"><h3 style="font-size:36px">Đúng lớp và khít hộp</h3>Tính qua 10 mức IoU nên khó cải thiện giả hơn AP50 (chỉ cần đúng chỗ tương đối).</div>
+      <div class="card" style="padding:24px 30px;font-size:30px"><h3 style="font-size:36px">Chuẩn chung COCO</h3>So được với các nghiên cứu YOLO khác, và dùng được để tự động chọn checkpoint tốt nhất.</div>
+    </div>
+    <div class="card" style="flex:none">
+      <h3>Phải chốt trước khi xem kết quả: chọn chỉ số khác thì ra model khác</h3>
+      <table class="t sm">
+        <tr><th>Checkpoint của hybrid</th><th class="r">mAP50–95</th><th class="r">Precision</th><th class="r">F1</th></tr>
+        <tr class="hi"><td>Update 500 (đã chọn theo mAP)</td><td class="r">38,71</td><td class="r">52,62</td><td class="r">53,43</td></tr>
+        <tr><td>Update 15.000 (cuối run)</td><td class="r">38,52</td><td class="r">53,89</td><td class="r">53,55</td></tr>
+      </table>
+    </div>
+    <div class="say"><b>Nói:</b> em chọn mAP50–95 từ đầu vì nó không phụ thuộc ngưỡng và đo cả độ khít hộp. Nếu đổi chỉ số sau khi có kết quả, em sẽ chọn ra một model khác.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 15.3 · Report_KB1, mục 1</span><span class="pg"></span></div>
+</section>
+
+<!-- ===================== PHẦN 2: CÁCH LÀM ===================== -->
+
+<!-- 7. TỔNG QUAN QUY TRÌNH -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · Tổng quan</div><h2>Hai giai đoạn, mỗi giai đoạn trả lời một câu hỏi</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">yolov8n.pt<small>Trọng số pretrained</small></div><div class="arr">→</div>
+      <div class="box">KB3 · TPE<small>Thử 8 cách train, chọn lr0 và weight decay tốt nhất</small></div><div class="arr">→</div>
+      <div class="box">Model TPE<small>Trial 2 · 38,51</small></div><div class="arr">→</div>
+      <div class="box">KB2 · DPO<small>Dạy model nên giữ hộp nào, bỏ hộp nào</small></div><div class="arr">→</div>
+      <div class="box hl">Hybrid<small>38,71 · vẫn là 1 YOLOv8n</small></div>
+    </div>
+    <div class="cards c2" style="flex:1">
+      <div class="card"><h3>KB3: “Train thế nào thì tốt hơn?”</h3>Không đổi model, chỉ đổi <b>cách train</b> (tốc độ học, mức phạt trọng số). Mỗi lần thử là train lại từ pretrained. Kết quả: một model nền tốt hơn.</div>
+      <div class="card"><h3>KB2: “Model đã có, sửa lỗi ra sao?”</h3>Không train lại. Lấy chính <b>lỗi của model TPE</b> trên ảnh train (hộp báo nhầm, lá bỏ sót), biến thành bài tập “giữ hay bỏ”, rồi chỉnh nhẹ nhánh phân lớp.</div>
+    </div>
+    <div class="say"><b>Lưu ý:</b> S0 cũng train từ yolov8n.pt với cấu hình mặc định. S0 là <b>mốc so sánh</b>, không phải điểm bắt đầu của TPE. Khi dự đoán, hybrid chỉ là một YOLOv8n bình thường, không cần nhãn hay model phụ.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 1</span><span class="pg"></span></div>
+</section>
+
+<!-- 8. TPE LÀM GÌ -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · KB3 (TPE)</div><h2>TPE chọn cách train dựa trên các lần thử trước</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">1 · Chọn cấu hình<small>lr0 và weight decay</small></div><div class="arr">→</div>
+      <div class="box">2 · Train YOLO<small>≤ 200 epoch, dừng sớm khi 30 epoch không tiến bộ</small></div><div class="arr">→</div>
+      <div class="box">3 · Chấm điểm<small>mAP50–95 trên validation</small></div><div class="arr">→</div>
+      <div class="box hl">4 · TPE đề xuất<small>Cấu hình mới giống các lần điểm cao, khác các lần điểm thấp</small></div>
+      <div class="arr">↺</div>
+    </div>
+    <div class="cards c3" style="flex:1">
+      <div class="card sm"><h3>Vì sao không thử hết?</h3>Mỗi lần train mất 2–3,5 giờ; 8 lần tốn 22,7 giờ. TPE dùng điểm của các lần trước để đoán vùng đáng thử, thay vì đoán mò.</div>
+      <div class="card sm"><h3>Tìm trong vùng nào</h3>lr0: 0,005 – 0,015<br>WD: 0,00025 – 0,001<br>Quanh mặc định 0,01 và 0,0005; các tham số khác giữ nguyên.</div>
+      <div class="card sm"><h3>8 lần thử</h3>Lần 0: cấu hình mặc định.<br>Lần 1: chọn ngẫu nhiên.<br>Lần 2–7: TPE đề xuất.<br>Chọn lần có mAP cao nhất: <b>trial 2</b>.</div>
+    </div>
+    <div class="say"><b>Nói:</b> TPE không phải học tăng cường. Nó chỉ chọn cách train; YOLO vẫn học bằng loss phát hiện bình thường.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 4, 5, 7 · Bergstra et al., 2011 · Optuna TPESampler</span><span class="pg"></span></div>
+</section>
+
+<!-- 9. VÌ SAO TRIAL 2 TỐT HƠN -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · KB3 (TPE)</div><h2>Cấu hình thắng khác mặc định ở đâu, và vì sao giúp ích</h2></header>
+  <div class="body">
+    <table class="t sm">
+      <tr><th style="width:30%">Lần thử</th><th class="r">lr0</th><th class="r">Weight decay</th><th class="r">Epoch tốt nhất</th><th class="r">mAP50–95</th></tr>
+      <tr><td>Trial 0 · mặc định</td><td class="r">0,0100</td><td class="r">0,00050</td><td class="r">91</td><td class="r">36,07</td></tr>
+      <tr class="hi"><td>Trial 2 · thắng</td><td class="r">0,0054 (×0,5)</td><td class="r">0,00091 (×1,8)</td><td class="r">139</td><td class="r">38,51</td></tr>
+      <tr><td>Trial 4 · thứ hai</td><td class="r">0,0148</td><td class="r">0,00027</td><td class="r">146</td><td class="r">38,35</td></tr>
+      <tr><td>Trial 3 · gần giống trial 2</td><td class="r">0,0052</td><td class="r">0,00099</td><td class="r">187</td><td class="r">37,09</td></tr>
+    </table>
+    <div class="cards c2" style="flex:1">
+      <div class="card sm"><h3>Cách hiểu</h3><b>lr0</b> = độ dài mỗi bước sửa trọng số. Giảm một nửa → sửa từ từ; model còn tiến bộ tới epoch 139 (mặc định dừng ở 91).<br><b>Weight decay</b> = phạt trọng số lớn. Phạt mạnh hơn → khó “học thuộc” ảnh train.<br>So S0: tìm thêm <b>24 lá</b> (recall +1,27).</div>
+      <div class="card sm" style="--acc:#FF4D8D;--accd:#C2185B"><h3>Lưu ý trung thực</h3>Trial 3 gần như cùng cấu hình nhưng thấp hơn <b>1,42</b>. Train lại cấu hình mặc định cũng lệch S0 <b>1,75</b>.<br>→ Một phần mức +0,69 có thể do lần train may mắn; chưa chứng minh cấu hình này luôn tốt hơn.</div>
+    </div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 7.2–7.3 · “cách hiểu” là diễn giải, chưa có thí nghiệm tách riêng lr0 / WD</span><span class="pg"></span></div>
+</section>
+
+<!-- 10. Ý TƯỞNG DPO -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · KB2 (DPO)</div><h2>Ý tưởng: dạy model bằng so sánh hai kết quả</h2></header>
+  <div class="body">
+    <div class="cards c2">
+      <div class="card sm"><h3>Train thường (loss gốc của YOLO)</h3>Cho đáp án ở mọi vị trí: chỗ này là lá bệnh X, chỗ kia là nền. Mỗi ảnh có 8.400 vị trí, phần lớn là nền. Không có tín hiệu riêng nào nói “hộp này là báo nhầm, hãy bỏ”.</div>
+      <div class="card sm"><h3>DPO (Direct Preference Optimization)</h3>Cho model xem <b>hai kết quả gần như giống nhau</b>, chỉ khác giữ hay bỏ <b>một hộp</b>, và nói kết quả nào tốt hơn. Model học thay đổi đúng chỗ gây lỗi.</div>
+    </div>
+    <div class="card sm" style="flex:none"><h3>Vì sao cần</h3>Model TPE trên chính 2.411 ảnh train vẫn <b>bỏ sót 331 lá</b> và <b>báo nhầm 3.976 hộp</b>. Đó là những lỗi cụ thể, có địa chỉ rõ ràng, để biến thành bài tập.</div>
+    <div class="flow">
+      <div class="box"><span><span class="step">1</span></span>Tạo cặp A / B<small>Từ lỗi của model TPE trên ảnh train</small></div><div class="arr">→</div>
+      <div class="box"><span><span class="step">2</span></span>Chấm bằng nhãn thật<small>A hay B tốt hơn trên cả ảnh</small></div><div class="arr">→</div>
+      <div class="box hl"><span><span class="step">3</span></span>Chỉnh nhánh phân lớp<small>Theo cặp, cộng với loss thường</small></div>
+    </div>
+    <div class="say"><b>Nói:</b> giống thầy chữa bài: không giảng lại cả chương, chỉ chỉ ra “câu này nên bỏ”, “câu này nên giữ”.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 10 và 12.1 · Rafailov et al., DPO, 2023</span><span class="pg"></span></div>
+</section>
+
+<!-- 11. TẠO VÀ CHẤM MỘT CẶP -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · KB2 bước 1–2</div><h2>Một cặp A / B được tạo và chấm như thế nào</h2></header>
+  <div class="body">
+    <div class="row" style="flex:1;align-items:stretch">
+      <div class="fig" style="flex:1.55">
+        <svg viewBox="0 0 1000 470" font-family="Segoe UI, Roboto, Arial, sans-serif">
+          <!-- PANEL A -->
+          <text x="10" y="34" font-size="30" font-weight="800" fill="#6B3FD6">A · giữ hộp X</text>
+          <rect x="10" y="52" width="470" height="300" rx="14" fill="#EEF5E9" stroke="#C9DCC0" stroke-width="2"/>
+          <ellipse cx="115" cy="148" rx="62" ry="40" fill="#8CCB6E"/><circle cx="100" cy="140" r="8" fill="#7A5A1E"/><circle cx="132" cy="158" r="6" fill="#7A5A1E"/>
+          <ellipse cx="350" cy="250" rx="80" ry="55" fill="#8CCB6E"/><circle cx="330" cy="240" r="9" fill="#7A5A1E"/><circle cx="372" cy="262" r="7" fill="#7A5A1E"/>
+          <rect x="45" y="100" width="140" height="96" fill="none" stroke="#0A7A4B" stroke-width="4" stroke-dasharray="10 7"/>
+          <rect x="262" y="187" width="176" height="126" fill="none" stroke="#0A7A4B" stroke-width="4" stroke-dasharray="10 7"/>
+          <rect x="49" y="104" width="134" height="90" fill="none" stroke="#1F5BD8" stroke-width="5"/>
+          <rect x="49" y="78" width="96" height="26" fill="#1F5BD8"/><text x="56" y="98" font-size="20" fill="#fff" font-weight="700">lá · 0,82</text>
+          <rect x="268" y="192" width="166" height="118" fill="none" stroke="#1F5BD8" stroke-width="5"/>
+          <rect x="268" y="166" width="96" height="26" fill="#1F5BD8"/><text x="275" y="186" font-size="20" fill="#fff" font-weight="700">lá · 0,64</text>
+          <rect x="40" y="255" width="120" height="72" fill="none" stroke="#E8710A" stroke-width="6"/>
+          <rect x="40" y="229" width="92" height="26" fill="#E8710A"/><text x="47" y="249" font-size="20" fill="#fff" font-weight="700">X · 0,31</text>
+          <text x="10" y="395" font-size="28" font-weight="700" fill="#12302B">2 lá đúng · <tspan fill="#B4470A">1 báo nhầm</tspan></text>
+          <!-- PANEL B -->
+          <text x="520" y="34" font-size="30" font-weight="800" fill="#6B3FD6">B · bỏ hộp X</text>
+          <rect x="520" y="52" width="470" height="300" rx="14" fill="#EEF5E9" stroke="#C9DCC0" stroke-width="2"/>
+          <ellipse cx="625" cy="148" rx="62" ry="40" fill="#8CCB6E"/><circle cx="610" cy="140" r="8" fill="#7A5A1E"/><circle cx="642" cy="158" r="6" fill="#7A5A1E"/>
+          <ellipse cx="860" cy="250" rx="80" ry="55" fill="#8CCB6E"/><circle cx="840" cy="240" r="9" fill="#7A5A1E"/><circle cx="882" cy="262" r="7" fill="#7A5A1E"/>
+          <rect x="555" y="100" width="140" height="96" fill="none" stroke="#0A7A4B" stroke-width="4" stroke-dasharray="10 7"/>
+          <rect x="772" y="187" width="176" height="126" fill="none" stroke="#0A7A4B" stroke-width="4" stroke-dasharray="10 7"/>
+          <rect x="559" y="104" width="134" height="90" fill="none" stroke="#1F5BD8" stroke-width="5"/>
+          <rect x="559" y="78" width="96" height="26" fill="#1F5BD8"/><text x="566" y="98" font-size="20" fill="#fff" font-weight="700">lá · 0,82</text>
+          <rect x="778" y="192" width="166" height="118" fill="none" stroke="#1F5BD8" stroke-width="5"/>
+          <rect x="778" y="166" width="96" height="26" fill="#1F5BD8"/><text x="785" y="186" font-size="20" fill="#fff" font-weight="700">lá · 0,64</text>
+          <rect x="550" y="255" width="120" height="72" fill="none" stroke="#9AA8A4" stroke-width="3" stroke-dasharray="6 6"/>
+          <line x1="550" y1="255" x2="670" y2="327" stroke="#9AA8A4" stroke-width="3"/><line x1="670" y1="255" x2="550" y2="327" stroke="#9AA8A4" stroke-width="3"/>
+          <text x="520" y="395" font-size="28" font-weight="700" fill="#12302B">2 lá đúng · <tspan fill="#0A7A4B">0 báo nhầm</tspan></text>
+          <rect x="820" y="8" width="170" height="38" rx="19" fill="#0A7A4B"/><text x="842" y="35" font-size="24" font-weight="800" fill="#fff">✓ Chọn B</text>
+          <!-- CHÚ THÍCH -->
+          <line x1="10" y1="445" x2="50" y2="445" stroke="#0A7A4B" stroke-width="4" stroke-dasharray="10 7"/><text x="60" y="453" font-size="22" fill="#486560">Hộp nhãn thật</text>
+          <line x1="250" y1="445" x2="290" y2="445" stroke="#1F5BD8" stroke-width="5"/><text x="300" y="453" font-size="22" fill="#486560">Hộp model báo · điểm tin cậy</text>
+          <line x1="640" y1="445" x2="680" y2="445" stroke="#E8710A" stroke-width="6"/><text x="690" y="453" font-size="22" fill="#486560">Hộp đang xét (X)</text>
+        </svg>
+      </div>
+      <div class="cards" style="flex:1;align-content:start;gap:22px">
+        <div class="card sm"><h3>Chỉ khác một hộp</h3>A và B lấy từ <b>cùng một lần dự đoán</b> của model TPE. Mọi hộp, tọa độ, điểm khác giữ nguyên. Chỉ bật / tắt hộp X.</div>
+        <div class="card sm"><h3>Chấm cả ảnh</h3>Mỗi phương án qua NMS rồi so với nhãn thật. Chỉ nhận cặp nếu phương án được chọn <b>không làm mất lá nào</b> đã tìm được và <b>không tăng báo nhầm</b>.</div>
+        <div class="card sm"><h3>Nhãn chỉ dùng lúc tạo cặp</h3>Trên ảnh train. Không sinh hộp mới, không chép tọa độ nhãn.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Hình minh họa tự vẽ · quy tắc chấm: conditional/pairs.py · Report_Hybrid, mục 11</span><span class="pg"></span></div>
+</section>
+
+<!-- 12. BỐN LOẠI CẶP -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · KB2 bước 1–2</div><h2>Bốn loại lỗi được biến thành bài tập</h2></header>
+  <div class="body">
+    <table class="t sm">
+      <tr><th style="width:17%">Loại cặp</th><th style="width:41%">Tình huống trên ảnh train (model TPE)</th><th style="width:27%">Bài học cho model</th><th class="r">Số cặp</th></tr>
+      <tr><td><b>Cứu</b><br><span class="small">recovery</span></td><td>Lá bị bỏ sót, nhưng có hộp đúng lớp với điểm thấp (0,05–0,25) và IoU ≥ 0,6</td><td><span class="pill up">Giữ</span> → nâng điểm hộp này</td><td class="r">167</td></tr>
+      <tr><td><b>Giữ đúng</b><br><span class="small">preservation</span></td><td>Hộp đang tìm đúng một lá</td><td><span class="pill up">Giữ</span> → giữ lá đang đúng</td><td class="r">80</td></tr>
+      <tr class="hi"><td><b>Nền</b><br><span class="small">background</span></td><td>Hộp nằm trên nền, gần như không chạm lá nào (IoU ≤ 0,1)</td><td><span class="pill dn">Bỏ</span> → hạ điểm hộp này</td><td class="r">468</td></tr>
+      <tr class="hi"><td><b>Trùng</b><br><span class="small">duplicate</span></td><td>Hộp thứ hai cho một lá đã có hộp đúng</td><td><span class="pill dn">Bỏ</span> → hạ điểm hộp này</td><td class="r">58</td></tr>
+    </table>
+    <div class="cards c2">
+      <div class="card sm"><h3>773 cặp trên 448 ảnh</h3>662 cặp dùng để học, 111 cặp giữ lại để kiểm tra. Khi lấy mẫu, <b>mỗi loại ≈ 25%</b>, để nhóm nền (468 cặp) không lấn át.</div>
+      <div class="card sm"><h3>Nối với kết quả</h3>Một nửa tín hiệu là “<b>bỏ</b>” (nền, trùng): nhắm thẳng vào hộp báo nhầm. Đây là nguồn gốc của việc FP giảm 87 ở slide 17.</div>
+    </div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 11.2 và 12 · ngưỡng là quy tắc tự đặt, không phải giá trị từ paper</span><span class="pg"></span></div>
+</section>
+
+<!-- 13. MODEL HỌC TỪ MỘT CẶP -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · KB2 bước 3</div><h2>Model học từ một cặp: đẩy điểm lên hoặc kéo xuống</h2></header>
+  <div class="body">
+    <div class="row">
+      <div class="fx" style="flex:1.2">Loss = log(1 + e<sup>−β · s · (z − z<sub>ref</sub>)</sup>)
+        <small>z: điểm thô (logit) của hộp, điểm tin cậy = sigmoid(z)<br>z<sub>ref</sub>: điểm của model TPE đóng băng · β = 0,1<br>s = +1 nếu nên giữ, −1 nếu nên bỏ</small></div>
+      <div class="card sm" style="flex:1"><h3>Giảm loss nghĩa là</h3><b>Nên giữ</b> → đẩy z lên.<br><b>Nên bỏ</b> → kéo z xuống.<br>z<sub>ref</sub> là mốc: đo model đã đổi bao nhiêu so với lúc đầu. Lúc đầu z = z<sub>ref</sub>, loss = log 2.</div>
+    </div>
+    <table class="t sm">
+      <tr><th style="width:27%">Ví dụ tự đặt</th><th style="width:23%">Trước (model TPE)</th><th style="width:20%">Sau khi học</th><th>Ở ngưỡng báo 0,25</th></tr>
+      <tr><td><b>Hộp nền X</b> · nên bỏ</td><td>z = −1,0 → <b>0,27</b></td><td>z = −1,3 → <b>0,21</b></td><td>Không còn báo nhầm: <span class="fp">FP −1</span></td></tr>
+      <tr><td><b>Lá yếu Y</b> · nên giữ</td><td>z = −1,6 → <b>0,17</b></td><td>z = −1,0 → <b>0,27</b></td><td>Không còn bỏ sót: <span class="tp">TP +1</span></td></tr>
+    </table>
+    <div class="note">Chỉ nhánh phân lớp (cv3, 12% tham số) được học. Tọa độ hộp, backbone, neck đóng băng → DPO chỉ đổi <u>điểm</u> và <u>lớp</u> của hộp, không đổi vị trí hộp.</div>
+  </div>
+  <div class="foot"><span>Công thức: Report_Hybrid, mục 10.3 · policy.py · hai ví dụ là số tự đặt để minh họa hướng thay đổi</span><span class="pg"></span></div>
+</section>
+
+<!-- 14. TRỘN VỚI LOSS THƯỜNG -->
+<section class="slide s-p">
+  <header><div class="tag">Cách làm · KB2 bước 3</div><h2>Trộn với loss thường để không làm hỏng model</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">Mỗi bước: 4 ảnh<small>2 ảnh train ngẫu nhiên + 2 ảnh có cặp</small></div><div class="arr">→</div>
+      <div class="box">Loss thường<small>Trên cả 4 ảnh, như train YOLO</small></div><div class="arr">+</div>
+      <div class="box">0,03 × Loss DPO<small>Trên 2 cặp giữ / bỏ</small></div><div class="arr">→</div>
+      <div class="box hl">Cập nhật nhánh phân lớp<small>AdamW, LR 10⁻⁶</small></div>
+    </div>
+    <div class="cards c3" style="flex:1">
+      <div class="card sm"><h3>λ = 0,03: chỉ nắn nhẹ</h3>Ở bước đầu, lực kéo của DPO chỉ bằng <b>2,2%</b> lực kéo của loss thường. Đã thử λ = 0,1: mAP 38,60; λ = 0,03: 38,63 (cùng lịch chấm).</div>
+      <div class="card sm"><h3>Loss nền × 0,5</h3>Mỗi bước có khoảng <b>33.500</b> vị trí nền và <b>100</b> vị trí có lá. Giảm một nửa phần loss ở nền để sức ép “mọi chỗ là nền” không quá lớn.</div>
+      <div class="card sm"><h3>Giữ kiến thức cũ</h3>Loss thường giữ model không quên cách phát hiện. Backbone, nhánh tọa độ đóng băng, LR rất nhỏ. Khởi đầu đúng bằng model TPE.</div>
+    </div>
+    <div class="say"><b>Nói:</b> loss thường giữ những gì model đã biết; DPO thêm một tín hiệu nhỏ, đúng chỗ, để sửa lỗi giữ / bỏ hộp.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 12.3, 13, 17.6 · KB2_HYBRID_SELECTED_EXPLANATION, mục 6 · 0,03 và 0,5 là chọn qua thử nghiệm</span><span class="pg"></span></div>
+</section>
+
+<!-- ===================== PHẦN 3: TỪ CÁCH LÀM ĐẾN CON SỐ ===================== -->
+
+<!-- 15. AP TĂNG KHI HỘP KHÔNG ĐỔI -->
+<section class="slide s-b">
+  <header><div class="tag">Từ cách làm đến con số</div><h2>Vì sao AP tăng dù tọa độ hộp không đổi?</h2></header>
+  <div class="body">
+    <div class="card sm" style="flex:none">AP xếp mọi hộp theo điểm từ cao xuống thấp, rồi đếm đúng / sai từ trên xuống. Ví dụ tự đặt: 3 lá thật, 5 hộp, <b>vị trí hộp giữ nguyên</b>; DPO chỉ hạ điểm một hộp nhầm từ 0,80 xuống 0,45.</div>
+    <div class="row">
+      <table class="t sm ctr">
+        <tr><th colspan="5">Trước (model TPE)</th></tr>
+        <tr><td>0,90</td><td>0,80</td><td>0,70</td><td>0,60</td><td>0,50</td></tr>
+        <tr><td class="tp">Đúng</td><td class="fp">Nhầm</td><td class="tp">Đúng</td><td class="fp">Nhầm</td><td class="tp">Đúng</td></tr>
+        <tr><td class="tp">1/1</td><td></td><td class="tp">2/3</td><td></td><td class="tp">3/5</td></tr>
+        <tr class="hi"><td colspan="5">AP ≈ (1 + 0,67 + 0,60) / 3 = <b>0,76</b></td></tr>
+      </table>
+      <table class="t sm ctr">
+        <tr><th colspan="5">Sau (hộp nhầm 0,80 bị hạ xuống 0,45)</th></tr>
+        <tr><td>0,90</td><td>0,70</td><td>0,60</td><td>0,50</td><td>0,45</td></tr>
+        <tr><td class="tp">Đúng</td><td class="tp">Đúng</td><td class="fp">Nhầm</td><td class="tp">Đúng</td><td class="fp">Nhầm</td></tr>
+        <tr><td class="tp">1/1</td><td class="tp">2/2</td><td></td><td class="tp">3/4</td><td></td></tr>
+        <tr class="hi"><td colspan="5">AP ≈ (1 + 1 + 0,75) / 3 = <b>0,92</b></td></tr>
+      </table>
+    </div>
+    <div class="note">Hộp nhầm bị đẩy xuống dưới → các hộp đúng đứng trước → precision cao hơn ở mỗi lá tìm được. Thực tế so TPE: AP50 +0,20, AP75 +0,21, trong khi nhánh tọa độ đã kiểm là không đổi.</div>
+  </div>
+  <div class="foot"><span>Hàng thứ ba: precision tại mỗi lá đúng (cách tính rút gọn; AP thật dùng 101 mức recall và 10 mức IoU) · Report_Hybrid, mục 17.2</span><span class="pg"></span></div>
+</section>
+
+<!-- 16. VÌ SAO CÁC CHỈ SỐ KHÁC TĂNG NHIỀU HƠN -->
+<section class="slide s-b">
+  <header><div class="tag">Từ cách làm đến con số</div><h2>Vì sao AP50, AR300 tăng nhiều hơn mAP?</h2></header>
+  <div class="body">
+    <div class="row" style="align-items:flex-start">
+      <table class="t sm" style="flex:1.6">
+        <tr><th style="width:22%">Chỉ số</th><th style="width:44%">Nghĩa dễ hiểu</th><th class="r" style="width:14%">Tăng</th><th class="r">So với S0</th></tr>
+        <tr><td>AR300</td><td>Tìm được vật ở mọi ngưỡng</td><td class="r">+1,87</td><td class="r">+3,3%</td></tr>
+        <tr><td>Precision</td><td>Báo ra thì đúng bao nhiêu</td><td class="r">+1,70</td><td class="r">+3,3%</td></tr>
+        <tr><td>AP50</td><td>Đúng chỗ (IoU ≥ 0,5)</td><td class="r">+1,51</td><td class="r">+3,1%</td></tr>
+        <tr class="hi"><td>mAP50–95</td><td>Đúng chỗ và khít hộp</td><td class="r">+0,89</td><td class="r">+2,4%</td></tr>
+        <tr><td>F1</td><td>Cân bằng precision, recall</td><td class="r">+0,96</td><td class="r">+1,8%</td></tr>
+        <tr><td>AP75</td><td>Hộp khít (IoU ≥ 0,75)</td><td class="r">+0,74</td><td class="r">+1,7%</td></tr>
+      </table>
+      <div class="cards" style="flex:1">
+        <div class="card"><h3>Quy luật</h3>Chỉ số “dễ” (AP50, AR300) tăng nhiều hơn chỉ số “khó” (AP75).</div>
+        <div class="card"><h3>Khớp với cách làm</h3>DPO chỉ học nhánh phân lớp, tọa độ hộp đóng băng (slide 13). Nên cải thiện nằm ở <b>nhận đúng và xếp hạng</b>, còn độ khít hộp tăng ít.</div>
+      </div>
+    </div>
+    <div class="say"><b>Nói:</b> AP50 và AR300 tăng nhiều hơn vì chúng dễ hơn. Em không lấy chúng làm chỉ số chính để tránh chọn số đẹp, nhưng chúng cho thấy cải thiện nằm ở việc nhận đúng và xếp hạng.</div>
+  </div>
+  <div class="foot"><span>So với S0 = chênh / giá trị S0 · số tự tính từ Report_Hybrid, mục 15.1</span><span class="pg"></span></div>
+</section>
+
+<!-- 17. HAI GIAI ĐOẠN, HAI CÁCH CẢI THIỆN -->
+<section class="slide s-b">
+  <header><div class="tag">Từ cách làm đến con số</div><h2>Mỗi cách làm để lại một “dấu vân tay” trên số liệu</h2></header>
+  <div class="body">
+    <table class="t sm">
+      <tr><th>Giai đoạn</th><th class="r">mAP</th><th class="r">Recall</th><th class="r">Lá đúng (TP)</th><th class="r">Báo nhầm (FP)</th><th class="r">Precision</th></tr>
+      <tr><td><b>S0 → TPE</b> (KB3)</td><td class="r good">+0,69</td><td class="r good">+1,27</td><td class="r good">+24</td><td class="r bad">+25</td><td class="r">−0,05</td></tr>
+      <tr class="hi"><td><b>TPE → Hybrid</b> (KB2)</td><td class="r good">+0,20</td><td class="r bad">−1,11</td><td class="r bad">−21</td><td class="r good">−87</td><td class="r good">+1,74</td></tr>
+    </table>
+    <div class="cards c2" style="flex:1;">
+      <div class="card sm"><h3>KB3: tìm được nhiều lá hơn</h3>Học chậm hơn, phạt mạnh hơn, train lâu hơn (slide 9) → model nền tốt hơn, nhận ra thêm 24 lá. Nhưng cách train thường không có tín hiệu nào nhắm riêng vào hộp nhầm, nên FP không giảm (+25).</div>
+      <div class="card sm"><h3>KB2: báo nhầm ít hơn</h3>Một nửa bài tập là “bỏ hộp nền / hộp trùng” (slide 12) → điểm các hộp nhầm bị kéo xuống dưới 0,25 → FP −87. Đổi lại model trở nên thận trọng chung, vài lá thật cũng bị hạ điểm → TP −21.</div>
+    </div>
+    <div class="say"><b>Nói:</b> hai bước cải thiện theo hai hướng khác nhau, đúng với cách mỗi bước được thiết kế. Đây là cách giải thích khớp với số liệu; em chưa tách riêng từng thành phần bằng thí nghiệm.</div>
+  </div>
+  <div class="foot"><span>Số so với S0 tự tính · Nguồn: Report_Hybrid, mục 15.1 và 11</span><span class="pg"></span></div>
+</section>
+
+<!-- 18. PRECISION TĂNG RECALL GIẢM -->
+<section class="slide s-b">
+  <header><div class="tag">Từ cách làm đến con số</div><h2>Precision tăng, recall giảm: vì sao cả hai đều đúng</h2></header>
+  <div class="body">
+    <div class="row">
+      <div class="kpi"><div class="l">Lá tìm đúng (TP) so với TPE</div><div class="v bad" style="font-size:72px">−21</div><div class="l" style="font-weight:600">1.045 → 1.024</div></div>
+      <div class="kpi"><div class="l">Hộp báo nhầm (FP) so với TPE</div><div class="v good" style="font-size:72px">−87</div><div class="l" style="font-weight:600">1.009 → 922</div></div>
+      <div class="kpi"><div class="l">Lá cứu được / bị mất</div><div class="v" style="font-size:72px">3 / 24</div><div class="l" style="font-weight:600">19 lá mất nằm ở ảnh ≥ 6 lá</div></div>
+    </div>
+    <div class="card" style="flex:none;font-size:30px">
+      <p><b>Recall</b> = lá tìm đúng / 1.887 lá thật. Mất 21 lá nên recall giảm 21 / 1.887 = <b>1,11 điểm</b>.</p>
+      <p><b>Precision</b> = hộp đúng / hộp báo ra. Bỏ 87 hộp sai nhưng mất 21 hộp đúng: 1.045 × 87 = <b>90.915</b> lớn hơn 1.009 × 21 = <b>21.189</b>, nên precision tăng.</p>
+      <p><b>F1</b> tăng vì 90.915 lớn hơn 21 × (1.009 + 1.887) = <b>60.816</b>.</p>
+    </div>
+    <div class="note">Lá bị mất tập trung ở ảnh đông lá: ở đó hộp đúng và hộp trùng nằm sát nhau, dạy “bỏ hộp trùng” dễ kéo theo hộp đúng bên cạnh (giả thuyết, chưa kiểm). So với S0 thì precision, recall, F1 đều tăng (TP +3, FP −62).</div>
+  </div>
+  <div class="foot"><span>Nguồn: KB2_HYBRID_SELECTED_EXPLANATION, mục 4 · Report_Hybrid, mục 15.4</span><span class="pg"></span></div>
+</section>
+
+<!-- 19. DỪNG Ở UPDATE 500 -->
+<section class="slide s-b">
+  <header><div class="tag">Từ cách làm đến con số</div><h2>Vì sao dừng ở update 500: DPO như một liều thuốc</h2></header>
+  <div class="body">
+    <table class="t sm">
+      <tr><th>Số bước DPO</th><th class="r">mAP50–95</th><th class="r">Precision</th><th class="r">Recall</th><th class="r">Báo nhầm (FP)</th><th class="r">Bỏ sót (FN)</th></tr>
+      <tr><td>0 · model TPE</td><td class="r">38,51</td><td class="r">50,88</td><td class="r">55,38</td><td class="r">1.009</td><td class="r">842</td></tr>
+      <tr class="hi"><td>500 · được chọn</td><td class="r">38,71</td><td class="r">52,62</td><td class="r">54,27</td><td class="r">922</td><td class="r">863</td></tr>
+      <tr><td>1.000</td><td class="r">38,63</td><td class="r">52,97</td><td class="r">53,95</td><td class="r">904</td><td class="r">869</td></tr>
+      <tr><td>15.000 · cuối</td><td class="r">38,52</td><td class="r">53,89</td><td class="r">53,21</td><td class="r">859</td><td class="r">883</td></tr>
+    </table>
+    <div class="cards c2" style="flex:1">
+      <div class="card sm"><h3>Xu hướng</h3>Học DPO càng lâu, model càng thận trọng: FP giảm đều (1.009 → 859) nhưng FN tăng đều (842 → 883). mAP lên cao nhất ở 500 rồi giảm dần.</div>
+      <div class="card sm"><h3>Cách chọn</h3>Chấm mỗi 250 bước, giữ checkpoint có mAP50–95 cao nhất (chỉ số đã chốt trước). Cả lượt KB2 mất khoảng 33 phút, so với 2,6 giờ cho một lần train TPE.</div>
+    </div>
+    <div class="say"><b>Nói:</b> ít DPO thì sửa được hộp nhầm; nhiều quá thì model bỏ sót lá. Điểm cân bằng tốt nhất trên validation là 500 bước.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 15.3 và 15.5 · chọn nhiều lần trên validation có thể làm số hơi lạc quan</span><span class="pg"></span></div>
+</section>
+
+<!-- 20. BẰNG CHỨNG DPO CÓ TÁC DỤNG -->
+<section class="slide s-b">
+  <header><div class="tag">Bằng chứng</div><h2>Tốt hơn nhờ DPO, hay chỉ nhờ train thêm?</h2></header>
+  <div class="body">
+    <div class="card sm" style="flex:none">Thí nghiệm trước (03/11): bắt đầu từ S0, chạy <b>hai bản giống hệt</b> (cùng ảnh, cùng thứ tự, cùng 15.000 bước), chỉ khác <b>có hay không có DPO</b>. Lặp lại với 3 seed.</div>
+    <table class="t sm">
+      <tr><th style="width:36%">So sánh (trung bình 3 seed)</th><th class="r">Chỉ loss thường</th><th class="r">Thêm DPO</th><th class="r">Chênh</th><th class="r">Số seed DPO hơn</th></tr>
+      <tr class="hi"><td>Cùng 15.000 bước · mAP50–95</td><td class="r">38,06</td><td class="r">38,17</td><td class="r">+0,11</td><td class="r">3 / 3</td></tr>
+      <tr><td>Checkpoint tốt nhất · mAP50–95</td><td class="r">38,12</td><td class="r">38,17</td><td class="r">+0,05</td><td class="r">3 / 3</td></tr>
+      <tr><td>Cùng 15.000 bước · AP50 / AP75</td><td class="r">—</td><td class="r">—</td><td class="r">+0,14 / +0,18</td><td class="r">3 / 3</td></tr>
+      <tr><td>Cùng 15.000 bước · Precision / F1</td><td class="r">53,26 / 53,13</td><td class="r">53,21 / 53,11</td><td class="r">−0,05 / −0,02</td><td class="r">không đều</td></tr>
+    </table>
+    <div class="cards c2" style="flex:1">
+      <div class="card sm"><h3>Nói được</h3>Khi mọi thứ khác giống nhau, thêm DPO cho AP cao hơn ở <b>cả 3 lần</b>. Phần tăng không chỉ do train thêm.</div>
+      <div class="card sm" style="--acc:#FF4D8D;--accd:#C2185B"><h3>Chưa nói được</h3>Thí nghiệm này bắt đầu từ S0 với λ = 0,1. Chưa làm lại từ model TPE, nên chưa tách được phần +0,20 của hybrid là do DPO hay do train thêm.</div>
+    </div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_KB2_DPO_20261103, mục 10 và 13 · Report_Hybrid, mục 17.4–17.5</span><span class="pg"></span></div>
+</section>
+
+<!-- ===================== PHẦN 4: Ý NGHĨA VÀ GIỚI HẠN ===================== -->
+
+<!-- 21. Ý NGHĨA THỰC TẾ -->
+<section class="slide s-o">
+  <header><div class="tag">Có ý nghĩa gì</div><h2>Đổi sang số đếm thật thì khác biệt là bao nhiêu</h2></header>
+  <div class="body">
+    <div class="row">
+      <div class="kpi"><div class="l">Hộp báo nhầm (FP)</div><div class="v good" style="font-size:80px">−62</div><div class="l" style="font-weight:600">984 → 922 (khoảng −6%)<br>≈ 1 hộp mỗi 8 ảnh</div></div>
+      <div class="kpi"><div class="l">Lá tìm đúng (TP)</div><div class="v" style="font-size:80px">+3</div><div class="l" style="font-weight:600">1.021 → 1.024<br>trên 1.887 lá</div></div>
+      <div class="kpi"><div class="l">Lá bị bỏ sót (FN)</div><div class="v" style="font-size:80px">−3</div><div class="l" style="font-weight:600">866 → 863</div></div>
+    </div>
+    <div class="cards c2" style="flex:1;">
+      <div class="card"><h3>Hợp khi</h3>Mỗi hộp báo nhầm làm người dùng phải kiểm tra lại. Giảm 62 hộp nghĩa là bớt khoảng 1 lần kiểm tra thừa mỗi 8 ảnh.</div>
+      <div class="card"><h3>Chưa chứng minh khi</h3>Mục tiêu là không bỏ sót bệnh. Chỉ tìm thêm 3 lá trên 1.887 (khoảng 0,16%), nên chưa có cải thiện đáng kể ở mặt này.</div>
+    </div>
+    <div class="say"><b>Nói:</b> điểm rõ nhất là báo nhầm ít hơn khoảng 6%, đúng với thiết kế của KB2; còn số lá tìm được gần như không đổi.</div>
+  </div>
+  <div class="foot"><span>Số đếm: Report_Hybrid, mục 15.1 · phần “hợp khi” là gợi ý diễn giải, không phải kết quả đo</span><span class="pg"></span></div>
+</section>
+
+<!-- 22. ĐỘ TIN CẬY -->
+<section class="slide s-o">
+  <header><div class="tag">Có đáng tin không</div><h2>Con số này đáng tin đến đâu</h2></header>
+  <div class="body">
+    <div class="cards c3" style="flex:1;">
+      <div class="card"><h3>Độ dao động đã thấy</h3>Train lại đúng cấu hình gốc chỉ được 36,07% so với 37,82%: <b>lệch 1,75 điểm</b>. KB2 chạy ba seed dao động ± 0,04–0,06 điểm.</div>
+      <div class="card"><h3>Vì sao cần nhiều seed</h3>Seed là số khởi tạo ngẫu nhiên (thứ tự ảnh, giá trị ban đầu). Chạy một seed giống đo một lần: chưa biết lần sau có ra như vậy không.</div>
+      <div class="card"><h3>Giới hạn của hybrid</h3><ul><li>Một seed, một winner TPE.</li><li>Validation dùng chọn nhiều lần.</li><li>Chưa có khoảng tin cậy hay dữ liệu mới.</li></ul></div>
+    </div>
+    <div class="note">Tác dụng của DPO đã lặp lại ở 3/3 seed (thí nghiệm từ S0, slide 20). Còn phần KB3 (+0,69) nhỏ hơn độ lệch 1,75 giữa hai lần train cùng cấu hình, nên chưa đủ để khẳng định chắc.</div>
+    <div class="say"><b>Nói:</b> em coi đây là kết quả sơ bộ, cần chạy thêm seed và kiểm tra trên dữ liệu mới.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 7.3 và 16.3 · Report_KB2_DPO_20261103 (ba seed, từ S0)</span><span class="pg"></span></div>
+</section>
+
+<!-- 23. CHƯA TỐT HƠN -->
+<section class="slide s-k">
+  <header><div class="tag">Điểm chưa cải thiện</div><h2>Những chỗ hybrid chưa tốt hơn</h2></header>
+  <div class="body">
+    <table class="t sm">
+      <tr><th style="width:22%">Mặt</th><th style="width:34%">Kết quả</th><th>Vì sao cần lưu ý</th></tr>
+      <tr><td><b>Vật nhỏ</b></td><td>AP vật nhỏ 4,40 → 4,12 (−0,28)</td><td>Giảm ở bước KB3 (TPE 4,10); KB2 gần như không đổi (+0,02). Chỉ có 94 vật nhỏ nên số dao động mạnh</td></tr>
+      <tr><td><b>Recall so với TPE</b></td><td>55,38 → 54,27 (−1,11)</td><td>DPO làm model thận trọng hơn (slide 18, 19)</td></tr>
+      <tr><td><b>Theo lớp, so với S0</b></td><td>15 lớp tăng, 13 lớp giảm</td><td>Mỗi lớp nặng như nhau; lớp ít mẫu dao động mạnh</td></tr>
+      <tr><td><b>Lá bỏ sót chưa cứu được</b></td><td>167 cặp “cứu” / 331 lá TPE bỏ sót trên train</td><td>Chỉ cứu được lá đã có hộp yếu; lá không có hộp nào thì DPO không tạo cặp</td></tr>
+    </table>
+    <div class="note">Vật vừa và vật lớn vẫn tăng so với S0 (AP vừa +0,33, AP lớn +1,47).</div>
+    <div class="say"><b>Nói:</b> em nêu cả những chỗ chưa tốt hơn để kết luận không bị nói quá.</div>
+  </div>
+  <div class="foot"><span>Nguồn: Report_Hybrid, mục 11.3, 12.1, 15.1 và 15.4 · AP vừa, AP lớn so với S0 tự tính</span><span class="pg"></span></div>
+</section>
+
+<!-- 24. KẾT LUẬN -->
+<section class="slide s-k">
+  <header><div class="tag">Kết luận</div><h2>Bốn điều cần nhớ</h2></header>
+  <div class="body">
+    <div class="cards" style="grid-template-columns:1fr;flex:1;align-content:center;gap:24px">
+      <div class="card" style="font-size:34px"><b>1. Tốt hơn:</b> mAP50–95 +0,89 điểm so với S0; AP50, AR300, precision, F1 đều tăng.</div>
+      <div class="card" style="font-size:34px"><b>2. Vì sao:</b> KB3 chọn cách train (bước học nhỏ, phạt trọng số mạnh) nên tìm thêm lá; KB2 dạy model bỏ hộp nền / hộp trùng nên hộp nhầm bị hạ điểm, xếp sau hộp đúng.</div>
+      <div class="card" style="font-size:34px"><b>3. Ý nghĩa:</b> báo nhầm ít hơn khoảng 6% (−62 hộp); số lá tìm được gần như không đổi (+3).</div>
+      <div class="card" style="font-size:34px"><b>4. Giới hạn:</b> mức chênh nhỏ, một seed, validation đã dùng nhiều lần; coi là kết quả sơ bộ.</div>
+    </div>
+    <div class="note">Một câu: hybrid tốt hơn vì học được cách bỏ hộp báo nhầm và xếp hộp đúng lên trước, nhưng chưa tìm được nhiều lá bệnh hơn.</div>
+  </div>
+  <div class="foot"><span>RL–YOLO / BÁO CÁO</span><span class="pg"></span></div>
+</section>
+
+<!-- 25. VIỆC TIẾP THEO -->
+<section class="slide s-g">
+  <header><div class="tag">Để khẳng định chắc</div><h2>Cần làm thêm gì</h2></header>
+  <div class="body">
+    <table class="t">
+      <tr><th style="width:42%">Việc cần làm</th><th>Trả lời câu hỏi nào</th></tr>
+      <tr><td><b>Chạy “chỉ loss thường” từ model TPE</b></td><td>Phần +0,20 là do DPO hay do train thêm?</td></tr>
+      <tr><td><b>Chạy thêm seed 43, 44</b></td><td>Cải thiện có ổn định không?</td></tr>
+      <tr><td><b>Khoảng tin cậy (bootstrap)</b></td><td>Mức +0,89 có vượt độ dao động không?</td></tr>
+      <tr><td><b>Dữ liệu holdout mới</b></td><td>Có tổng quát hóa ngoài validation không?</td></tr>
+      <tr><td><b>Ablation từng loại cặp</b></td><td>Loại cặp nào giảm FP, loại nào làm mất lá?</td></tr>
+    </table>
+    <div class="note">Mục tiêu: biến “xu hướng tích cực, có cơ chế giải thích” thành kết luận có bằng chứng.</div>
+  </div>
+  <div class="foot"><span>RL–YOLO / BÁO CÁO</span><span class="pg"></span></div>
+</section>
+
+</div></div>
+<div id="hud"></div>
+<script>
+(function(){
+  var deck=document.getElementById('deck'),hud=document.getElementById('hud');
+  var slides=[].slice.call(document.querySelectorAll('.slide')),cur=0;
+  slides.forEach(function(s,k){var p=s.querySelector('.pg');if(p)p.textContent=(k+1)+' / '+slides.length;});
+  function fit(){var s=Math.min(innerWidth/1920,innerHeight/1080);deck.style.transform='scale('+s+')';}
+  function show(n){
+    cur=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,k){s.classList.toggle('on',k===cur);});
+    hud.textContent=(cur+1)+' / '+slides.length+'  ·  ← → chuyển slide  ·  F toàn màn hình  ·  Ctrl+P xuất PDF';
+    if(history.replaceState)history.replaceState(null,'','#'+(cur+1));
+  }
+  addEventListener('resize',fit);
+  addEventListener('keydown',function(e){
+    var k=e.key;
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='Enter'){e.preventDefault();show(cur+1);}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='Backspace'){e.preventDefault();show(cur-1);}
+    else if(k==='Home')show(0);
+    else if(k==='End')show(slides.length-1);
+    else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  });
+  addEventListener('click',function(e){show(e.clientX>innerWidth/3?cur+1:cur-1);});
+  addEventListener('hashchange',function(){var n=parseInt(location.hash.slice(1),10);if(n)show(n-1);});
+  fit();
+  show((parseInt(location.hash.slice(1),10)||1)-1);
+})();
+</script>
+</body>
+</html>
