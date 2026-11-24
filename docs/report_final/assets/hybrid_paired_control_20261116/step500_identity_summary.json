@@ -1,0 +1,26 @@
+[
+  {
+    "seed": 42,
+    "retained_GT": 1024,
+    "lost_GT": 0,
+    "recovered_GT": 0,
+    "AP_class_increased": 10,
+    "AP_class_decreased": 13
+  },
+  {
+    "seed": 43,
+    "retained_GT": 1025,
+    "lost_GT": 0,
+    "recovered_GT": 0,
+    "AP_class_increased": 13,
+    "AP_class_decreased": 9
+  },
+  {
+    "seed": 44,
+    "retained_GT": 1027,
+    "lost_GT": 0,
+    "recovered_GT": 0,
+    "AP_class_increased": 11,
+    "AP_class_decreased": 11
+  }
+]

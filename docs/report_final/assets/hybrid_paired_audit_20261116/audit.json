@@ -1,0 +1,329 @@
+{
+  "scope": "Existing local artifacts only; no new training or inference",
+  "date": "2026-11-16",
+  "runs": {
+    "native_constant": {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_bg_compare_s42_20261106_051730_406262/native_bg050/native",
+      "seed": 42,
+      "lambda": 0.0,
+      "steps": 15000,
+      "logged_validation_steps": [
+        0,
+        1000,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000
+      ],
+      "stream_file_sha256": "6c68c0f2550810f098aac76058ccc7fa48d1ae99cc03153d2b6a8d461e793241",
+      "stream_rows": 15000,
+      "source_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+      "bank_manifest_sha256": "fd27beb8c3e51be0bb5730976b9d1a7a5d5abca12991d37fc4bbb72c0262b377",
+      "best_step": 1000,
+      "best_mAP50_95": 0.38630354404449463,
+      "lr_schedule": {
+        "type": "constant",
+        "lr": 1e-06
+      },
+      "logged_lr_entries_verified": 0,
+      "has_checkpoint500": false
+    },
+    "dpo_constant": {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_lambda003_s42_20261106_trial2/run/dpo",
+      "seed": 42,
+      "lambda": 0.03,
+      "steps": 15000,
+      "logged_validation_steps": [
+        0,
+        1000,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000
+      ],
+      "stream_file_sha256": "6c68c0f2550810f098aac76058ccc7fa48d1ae99cc03153d2b6a8d461e793241",
+      "stream_rows": 15000,
+      "source_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+      "bank_manifest_sha256": "fd27beb8c3e51be0bb5730976b9d1a7a5d5abca12991d37fc4bbb72c0262b377",
+      "best_step": 1000,
+      "best_mAP50_95": 0.386314332485199,
+      "lr_schedule": {
+        "type": "constant",
+        "lr": 1e-06
+      },
+      "logged_lr_entries_verified": 0,
+      "has_checkpoint500": false
+    },
+    "dpo_selected": {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_schedule_s42_20261106_trial3/run/dpo",
+      "seed": 42,
+      "lambda": 0.03,
+      "steps": 15000,
+      "logged_validation_steps": [
+        0,
+        250,
+        500,
+        750,
+        1000,
+        1250,
+        1500,
+        1750,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000
+      ],
+      "stream_file_sha256": "6c68c0f2550810f098aac76058ccc7fa48d1ae99cc03153d2b6a8d461e793241",
+      "stream_rows": 15000,
+      "source_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+      "bank_manifest_sha256": "fd27beb8c3e51be0bb5730976b9d1a7a5d5abca12991d37fc4bbb72c0262b377",
+      "best_step": 500,
+      "best_mAP50_95": 0.38713255524635315,
+      "lr_schedule": {
+        "drop_after_update": 1000,
+        "factor": 0.1,
+        "initial_lr": 1e-06,
+        "updates_are_one_based": true
+      },
+      "logged_lr_entries_verified": 601,
+      "has_checkpoint500": true
+    }
+  },
+  "checks": {
+    "evaluation_checkpoint_hashes_verified": 54,
+    "source_and_bank_hashes_verified": true,
+    "streams_byte_identical": true,
+    "all_15000_stream_steps_verified": true,
+    "reference_and_frozen_states_match": true,
+    "constant_pair_config_differences": {
+      "arm": [
+        "native",
+        "dpo"
+      ],
+      "dpo_weight": [
+        0.1,
+        0.03
+      ],
+      "effective_dpo_weight": [
+        0.0,
+        0.03
+      ]
+    }
+  },
+  "completed_TPE_runs_at_least_15000_updates": [
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_schedule_s42_20261106_trial3/run/dpo",
+      "seed": 42,
+      "lambda": 0.03,
+      "steps": 15000,
+      "background": 0.5,
+      "evaluation_steps": [
+        0,
+        250,
+        500,
+        750,
+        1000,
+        1250,
+        1500,
+        1750,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000
+      ],
+      "lr_schedule": {
+        "drop_after_update": 1000,
+        "factor": 0.1,
+        "initial_lr": 1e-06,
+        "updates_are_one_based": true
+      }
+    },
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_lambda100_s42_20261113_trial1/run/dpo",
+      "seed": 42,
+      "lambda": 1.0,
+      "steps": 15000,
+      "background": 0.5,
+      "evaluation_steps": [
+        0,
+        250,
+        500,
+        750,
+        1000,
+        1250,
+        1500,
+        1750,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000
+      ],
+      "lr_schedule": {
+        "drop_after_update": 1000,
+        "factor": 0.1,
+        "initial_lr": 1e-06,
+        "updates_are_one_based": true
+      }
+    },
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_drop500_s42_20261106_trial1/run/dpo",
+      "seed": 42,
+      "lambda": 0.03,
+      "steps": 15000,
+      "background": 0.5,
+      "evaluation_steps": [
+        0,
+        250,
+        500,
+        750,
+        1000,
+        1250,
+        1500,
+        1750,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000
+      ],
+      "lr_schedule": {
+        "drop_after_update": 500,
+        "factor": 0.1,
+        "initial_lr": 1e-06,
+        "updates_are_one_based": true
+      }
+    },
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261106_030407_969341/dpo",
+      "seed": 42,
+      "lambda": 0.1,
+      "steps": 30000,
+      "background": 0.5,
+      "evaluation_steps": null,
+      "lr_schedule": null
+    },
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_bg_compare_s42_20261106_051730_406262/dpo_bg025/dpo",
+      "seed": 42,
+      "lambda": 0.1,
+      "steps": 15000,
+      "background": 0.25,
+      "evaluation_steps": null,
+      "lr_schedule": null
+    },
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_bg_compare_s42_20261106_051730_406262/native_bg050/native",
+      "seed": 42,
+      "lambda": 0.0,
+      "steps": 15000,
+      "background": 0.5,
+      "evaluation_steps": null,
+      "lr_schedule": null
+    },
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_lambda003_s42_20261106_trial2/run/dpo",
+      "seed": 42,
+      "lambda": 0.03,
+      "steps": 15000,
+      "background": 0.5,
+      "evaluation_steps": null,
+      "lr_schedule": null
+    },
+    {
+      "path": "kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/dpo",
+      "seed": 42,
+      "lambda": 0.1,
+      "steps": 15000,
+      "background": 0.5,
+      "evaluation_steps": null,
+      "lr_schedule": null
+    }
+  ],
+  "continuation_seeds_found": [
+    42
+  ],
+  "paired_constant_LR_deltas_DPO_minus_native": {
+    "1000": {
+      "mAP50_95": 0.0010788440704345703,
+      "mAP50": -0.002968311309814453,
+      "mAP75": -0.0031322240829467773,
+      "precision": -0.05517256330210829,
+      "operating_recall": 0.0,
+      "f1": -0.028081087311826458,
+      "tp": 0,
+      "fp": 2,
+      "fn": 0
+    },
+    "15000": {
+      "mAP50_95": 0.04573166370391846,
+      "mAP50": -0.016379356384277344,
+      "mAP75": 0.08095800876617432,
+      "precision": 0.06897669611420909,
+      "operating_recall": -0.05299417064122958,
+      "f1": 0.004404908735056168,
+      "tp": -1,
+      "fp": -3,
+      "fn": 1
+    }
+  },
+  "missing": "Native lambda0 with scheduled LR and dense evaluation; paired continuation seeds43/44 for both lambda0 and lambda0.03"
+}

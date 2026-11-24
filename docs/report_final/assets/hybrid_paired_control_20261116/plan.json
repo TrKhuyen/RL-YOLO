@@ -1,0 +1,264 @@
+{
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "arms": {
+    "native": 0.0,
+    "dpo": 0.03
+  },
+  "updates": 15000,
+  "primary_contrast": "paired DPO-native mAP50_95 at fixed step500",
+  "secondary_contrasts": [
+    "selected best under same grid/min_delta and step0 eligible",
+    "fixed step15000"
+  ],
+  "selection_min_delta_fraction": 0.0001,
+  "bank": "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences",
+  "source": {
+    "model": "yolov8n",
+    "source_checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/selected_best.pt",
+    "source_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+    "dataset": {
+      "root": "/home/celine/Celine/graduate/RL-YOLO/pre-data/data/v2i_cleanned",
+      "config": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/configs/pest.yaml",
+      "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+      "counts": {
+        "train": {
+          "images": 2411,
+          "labels": 2411,
+          "known_augmented_images": 667
+        },
+        "valid": {
+          "images": 479,
+          "labels": 479,
+          "known_augmented_images": 0
+        },
+        "test": {
+          "images": 239,
+          "labels": 239,
+          "known_augmented_images": 0
+        }
+      },
+      "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+    },
+    "supervised": {
+      "model": "yolov8n",
+      "checkpoint": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\checkpoint_based\\yolov8n\\weights\\best.pt",
+      "checkpoint_sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9",
+      "dataset": {
+        "root": "D:\\graduate\\RL-YOLO\\pre-data\\data\\v2i_cleanned",
+        "config": "D:\\graduate\\RL-YOLO\\kb1_reward_guided_training\\configs\\pest.yaml",
+        "sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+        "counts": {
+          "train": {
+            "images": 2411,
+            "labels": 2411,
+            "known_augmented_images": 667
+          },
+          "valid": {
+            "images": 479,
+            "labels": 479,
+            "known_augmented_images": 0
+          },
+          "test": {
+            "images": 239,
+            "labels": 239,
+            "known_augmented_images": 0
+          }
+        },
+        "source_id_policy": "known flip/rotation suffix removed; identical full Roboflow IDs rejected"
+      },
+      "pretrained_name": "yolov8n.pt",
+      "pretrained_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "data_config_sha256": "cbc7c93bee7848ea6bf4f0f6b52e444ba78aee8a203987578f7addfdeadae308",
+      "dp_flags": {
+        "w3f": false,
+        "psa": false
+      }
+    },
+    "runtime": {
+      "python": "3.10.20",
+      "platform": "Linux-7.2.14-arch1-1-x86_64-with-glibc2.44",
+      "versions": {
+        "torch": "2.5.1+cu121",
+        "torchvision": "0.20.1+cu121",
+        "ultralytics": "8.4.163",
+        "torchmetrics": "1.9.0",
+        "faster-coco-eval": "1.7.2",
+        "albumentations": "2.0.8",
+        "numpy": "2.2.6",
+        "opencv-python": "4.13.0.92",
+        "PyYAML": "6.0.3",
+        "scipy": "1.15.3"
+      },
+      "cuda": "12.1",
+      "cudnn": 90100,
+      "ultralytics_code_sha256": {
+        "utils/loss.py": "c1d4847a833da3f3ca71afdace689e0b0d78949face65c207723fcc0563a9533",
+        "nn/tasks.py": "50ffe702b9b122150f06105b50ea7b8c7990b709b990c50681a7de670717fe9e",
+        "nn/modules/head.py": "617b5bdd6e2d609c7187e00df11500fd40825f3d2232a349e6d8f3f07656d979"
+      }
+    },
+    "code_sha256": {
+      "__init__.py": "911b5dc5b7f3e00efa2d287ce13c895cfbd41889254b528a79ef8c955078c1bd",
+      "adapter.py": "059f7932e673ac2a025649a34f2b403885dfd740eb008a20aa7ba16a1f6c7ef3",
+      "artifacts.py": "18e7243c15e19d46d0fc5ad61b0079a5f8e8b8d9e7b3fdd49aef1f0b5783908a",
+      "data.py": "788799c890c95c7557e9c4140a083d19dd5d82958277bbfa84ae4ec66089997f",
+      "evaluate.py": "bd12c085a592a00f66aee429f8a7ae598c9aa281b1450b2ad6636484db42dc44",
+      "generate_preferences.py": "aa03f76335deb3479bafb54924a6335d5940de338d9e8ae22fe189610d0b78ae",
+      "metrics.py": "3e014f9b07b2fc00deb12aa5337bc8d4cce919a1987121133cd10564e6622ed6",
+      "policy.py": "53110e27ee2d8c29ecc00c70f2aaae235180611f86446bed153f6c242a24eae0",
+      "preferences.py": "613a37254833cb3993974b8567efacdd8517edc416c1a5ed4d0e3e6f3002fc29",
+      "preview.py": "76ca589315c5a99c4b9239402b637f7103b750e9e8688d5e2d2f06601b525ce4",
+      "quality.py": "4416a7fb52ada6a8e27c5005c45010fe9905ffc70fa85b031bfd016c336701f4",
+      "run.py": "3e6bd316136c3299ac777427b939815c6132d944478e1fe4c1050a50d67773e6",
+      "train_dpo.py": "e7d5f2e6764f9546c5fc3326beeafd31145cc171289977a8ff53ad2103a41122"
+    },
+    "objective_version": "structured_detection_dpo_v1",
+    "transform_version": "longest_max_size_center_pad114_rgb_unit_v1",
+    "source_kind": "kb3_tpe_winner",
+    "source_tpe": {
+      "checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/selected_best.pt",
+      "checkpoint_sha256": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+      "trial": 2,
+      "historical_validation": {
+        "mAP50_95": 0.38507065176963806,
+        "mAP50": 0.5042979717254639,
+        "APs": 0.04099680855870247,
+        "precision": 0.508763388510224,
+        "AR300": 0.582611620426178,
+        "operating_recall": 0.5537890832008479,
+        "f1": 0.5303222532352195,
+        "macro_f1": 0.5128175888618615,
+        "APm": 0.18436191976070404,
+        "APl": 0.43857309222221375,
+        "recall": 0.582611620426178,
+        "eval_protocol": "kb1_canonical_v2_ar300",
+        "fps": 0.0,
+        "n_images": 479
+      },
+      "hyperparameters": {
+        "lr0": 0.005354944281299181,
+        "weight_decay": 0.0009130337123429847,
+        "momentum": 0.937,
+        "augmentation_strength": 0.5
+      },
+      "seed": 0,
+      "selection": "kb1_native_validation_fitness_best_ema",
+      "dataset_sha256": "cbd68ffc1da935ac300fba953ea5f9c97c831f53887e1b9391d500f9e40c0c95",
+      "evaluation_sha256": "14cf46b1b77040dada70107cefa96a5dad821216112d910488b2eb598b024e8f",
+      "manifest_sha256": "26eeceb49697f1c96d3674b90f4b49f0bfeff92d97e297186d6c5ba8bb7ffd8e",
+      "result_sha256": "a0a0ea9a340047a36f607fedc4860149afc74cec5ad34e4ee91edd70eedf93b4",
+      "spec_sha256": "1d48cf0ca1aea9af34be14dc4d3f9d20f04ebbae4c93cf20896397a0c0d4bbfb"
+    },
+    "hybrid_version": "hybrid_tpe_conditional_strength_v1",
+    "shared_S0": {
+      "checkpoint": "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt",
+      "sha256": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9"
+    },
+    "hybrid_code_sha256": {
+      "__init__.py": "402ff809c72606b8059881537bc809d01da3e79453dfa621545c0060ae18d299",
+      "bank.py": "f4e25199d5785110f9af12aa463db612558ecaf70fc0b108f6249fcf62ad2815",
+      "evaluate.py": "d97746b20a3cf88ac17a66066b318a7a11984389682a47347c81f1d6db632d0c",
+      "run.py": "7ce53769231c454d927ccffbd26644769e604acfe7ee48bf416b820cfed63dd7",
+      "source.py": "bccbd3cd4bae32fe894ce489a92a3772674cd5321440b3bc8fd8295ad528cbda",
+      "train.py": "8bf1ffc5e76fd9e8c5fb2359bf2b18c9034974751a699e7233d0a021f0c135f2"
+    },
+    "conditional_code_sha256": {
+      "__init__.py": "fc7088de93ca9af028014926a1eac192037f4e5ca4691d9b571bfd5721ebc01b",
+      "bank.py": "b3e397241e8d115c55819a9b9596b38587f4ec705be8b8c064029b7e9174d0b0",
+      "evaluate.py": "2b580b98fe17b4507eb1efb806a2f9a9cc1784a3351a351d82d4f7c2d42e3e7e",
+      "evaluation.py": "da1dd5821636b916c2e4c5aa8b2bf41c8f3158686ac5c90a8d439b6ac9a6bb67",
+      "pairs.py": "6c44606522755df2c83f1a2a49f377f4891ec8fe8521e36a728ddbe08c8884e7",
+      "policy.py": "0ca295d75dea2fbc8c7e56b254100bee20514c64b2233052d32e4643117970cf",
+      "run.py": "e64146ee0f451cd02276fd3569453dc0c86b77ceef218658d37aea94741bd537",
+      "train.py": "b80c0c7861d6b1afe4bc7c956c1d324fb32206eaf3bbe05b4e2e91f607d2be80"
+    },
+    "background_code_sha256": {
+      "__init__.py": "a0aa6c645e21509121830adc5b14d460a888875fa0f340a988eb9aaa351e540c",
+      "loss.py": "61c207e0c761a2b298e800db89cba90e1034aa8144c75332b2f868507bfc6ca0",
+      "run.py": "32782a8dcb72605ed44ba857a97d5ab3a196018ef2cc7c274c3e5c043f9c6d67",
+      "train.py": "d6fb8100d3122cd042c19f7cb77dd53d99ecf6f17e738f269551495559ec68b2"
+    },
+    "strength_code_sha256": {
+      "__init__.py": "c4506e51dcae0c841653efa7d576a340ac72f83e0e746a4d9f4179e009d3e4aa",
+      "selection.py": "3c6b0a453d1fe80324162eb2961ab03dcd2939182479f85a4eb5ad1fd3fb586f",
+      "step_audit.py": "d0614043834631a2bf684eb3c9aaa39385f29ff31e5cd4507d9e8418530dde57",
+      "train.py": "cd05b6599344f0b67319ae344624f113613a7a21b9650fe4609df62d044160b7"
+    }
+  },
+  "protected": {
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/selected_best.pt": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences/manifest.json": "fd27beb8c3e51be0bb5730976b9d1a7a5d5abca12991d37fc4bbb72c0262b377",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences/pairs.jsonl": "eb174404ad6ac5e332d822fea3042bce9968abea1e68e22c76177e55d7735535",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_tpe2_s42_20261105_180813_658387/preferences/contexts.jsonl": "e58279a9bce074a41a070606012c187ba6ff4e92dd9527c4688f4ad26f9a9b13",
+    "/home/celine/Celine/graduate/RL-YOLO/scripts/run_kb2_paired_control.py": "d12e18b9a3b631cbf9f8ab967053afa6df11a392d3eb332ebdfc983dfadcb64c",
+    "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/hybrid_schedule/train.py": "45a6ed7e9070cbbed6219df8a12cb714215804d24dfc91a3996862deb8a21575"
+  },
+  "lr": {
+    "initial": 1e-06,
+    "drop_after": 1000,
+    "factor": 0.1
+  },
+  "eval": {
+    "early_interval": 250,
+    "early_until": 2000,
+    "later_interval": 1000
+  },
+  "all_six_runs_fresh": true,
+  "test_evaluation": false,
+  "stopping": "complete all six arms regardless of favorable/unfavorable result",
+  "runtime": {
+    "python": "3.10.20 (main, Aug  7 2026, 02:25:15) [Clang 22.1.3 ]",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "torch": "2.5.1+cu121",
+    "packages": {
+      "ultralytics": "8.4.163",
+      "torchmetrics": "1.9.0",
+      "faster-coco-eval": "1.7.2",
+      "albumentations": "2.0.8"
+    },
+    "env": {
+      "OMP_NUM_THREADS": "4",
+      "MKL_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "4",
+      "CUDA_LAUNCH_BLOCKING": "1"
+    },
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ]
+  }
+}

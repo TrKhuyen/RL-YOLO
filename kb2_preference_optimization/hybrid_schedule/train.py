@@ -1,4 +1,4 @@
-"""DPO-only fork adding update-based LR decay and a denser early eval grid.
+"""Scheduled updates with a matched zero-DPO native control.
 
 The source bank, policy, losses and historical trainers stay byte-identical.
 """
@@ -37,10 +37,12 @@ def train(bank_path, output, arm='dpo', device='cuda', steps=2000, seed=42,
           eval_interval=1000, eval_limit=0, beta=.1, dpo_weight=.01, lr=1e-6,
           fp_tolerance=.05, ap_tolerance=.001, audit_pairs=32, background_weight=.5,
           lr_drop_step=0, lr_drop_factor=.1, early_eval_interval=0, early_eval_until=2000):
-    if (arm != 'dpo' or min(steps, eval_interval, audit_pairs) < 1
+    if (arm not in ('dpo', 'native') or min(steps, eval_interval, audit_pairs) < 1
             or eval_limit < 0 or not all(math.isfinite(v) for v in
                 (beta, dpo_weight, lr, fp_tolerance, ap_tolerance, background_weight))
-            or min(beta, dpo_weight, lr) <= 0 or min(fp_tolerance, ap_tolerance) < 0):
+            or min(beta, lr) <= 0 or min(fp_tolerance, ap_tolerance) < 0
+            or (arm == 'dpo' and dpo_weight <= 0)
+            or (arm == 'native' and dpo_weight != 0)):
         raise ValueError('Invalid training configuration')
     if not 0 <= background_weight <= 1:
         raise ValueError('background_weight must be in [0, 1]')

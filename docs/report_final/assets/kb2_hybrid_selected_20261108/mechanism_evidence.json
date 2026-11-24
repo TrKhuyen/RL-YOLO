@@ -9,6 +9,12 @@
     "trained_budget_updates": 15000,
     "selected_update": 500,
     "seed": 42,
+    "comparison_baseline": {
+      "role": "S0 = KB3 trial 0 pretrained anchor, native-selected best epoch 91",
+      "checkpoint": "kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0000/selected_best.pt",
+      "checkpoint_sha256": "d3c82f5a564c8841e19e0510c35415d2ae8d3a7752a25b577fb8be7a066a4d71",
+      "evaluation": "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_selected_20261108/S0_trial0.json"
+    },
     "lambda": 0.03,
     "beta": 0.1,
     "native_background_weight": 0.5,
@@ -873,9 +879,9 @@
     "source_report": "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/review.json"
   },
   "stage_gain": {
-    "KB3_TPE_vs_S0_mAP_pp": 0.6879150867462158,
+    "KB3_TPE_vs_S0_mAP_pp": 2.4410247802734375,
     "KB2_vs_TPE_mAP_pp": 0.20358562469482422,
-    "hybrid_vs_S0_mAP_pp": 0.89150071144104
+    "hybrid_vs_S0_mAP_pp": 2.6446104049682617
   },
   "class_summary": {
     "TPE": {
@@ -885,10 +891,10 @@
       "sum_mAP_contribution_pp": 0.20358424101557052
     },
     "S0": {
-      "AP_increased": 15,
-      "AP_decreased": 13,
+      "AP_increased": 23,
+      "AP_decreased": 5,
       "AP_equal": 0,
-      "sum_mAP_contribution_pp": 0.891501403280667
+      "sum_mAP_contribution_pp": 2.644610897238765
     }
   },
   "precision_F1_algebra": {
@@ -961,6 +967,8 @@
     "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_schedule_s42_20261106_trial3/run/dpo/best.pt": "7b371f3313f1fe8fd5de157d16c961f076874c7659a6060e6947b4b8f31a80a4",
     "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_schedule_20261106/review.json": "acc09dc70c558319dcd7b1e090ecc8101d08ff3676efd25cf2522f808654a3d9",
     "/home/celine/Celine/graduate/RL-YOLO/kb2_preference_optimization/outputs/yolov8n_hybrid_schedule_s42_20261106_trial3/run/dpo/manifest.json": "4a9dd6edd1a460ba6923739decff3a7035a9ee86a32fd6f94bcf2a63abfc21e7",
+    "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0000/selected_best.pt": "d3c82f5a564c8841e19e0510c35415d2ae8d3a7752a25b577fb8be7a066a4d71",
+    "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_selected_20261108/S0_trial0.json": "3ecf5419d24aead7f14ea322e5f6a05e5275e0aafd12fd0331735c210d7f7daf",
     "/home/celine/Celine/graduate/RL-YOLO/kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0002/selected_best.pt": "eb7072dd087de0154049ca8a5151c6ada6ba1fca2e2666c676a9c3d17c61a84d",
     "/home/celine/Celine/graduate/RL-YOLO/kb1_reward_guided_training/checkpoint_based/yolov8n/weights/best.pt": "9a7ce8d2710b94453da2add079d3b3635fb2a9f9ae1078fbe260428a67c969f9"
   },

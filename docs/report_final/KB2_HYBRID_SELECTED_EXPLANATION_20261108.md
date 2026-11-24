@@ -1,5 +1,10 @@
 # KB2 hybrid λ = 0,03 — kết quả chốt và giải thích có căn cứ
 
+**Đối chứng bổ sung ngày16/11:** đã chạy mới λ0/λ0,03 ghép cặp ở seed42/43/44,
+cùng stream, lịch LR và eval dày. DPO hơn native trung bình0,021936 điểm mAP
+tại500, nhưng thấp hơn0,012596 điểm tại15000. Xem
+[phân tích đóng góp riêng của DPO](HYBRID_DPO_CAUSAL_CONTROL_20261116.md).
+
 **Làm rõ ngày09/11:** phần17.1–17.8 của
 [báo cáo KB2](Report_KB2_DPO_20261103.md#171-model-thực-sự-học-gì-từ-một-cặp-keepdrop)
 đã bổ sung ví dụ score vượt threshold, ví dụ AP75 tăng dù box không đổi,
@@ -28,7 +33,11 @@ SHA256:
 `7b371f3313f1fe8fd5de157d16c961f076874c7659a6060e6947b4b8f31a80a4`.
 
 Khởi tạo **và frozen reference** đều là best TPE trial 2 của KB3. Không phải
-tiếp tục từ best KB2 cũ. S0 là mốc supervised chung. Trong báo cáo này, “DPO”
+tiếp tục từ best KB2 cũ. **S0 trong phép so của báo cáo này là KB3 trial 0**:
+pretrained anchor theo recipe KB1, checkpoint `trial_0000/selected_best.pt`
+(native-selected best epoch 91), thay cho checkpoint KB1 lịch sử. Trial 0 và
+trial 2 được huấn luyện độc lập từ pretrained, không phải trial 2 tiếp tục
+weights của trial 0. Trong báo cáo này, “DPO”
 chỉ toàn bộ pipeline KB2 gồm bank, GT judge, sampling và native + DPO loss;
 gain so TPE không được quy toàn bộ cho riêng một hạng loss.
 
@@ -52,7 +61,9 @@ không cần GT, preference judge hoặc reference để dự đoán.
 | Chọn best | Validation mAP50–95; min_delta 1e-4 fraction; TPE step 0 hợp lệ |
 
 Chốt kết quả không thay default launcher lịch sử, không ghi đè/copy lại
-checkpoint và không phát sinh training. Hồ sơ máy đọc được:
+checkpoint và không phát sinh training. **Cập nhật S0 ngày 11/11/2026** dùng
+checkpoint trial 0 đã có, chấm lại validation để bổ sung đầy đủ metric.
+Hồ sơ máy đọc được:
 [selection.json](assets/kb2_hybrid_selected_20261108/selection.json).
 
 ## 2. Minh chứng thực nghiệm: tốt hơn so với mốc nào?
@@ -61,39 +72,46 @@ Cả ba model được chấm cùng 479 ảnh validation / 1.887 GT / 28 class. 
 confidence tối thiểu 0,001, NMS IoU 0,60, max_det 300. Precision/recall/F1 và
 FP/FN dùng confidence 0,25, matching class-aware IoU 0,5. Tỷ lệ dưới đây là %.
 
-| Metric | S0 | Best TPE | Hybrid chốt | Δ so TPE, điểm % |
+| Metric | S0 (KB3 trial 0) | Best TPE | Hybrid chốt | Δ so TPE, điểm % |
 |---|---:|---:|---:|---:|
-| **mAP50–95** | 37,8218 | 38,5097 | **38,7133** | **+0,2036** |
-| AP50 | 49,1225 | 50,4306 | **50,6287** | +0,1981 |
-| AP75 | 42,9680 | 43,4945 | **43,7080** | +0,2135 |
-| Precision | 50,9227 | 50,8763 | **52,6208** | +1,7444 |
-| Recall | 54,1070 | **55,3789** | 54,2660 | −1,1129 |
-| F1 | 52,4666 | 53,0322 | **53,4307** | +0,3985 |
-| Macro F1 | 51,3707 | 51,2818 | **51,6693** | +0,3875 |
-| Macro recall | 54,5463 | **55,9285** | 55,0529 | −0,8756 |
-| AR300 | 56,2044 | **58,2612** | 58,0731 | −0,1881 |
-| APsmall | **4,3965** | 4,0997 | 4,1209 | +0,0212 |
-| APmedium | 17,9704 | **18,4362** | 18,3008 | −0,1354 |
-| APlarge | 42,5676 | 43,8593 | **44,0333** | +0,1741 |
-| TP | 1.021 | **1.045** | 1.024 | −21 GT |
-| FP ↓ | 984 | 1.009 | **922** | −87 detection |
-| FN ↓ | 866 | **842** | 863 | +21 GT |
+| **mAP50–95** | 36,0686 | 38,5097 | **38,7133** | **+0,2036** |
+| AP50 | 47,7023 | 50,4306 | **50,6287** | +0,1981 |
+| AP75 | 41,2404 | 43,4945 | **43,7080** | +0,2135 |
+| Precision | 49,0785 | 50,8763 | **52,6208** | +1,7444 |
+| Recall | 49,3906 | **55,3789** | 54,2660 | −1,1129 |
+| F1 | 49,2340 | 53,0322 | **53,4307** | +0,3985 |
+| Macro F1 | 47,4128 | 51,2818 | **51,6693** | +0,3875 |
+| Macro recall | 50,6517 | **55,9285** | 55,0529 | −0,8756 |
+| AR300 | 55,6950 | **58,2612** | 58,0731 | −0,1881 |
+| APsmall | 1,5128 | 4,0997 | **4,1209** | +0,0212 |
+| APmedium | 16,4392 | **18,4362** | 18,3008 | −0,1354 |
+| APlarge | 40,7118 | 43,8593 | **44,0333** | +0,1741 |
+| TP | 932 | **1.045** | 1.024 | −21 GT |
+| FP ↓ | 967 | 1.009 | **922** | −87 detection |
+| FN ↓ | 955 | **842** | 863 | +21 GT |
 
 Theo mAP50–95, phân rã số học của hai giai đoạn là:
 
-- S0 → TPE: **+0,6879 điểm phần trăm**.
+- S0 → TPE: **+2,4410 điểm phần trăm**.
 - TPE → KB2: **+0,2036 điểm phần trăm**.
-- S0 → hybrid cuối: **+0,8915 điểm phần trăm**.
+- S0 → hybrid cuối: **+2,6446 điểm phần trăm**.
 
 Đây là chênh lệch giữa các checkpoint trong pipeline đã chạy, không phải phép
 đo độc lập đóng góp nhân quả của từng thành phần. Đặc biệt, không gọi toàn bộ
-+0,8915 điểm là gain của KB2. So S0, AP/P/R/F1 đều tăng, FP giảm 62 và FN giảm
-3; so TPE, mô hình đánh đổi một phần recall lấy precision/AP/F1.
++2,6446 điểm là gain của KB2. So S0, AP/P/R/F1 đều tăng, FP giảm 45 và FN giảm
+92; so TPE, mô hình đánh đổi một phần recall lấy precision/AP/F1.
 
-Nguồn: [summary.csv](assets/kb2_hybrid_schedule_20261106/summary.csv) và
-[review.json](assets/kb2_hybrid_schedule_20261106/review.json), đã nạp lại
-checkpoint để đối chiếu metric. Phân tích mới kiểm SHA best và đối chiếu lại
-hai bộ kết quả nạp checkpoint đã hoàn tất; không chạy thêm model.
+Nguồn S0: [S0_trial0.json](assets/kb2_hybrid_selected_20261108/S0_trial0.json),
+đã kiểm SHA256 checkpoint
+`d3c82f5a564c8841e19e0510c35415d2ae8d3a7752a25b577fb8be7a066a4d71`
+và chấm lại trên CPU bằng evaluator KB2 của bảng. Trial 0 có mAP50–95 lịch sử
+36,0677%; khi nạp lại đạt 36,0686%, chênh khoảng 0,0010 điểm phần trăm với
+cùng SHA weights. Bảng và các delta dùng thống nhất số nạp lại. Recall trong
+bảng là `operating_recall` tại confidence 0,25; AR300 là metric riêng.
+Nguồn TPE/hybrid: [summary.csv](assets/kb2_hybrid_schedule_20261106/summary.csv)
+và [review.json](assets/kb2_hybrid_schedule_20261106/review.json), giữ các kết
+quả nạp lại đã xác minh. [metrics.csv](assets/kb2_hybrid_selected_20261108/metrics.csv)
+tổng hợp phép so sau cập nhật S0.
 
 ## 3. Cơ chế DPO: có thể chứng minh hướng học, không bảo đảm tăng AP
 
@@ -157,7 +175,7 @@ Như vậy mức giảm FP đủ bù mức giảm TP trong precision/F1, nhưng 
 identity audit ghi cứu **3**, mất **24**, TP thay đổi ròng **−21**.
 
 Các bất đẳng thức giải thích metric đã đo, không dự báo chắc chắn lượt train
-khác cũng sẽ có cùng FP/TP. So S0, TP tăng 3 và FP giảm 62 nên P/R/F1 đều tăng;
+khác cũng sẽ có cùng FP/TP. So S0 trial 0, TP tăng 92 và FP giảm 45 nên P/R/F1 đều tăng;
 hai kết luận so TPE và so S0 không mâu thuẫn.
 
 ## 5. Vì sao mAP/AP75 tăng khi không học tọa độ?
@@ -281,11 +299,11 @@ delta AP mỗi class chia28, không nhân số lượng GT vì đây là macro-a
 
 Đây là bằng chứng lợi ích AP của giai đoạn KB2 không nằm ở duy nhất một
 class, nhưng không đồng nghĩa mọi class cải thiện hoặc đã được xác nhận
-ổn định. So S0, hybrid có15 class tăng/13 giảm; phần thay đổi lớn ở vài class
+ổn định. So S0 trial 0, hybrid có23 class tăng/5 giảm; phần thay đổi lớn ở vài class
 còn bao gồm giai đoạn KB3, nên không gán cho riêng KB2.
 
 Object nhỏ vẫn là hạn chế: APsmall hybrid4,1209% chỉ tăng0,0212 điểm so TPE
-và thấp hơn S0 0,2756 điểm; support94 GT nhỏ trên ảnh đã resize/pad. So TPE,
+và cao hơn S0 trial 0 2,6081 điểm; support94 GT nhỏ trên ảnh đã resize/pad. So TPE,
 APmedium còn giảm0,1354 điểm. Không viết “hybrid cải thiện tất cả kích thước”.
 
 Nguồn đầy đủ 28 class và kiểm tổng đóng góp khớp mAP trong sai số float32:
@@ -295,7 +313,7 @@ Nguồn đầy đủ 28 class và kiểm tổng đóng góp khớp mAP trong sai
 
 > Trên validation phát triển của đề tài, hybrid KB3 TPE → KB2 DPO với λ = 0,03
 > đạt mAP50–95 38,7133%, tăng0,2036 điểm phần trăm so checkpoint TPE khởi tạo
-> và0,8915 điểm so S0. AP50/AP75, precision và F1 tăng so TPE, trong khi recall
+> và2,6446 điểm so S0 (KB3 trial 0). AP50/AP75, precision và F1 tăng so TPE, trong khi recall
 > giảm. Phân tích loss cho thấy tín hiệu preference có hướng tăng/giảm logit
 > phù hợp quyết định keep/drop được GT đánh giá; thay đổi classification có thể
 > cải thiện score, class và lựa chọn detection khi geometry đóng băng. Đây là
@@ -305,7 +323,7 @@ Nguồn đầy đủ 28 class và kiểm tổng đóng góp khớp mAP trong sai
 > protocol đánh giá; chưa phải xác nhận độc lập trên dữ liệu mới.
 
 Phạm vi xác nhận hiện tại: một continuation seed42 từ một TPE winner trên
-validation đã dùng phát triển. Các kết quả ba seed từ S0 lịch sử là recipe
+validation đã dùng phát triển. Các kết quả ba seed từ checkpoint KB1 lịch sử là recipe
 và nguồn khởi tạo khác, không được dùng thay cho ba seed của hybrid này. Chưa
 có CI/significance test hoặc holdout mới; test chung từng được KB1 xem nhiều
 lần không được mặc nhiên gọi là tập xác nhận độc lập. Việc chốt ở đây là chốt

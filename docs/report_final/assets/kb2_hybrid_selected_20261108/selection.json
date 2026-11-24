@@ -8,6 +8,12 @@
   "trained_budget_updates": 15000,
   "selected_update": 500,
   "seed": 42,
+  "comparison_baseline": {
+    "role": "S0 = KB3 trial 0 pretrained anchor, native-selected best epoch 91",
+    "checkpoint": "kb3_hyperparameter_optimization/checkpoint_hyperparameter_optimization/quality/tpe_kb1_pretrained_v2/yolov8n/tpe/trial_0000/selected_best.pt",
+    "checkpoint_sha256": "d3c82f5a564c8841e19e0510c35415d2ae8d3a7752a25b577fb8be7a066a4d71",
+    "evaluation": "/home/celine/Celine/graduate/RL-YOLO/docs/report_final/assets/kb2_hybrid_selected_20261108/S0_trial0.json"
+  },
   "lambda": 0.03,
   "beta": 0.1,
   "native_background_weight": 0.5,

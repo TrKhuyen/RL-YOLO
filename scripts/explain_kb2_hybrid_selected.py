@@ -20,7 +20,7 @@ def read(path):
 
 def write_csv(path, rows):
     with path.open('w', newline='', encoding='utf-8-sig') as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator='\n')
         writer.writeheader()
         writer.writerows(rows)
 
@@ -28,6 +28,9 @@ def write_csv(path, rows):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--baseline-evaluation', type=Path,
+                        default=REPO/'docs/report_final/assets/kb2_hybrid_selected_20261108/S0_trial0.json',
+                        help='Archived KB3 trial 0 evaluation used as comparison S0')
     args = parser.parse_args()
     output = args.output.resolve()
     if output.exists():
@@ -47,9 +50,18 @@ def main():
     assert manifest['config']['dpo_weight'] == .03 and manifest['config']['native_background_weight'] == .5
     assert done['frozen_state_unchanged'] and done['reference_unchanged']
     metrics = {label: read(source/f'{filename}.json') for label, filename in
-               [('S0', 'S0'), ('TPE', 'TPE'), ('selected', 'scheduled_lambda003_best'),
+               [('TPE', 'TPE'), ('selected', 'scheduled_lambda003_best'),
                 ('lambda003_1k_grid', 'constant_lambda003_best'),
                 ('lambda010_1k_grid', 'constant_lambda010_best')]}
+    baseline = read(args.baseline_evaluation)
+    baseline_checkpoint = REPO/baseline['checkpoint']
+    assert sha256(baseline_checkpoint) == baseline['checkpoint_sha256']
+    metrics = {'S0': baseline['metrics'], **metrics}
+    assert metrics['S0']['protocol'] == metrics['TPE']['protocol']
+    assert metrics['S0']['num_images'] == 479 and metrics['S0']['num_gt'] == 1887
+    assert not metrics['S0']['partial_evaluation']
+    comparison_baseline = {key: baseline[key] for key in ('role', 'checkpoint', 'checkpoint_sha256')}
+    comparison_baseline['evaluation'] = str(args.baseline_evaluation.resolve())
     q = metrics['selected']
     descriptive = ('evaluation_wall_seconds', 'checkpoint_selection')
     assert {k: v for k, v in state['metrics'].items() if k not in descriptive} == {
@@ -101,6 +113,8 @@ def main():
     assert math.isclose(ratio, .3, rel_tol=1e-5)
     protected = {str(path): digest, str(source/'review.json'): sha256(source/'review.json'),
                  str(run/'manifest.json'): sha256(run/'manifest.json')}
+    protected[str(baseline_checkpoint)] = baseline['checkpoint_sha256']
+    protected[str(args.baseline_evaluation.resolve())] = sha256(args.baseline_evaluation)
     for value in (Path(manifest['provenance']['source_checkpoint']),
                   Path(manifest['provenance']['shared_S0']['checkpoint'])):
         protected[str(value)] = sha256(value)
@@ -108,6 +122,7 @@ def main():
                  'user_selected': True, 'method': 'hybrid KB3 TPE -> KB2 DPO pipeline',
                  'checkpoint': str(path), 'checkpoint_sha256': digest,
                  'trained_budget_updates': 15000, 'selected_update': 500, 'seed': 42,
+                 'comparison_baseline': comparison_baseline,
                  'lambda': .03, 'beta': .1, 'native_background_weight': .5,
                  'native_foreground_weight': 1., 'initialization_and_reference': manifest['provenance'],
                  'config': manifest['config'], 'metrics': q,
